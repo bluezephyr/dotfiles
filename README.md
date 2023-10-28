@@ -1,19 +1,11 @@
-# Config Repository
+# Dotfiles Repository
 
 This repository contains installation instructions, configuration files
 ("dotfiles") for different programs such as git, vim etc.
 
-## Notes
-
-The notes folder contain instructions and other documentation for useful
-applications.
-
-
-## dotfiles
-
-The dotfiles folder contain the actual configuration files for different
-applications. Stow is used to deploy the configuration files to their correct
-locations. See dotfiles/README.md for more information.
+The different folders contain the actual configuration files for applications.
+Stow is used to deploy the configuration files to their correct locations.
+See the stow section below for more information.
 
 
 ## Workstation Preparations
@@ -37,6 +29,15 @@ For this purpose, `picom` is recommended. Install using:
 
 By default, EndeavourOS uses LightDM for the log-in, and uses the lightdm-gtk-greeter.
 
+## Default Applications
+
+`xdg-settings get default-web-browser` will return the current default browser.
+To change to Chrome, use `set` and application `google-chrome.desktop`. If the
+environment variable `BROWSER` is set, it needs to be unset using `unset
+BROWSER`.
+
+Changes to default applications will be seen in `~/.config/mimeapps.list`.
+Applications can be found in the folder `/usr/share/applications`
 
 
 ## Utilities
@@ -69,6 +70,36 @@ Arch: `sudo pacman -Syu lf`
 Arch: `sudo pacman -Syu ranger`
 
 
+### Neovim
+
+Use the steps below to install on Linux.
+See https://github.com/neovim/neovim/wiki/Installing-Neovim#linux
+for more information.
+
+```
+cd ~/.local/bin
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+chmod u+x nvim.appimage
+mv nvim.appimage nvim
+```
+
+The setup and configuration for Neovim requires that the following is installed
+
+* Node.js and npm
+
+
+### Node.js
+
+Install Nodejs and npm using the command below (https://nodejs.org/en/download/package-manager#arch-linux).
+See https://nodejs.org/en/about and https://github.com/npm/cli for more
+information.
+
+`sudo pacman -Syu nodejs npm`
+
+### Spotify
+
+`sudo pacman -Syu spotify-launcher`
+
 ## Stow
 
 Stow is used to manage the dotfiles. See https://www.gnu.org/software/stow/ for
@@ -97,12 +128,12 @@ application-name directory.
 
 For example, to stow the i3 configuration, the command
 
-`stow i3 -t ~`
+`stow -t ~ i3`
 
 To stow individual files that are not stored in .config (such as .gitconfig),
 use the flag `--dotfiles`.
 
-`stow gitconfig --dotfiles -t ~`
+`stow --dotfiles -t ~ gitconfig`
 
 ### Unstow
 
@@ -114,6 +145,22 @@ For the i3 configuration, the command would be
 
 `stow -t ~ -D i3`
 
+### Stow Steps
+
+If the dotfiles repo is cloned to the home directory, the -t flag can
+be omitted in the commands since the target dir defaults to the parent.
+The commands to run can be simplified as below.
+
+```
+cd ~
+git clone git@github.com:bluezephyr/dotfiles.git
+cd dotfiles
+stow --dotfiles bash
+stow --dotfiles gitconfig
+stow i3
+stow kitty
+stow nvim
+```
 
 ## Build tools
 
@@ -160,3 +207,4 @@ and copy the output into the Key part. Press "Add SSH key" to save.
 ## Blue Zephyr
 
 Color: R: 91 G: 102 B: 118
+
