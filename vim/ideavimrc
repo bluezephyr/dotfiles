@@ -1,0 +1,68 @@
+" Use Ctrl+<movement> keys to move around the windows
+map <c-j> <c-w>j
+map <c-k> <c-w>k
+map <c-l> <c-w>l
+map <c-h> <c-w>h
+
+" Bind nohl
+" Removes highlight of your last search
+noremap <C-n> :nohl<CR>
+vnoremap <C-n> :nohl<CR>
+inoremap <C-n> <ESC>:nohl<CR>
+
+" Make search case insensitive
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+
+" Line numbers
+set number
+set relativenumber
+
+""
+"" LEADER configurations
+""
+
+" Rebind <Leader> key
+let mapleader = ","
+
+" Copy and paste inner word
+nnoremap <Leader>c yiw
+nnoremap <Leader>v ciw<c-R>0<ESC>
+noremap <Leader>o o<ESC>
+noremap <Leader>O O<ESC>
+
+" Quick quit command
+noremap <Leader>q :quit<CR>  " Quit current window
+
+" Bind nohl
+" Removes highlight of your last search
+nnoremap <Leader>n :nohl<CR>
+
+
+""
+"" SPECIAL KEYS
+""
+
+" Map the ¤ to $ for easier access (for swedish keyboards)
+" And some other convenience mappings.
+"
+map ¤ $
+
+" Use jj in insert mode to <ESC>
+inoremap jj <ESC>l
+
+
+""
+"" OTHER SETTINGS
+""
+
+" No sound
+set visualbell
+set noerrorbells
+set ideajoin
+
+" Use the standard clipboard for the unnamed register
+set clipboard=unnamed
+set clipboard+=ideaput

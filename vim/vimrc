@@ -1,0 +1,247 @@
+""
+"" PLUGINS USING VIM-PLUG
+""
+"" See https://github.com/junegunn/vim-plug for instructions
+"" Fix for cygwin paths added
+""
+function! s:fix_plug_path(path)
+  if has('win32unix')
+  \ && executable('cygpath')
+  \ && executable('git')
+  \ && split(system('git --version'))[2] =~# 'windows'
+    return substitute(system('cygpath -m ' . a:path), '\r*\n\+$', '', '')
+  endif
+  return a:path
+endfunction
+let g:plug_home = s:fix_plug_path($HOME . '/.vim/plugged')
+call plug#begin()
+call plug#('junegunn/fzf', { 'dir': s:fix_plug_path($HOME . '/.fzf'), 'do': './install --all' })
+
+" Select some text using Vim's visual mode, then hit * and # to search for it elsewhere in the file.
+Plug 'bronson/vim-visual-star-search'
+
+" Fuzzy finder
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+Plug 'NLKNguyen/papercolor-theme'
+
+" Most Recently Used files
+Plug 'yegappan/mru'
+
+" Bbye allows you to do delete buffers without closing your windows or messing up your layout
+Plug 'moll/vim-bbye'
+
+" Rust programming language
+Plug 'rust-lang/rust.vim'
+
+call plug#end()
+
+
+""
+"" BUILT IN PLUGINS
+""
+
+" This plugin makes the '%' command jump to matching HTML tags, if/else/endif in Vim scripts, etc.
+packadd! matchit
+
+
+""
+"" PLUGIN configurations
+""
+
+" FZF
+nnoremap <C-p> :<C-u>FZF<CR>
+
+" Airline
+" Show open buffers on the top row
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#whitespace#show_message = 0
+let g:airline_powerline_fonts = 1
+let g:airline_theme='powerlineish'
+
+" PaperColor
+" t_Co = Number of colors (http://vim.wikia.com/wiki/256_colors_in_vim)
+set t_Co=256
+
+" Unclear if this is needed or how to do it in a good way
+" mkdir -p ~/.vim/colors && cd ~/.vim/colors
+" wget -O wombat256mod.vim http://www.vim.org/scripts/download_script.php?src_id=13400
+"color wombat256mod
+
+
+""
+"" GENERAL SETTINGS
+""
+
+" Recommended setting
+" See https://unix.stackexchange.com/questions/23389/how-can-i-set-vims-default-encoding-to-utf-8
+set encoding=utf-8
+
+" Command-line completion operates in an enhanced mode.
+set wildmenu
+
+" History
+set history=700
+set undolevels=700
+
+" Set scroll offset to 15 lines
+set scrolloff=15
+
+" Make search case insensitive
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+
+" Use the standard clipboard for the unnamed register
+set clipboard=unnamed
+
+" Mouse and backspace
+set mouse=a  " on OSX press ALT and click
+set bs=2     " make backspace behave like normal again
+
+" Mappings for easier access on swedish keyboards
+map ¤ $
+map! <F7> [
+map! <F8> ]
+
+" Use jj in insert mode to <ESC>
+inoremap jj <ESC>l
+
+" Bind nohl
+" Removes highlight of your last search
+noremap <C-n> :nohl<CR>
+vnoremap <C-n> :nohl<CR>
+inoremap <C-n> <ESC>:nohl<CR>
+
+" Better indentation
+vnoremap < <gv
+vnoremap > >gv
+
+" Disable backup and swap files - they trigger too many events
+" for file system watchers
+set nobackup
+set nowritebackup
+set noswapfile
+
+" Disable bells
+set belloff=all
+
+
+""
+"" NAVIGATION
+""
+
+" Use Ctrl+<movement> keys to move around the windows
+map <c-j> <c-w>j
+map <c-k> <c-w>k
+map <c-l> <c-w>l
+map <c-h> <c-w>h
+
+" Switch between buffers using TAB and Shift-TAB
+nnoremap <TAB> :bnext<CR>
+nnoremap <S-TAB> :bprevious<CR>
+
+
+
+""
+"" LEADER configurations
+""
+
+" Rebind <Leader> key
+" let mapleader = ","
+let mapleader = "\<space>"
+
+" Insert newline without entering insert mode
+noremap <Leader>o o<ESC>
+noremap <Leader>O O<ESC>
+
+" Show/hide whitespace
+noremap <Leader>v :set list!<CR>
+
+" Toggle wrap
+noremap <Leader>W :set wrap!<CR>
+
+" BBye
+nnoremap <Leader>q :Bdelete<CR>
+
+" Close all buffers
+nnoremap <Leader>e :qa<CR>
+
+" Most Recently Used files
+nnoremap <leader>p :FZFMru<cr>
+
+" Convenient save
+noremap <Leader>w :w<CR>
+
+
+""
+"" VISUAL APPEARANCE
+""
+
+" Color scheme
+colorscheme PaperColor
+set background=dark
+
+" Show a vertical line at column 100
+set colorcolumn=100
+"highlight ColorColumn ctermbg=7      " Use for light background
+highlight ColorColumn ctermbg=233     " Use for dark background
+
+" Show white space characters
+" turn on with :set list
+set listchars=eol:$,tab:>-,trail:~,extends:>,precedes:<,space:.
+
+" Showing line numbers and length
+set number
+set relativenumber
+
+set tw=79   " Width of document (used by gd)
+set nowrap  " Don't automatically wrap on load
+set fo-=t   " Don't automatically wrap text when typing
+
+" Show line numbers in help files
+autocmd Filetype help set number
+autocmd Filetype help set relativenumber
+
+" Show the cursor position all the time
+set ruler
+set cursorline
+
+
+""
+"" FILETYPE HANDLING
+""
+
+"" Don't use TABs but spaces
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set shiftround
+set expandtab
+
+" Use actual tab chars in Makefiles.
+autocmd FileType make set tabstop=8 shiftwidth=8 softtabstop=0 noexpandtab
+
+
+"""
+""" NEW THINGS
+"""
+""
+
+"" AIRLINE SETTINGS
+""
+"let g:airline#extensions#tabline#enabled = 1
+"let g:airline_theme             = 'dark'
+"
+"set laststatus=2
+""set guifont=Powerline\ Consolas\ 10
+"set guifont=Powerline_Consolas:h9:cANSI
+
+"if has ('win32unix') && !has('gui_running')
+"    let g:airline_powerline_fonts = 1
+"endif

@@ -1,0 +1,6 @@
+set guifont=Lucida_Console:h9:cANSI:qDRAFT
+set lines=65 columns=120
+
+set shell=C:/cygwin/bin/bash
+set shellcmdflag=--login\ -c
+set shellxquote=\"
