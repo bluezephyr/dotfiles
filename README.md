@@ -145,6 +145,15 @@ For the i3 configuration, the command would be
 
 `stow -t ~ -D i3`
 
+### Restow
+
+Restow (first unstow, then stow again) the package names that follow this
+option. This is useful for pruning obsolete symlinks from the target tree after
+updating the software in a package. This option may be repeated any number of
+times.
+
+`stow -R i3`
+
 ### Stow Steps
 
 If the dotfiles repo is cloned to the home directory, the -t flag can
@@ -160,18 +169,16 @@ stow --dotfiles gitconfig
 stow i3
 stow kitty
 stow nvim
+stow dunst
+stow ranger
 ```
 
 ## Build tools
 
-Quite a few tools are needed for the LSP in nvim to work properly.
+Tools for programming.
 
 ```
-sudo apt install npm
-sudo apt install python3.10-venv
-sudo apt install unzip
 sudo apt install clang clangd
-sudo apt install make
 ```
 
 
