@@ -112,9 +112,9 @@ fi
 
 ## Personal additions below
 
-## Settings for fzf (see /usr/share/doc/fzf/README.Debian)
-#source /usr/share/doc/fzf/examples/key-bindings.bash
-#source /usr/share/doc/fzf/examples/completion.bash
+# See https://unix.stackexchange.com/questions/403916/getting-started-with-fzf-on-arch-linux
+source /usr/share/fzf/key-bindings.bash
+source /usr/share/fzf/completion.bash
 
 ## Open file from command line
 #alias open=xdg-open
