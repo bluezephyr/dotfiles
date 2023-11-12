@@ -233,6 +233,7 @@ bindsym XF86AudioMicMute exec amixer sset Capture toggle
 # audio control
 bindsym XF86AudioPlay exec playerctl play
 bindsym XF86AudioPause exec playerctl pause
+bindsym XF86AudioStop exec playerctl pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
@@ -351,6 +352,8 @@ exec --no-startup-id dex --autostart --environment i3
 # uncomment the next line, use arandr to setup displays and save the file as monitor:
 exec --no-startup-id ~/.screenlayout/usb3-and-laptop.sh
 
+bindsym $mod+d exec --no-startup-id ~/.screenlayout/usb3-only.sh
+
 # set wallpaper
 # exec --no-startup-id sleep 2 && nitrogen --restore
 exec --no-startup-id sleep 1 && feh --bg-fill /usr/share/endeavouros/backgrounds/wallpapers/4k-moving-fantasy-forest-desktop.png
@@ -389,6 +392,9 @@ exec --no-startup-id /usr/bin/dunst
 #exec --no-startup-id sleep 2 && xfce4-terminal
 #exec --no-startup-id sleep 7 && firefox https://github.com/endeavouros-team/endeavouros-i3wm-setup/blob/main/force-knowledge.md
 #exec --no-startup-id sleep 3 && thunar
+
+# Keyboard layout
+exec_always "setxkbmap -layout us -variant altgr-intl -option nodeadkeys"
 
 ###############
 # system tray #
