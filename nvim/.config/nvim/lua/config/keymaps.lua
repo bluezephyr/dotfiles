@@ -38,7 +38,7 @@ vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = 'Increase h
 -- Buffer management
 vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
-vim.keymap.set('n', '<leader>w',  "<cmd>w!<CR>", { desc = 'Write buffer' })
+vim.keymap.set('n', '<leader>w',  "<cmd>wall!<CR>", { desc = 'Write all buffers' })
 vim.keymap.set('n', '<leader>q',  "<cmd>bdelete<CR>", { desc = 'Close buffer' })
 vim.keymap.set('n', '<leader>Q',  "<cmd>qa<CR>", { desc = 'Close nvim' })
 

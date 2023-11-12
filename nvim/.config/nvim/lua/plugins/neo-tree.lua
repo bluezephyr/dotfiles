@@ -1,7 +1,7 @@
 -- https://github.com/nvim-neo-tree/neo-tree.nvim
 return {
   "nvim-neo-tree/neo-tree.nvim",
-  branch = "v2.x",
+  branch = "v3.x",
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
@@ -9,7 +9,7 @@ return {
   },
     config = function ()
       -- Unless you are still migrating, remove the deprecated commands from v1.x
-      vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+      -- vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
 
       -- If you want icons for diagnostic errors, you'll need to define them somewhere:
       vim.fn.sign_define("DiagnosticSignError",
@@ -91,8 +91,7 @@ return {
           },
         },
         window = {
-          position = "left",
-          width = 40,
+          position = "current",
           mapping_options = {
             noremap = true,
             nowait = true,
@@ -116,7 +115,7 @@ return {
             -- ["t"] = "open_tab_drop",
             ["w"] = "open_with_window_picker",
             --["P"] = "toggle_preview", -- enter preview mode, which shows the current node without focusing
-            ["C"] = "close_node",
+            ["h"] = "close_node",
             -- ['C'] = 'close_all_subnodes',
             ["z"] = "close_all_nodes",
             --["Z"] = "expand_all_nodes",
@@ -174,8 +173,11 @@ return {
               --".null-ls_*",
             },
           },
-          follow_current_file = true, -- This will find and focus the file in the active buffer every
-                                       -- time the current file is changed while the tree is open.
+          follow_current_file = {
+            enabled = true, -- This will find and focus the file in the active buffer every time
+                            -- the current file is changed while the tree is open.
+            leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+          },
           group_empty_dirs = false, -- when true, empty folders will be grouped together
           hijack_netrw_behavior = "open_default", -- netrw disabled, opening a directory opens neo-tree
                                                   -- in whatever position is specified in window.position
@@ -201,8 +203,11 @@ return {
           }
         },
         buffers = {
-          follow_current_file = true, -- This will find and focus the file in the active buffer every
-                                       -- time the current file is changed while the tree is open.
+          follow_current_file = {
+            enabled = true, -- This will find and focus the file in the active buffer every time
+                            -- the current file is changed while the tree is open.
+            leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+          },
           group_empty_dirs = true, -- when true, empty folders will be grouped together
           show_unloaded = true,
           window = {
