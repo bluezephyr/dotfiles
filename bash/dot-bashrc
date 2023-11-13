@@ -120,3 +120,4 @@ source /usr/share/fzf/completion.bash
 #alias open=xdg-open
 
 . "$HOME/.cargo/env"
+eval "$(starship init bash)"

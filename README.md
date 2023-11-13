@@ -69,6 +69,11 @@ Arch: `sudo pacman -Syu lf`
 
 Arch: `sudo pacman -Syu ranger`
 
+### Starship
+
+Cross-shell prompt. See https://starship.rs/ Install using:
+
+`curl -sS https://starship.rs/install.sh | sh`
 
 ### Neovim
 
