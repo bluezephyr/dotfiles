@@ -37,6 +37,7 @@ yay -S dunst
 yay -S waybar
 yay -S playerctl
 yay -S pamixer
+yay -S blueman
 ```
 
 ## Fonts

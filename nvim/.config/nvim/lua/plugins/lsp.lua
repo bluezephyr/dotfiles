@@ -84,6 +84,7 @@ return {
     -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
     local servers = {
       'clangd',
+      'jsonls',
       'rust_analyzer',
       'pyright',
       'sourcery',
