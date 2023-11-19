@@ -17,13 +17,31 @@ for more information. On Ubuntu (bash), this is configured by default in
 
 TODO: Add `fzf` and add links to other tools.
 
-## Compositor
+## i3
+
+### Compositor
 
 The window manager i3 requires a compositor in order for scrolling to look nice.
 For this purpose, `picom` is recommended. Install using:
 
 `sudo pacman -Syu picom`
 
+## Hyprland
+
+Hyprland is a tiling window manager for Wayland. Install with `yay`. Also
+install additional software to get some useful things. See
+https://wiki.hyprland.org/Useful-Utilities/Must-have/ for more information.
+
+```
+yay -S dunst
+yay -S waybar
+yay -S playerctl
+yay -S pamixer
+```
+
+## Fonts
+
+`yay -S ttf-jetbrains-mono-nerd`
 
 ## Login
 
@@ -172,6 +190,7 @@ cd dotfiles
 stow --dotfiles bash
 stow --dotfiles gitconfig
 stow i3
+stow hypr
 stow kitty
 stow nvim
 stow dunst
