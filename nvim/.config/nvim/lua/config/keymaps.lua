@@ -40,7 +40,7 @@ vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>w',  "<cmd>wall!<CR>", { desc = 'Write all buffers' })
 vim.keymap.set('n', '<leader>q',  "<cmd>bdelete<CR>", { desc = 'Close buffer' })
-vim.keymap.set('n', '<leader>Q',  "<cmd>qa<CR>", { desc = 'Close nvim' })
+vim.keymap.set('n', '<leader>x',  "<cmd>qa<CR>", { desc = 'Close nvim' })
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })
@@ -107,5 +107,5 @@ vim.keymap.set("n", "<leader>a", "<cmd>lua Toggle_formatoption('a')<CR>", { desc
 vim.keymap.set("n", "<leader>W", "<cmd>set invwrap<CR>", { desc = 'Toggle wrap mode' })
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
-
+vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 --     ["v"] = { "<cmd>edit ~/.config/nvim/init.lua<CR>", "Edit config" },

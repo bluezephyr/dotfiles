@@ -42,7 +42,7 @@ return {
           },
           results_title = false,
           sorting_strategy = "ascending",
-          layout_strategy = 'horizontal',
+          layout_strategy = 'vertical',
           layout_config = {
             center = {
               width = 0.8,
@@ -101,6 +101,7 @@ return {
 
       -- vim.keymap.set('n', '<leader>e', require('telescope').extensions.file_browser.file_browser, { desc = 'File [E]xplorer' })
 
+      vim.keymap.set('n', '<leader>t', "<cmd>Telescope<CR>", { desc = 'Telescope' })
       vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
       vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
       vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
