@@ -38,6 +38,7 @@ yay -S waybar
 yay -S playerctl
 yay -S pamixer
 yay -S blueman
+yay -S hyprpaper
 ```
 
 ## Fonts
