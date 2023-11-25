@@ -40,7 +40,8 @@ vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>w',  "<cmd>wall!<CR>", { desc = 'Write all buffers' })
 vim.keymap.set('n', '<leader>q',  "<cmd>bdelete<CR>", { desc = 'Close buffer' })
-vim.keymap.set('n', '<leader>x',  "<cmd>qa<CR>", { desc = 'Close nvim' })
+vim.keymap.set('n', '<leader>Q',  "<cmd>qa<CR>", { desc = 'Close nvim' })
+vim.keymap.set('n', '<leader>x',  "<cmd>wqa<CR>", { desc = 'Close nvim and save all' })
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })

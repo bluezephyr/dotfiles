@@ -21,7 +21,6 @@ return {
   },
 
   config = function()
-
     --  This function gets run when an LSP connects to a particular buffer.
     local on_attach = function(_, bufnr)
       -- NOTE: Remember that lua is a real programming language, and as such it is possible
@@ -86,6 +85,7 @@ return {
       'clangd',
       'jsonls',
       'rust_analyzer',
+      'lua_ls',
       'pyright',
       'sourcery',
       'tsserver',
@@ -116,7 +116,6 @@ return {
     local runtime_path = vim.split(package.path, ';')
     table.insert(runtime_path, 'lua/?.lua')
     table.insert(runtime_path, 'lua/?/init.lua')
-
   end
 }
 -- From which_key:
@@ -151,4 +150,3 @@ return {
 --             "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
 --             "Workspace Symbols",
 --         },
-
