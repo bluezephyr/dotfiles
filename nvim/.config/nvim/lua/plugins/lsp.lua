@@ -37,25 +37,28 @@ return {
         vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
       end
 
-      nmap('<leader>cr', vim.lsp.buf.rename, 'Rename')
-      nmap('<leader>ca', vim.lsp.buf.code_action, 'Code Action')
-      nmap('<leader>ck', vim.lsp.buf.signature_help, 'Signature Documentation')
-      nmap('<leader>cd', vim.diagnostic.open_float, 'Show Diagnostics')
-      nmap('<leader>cs', require('telescope.builtin').lsp_document_symbols, 'Document Symbols')
+      nmap('<leader>sr', vim.lsp.buf.rename, 'Rename')
+      nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
+      nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
+      nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
+      nmap('<leader>ss', require('telescope.builtin').lsp_document_symbols, 'Document Symbols')
+      nmap('<leader>sf', '<cmd>Format<CR>', 'Format current file')
 
       nmap('gd', vim.lsp.buf.definition, 'Goto Definition')
       nmap('gD', vim.lsp.buf.declaration, 'Goto Declaration')
       nmap('gr', require('telescope.builtin').lsp_references, 'Goto References')
       nmap('gI', vim.lsp.buf.implementation, 'Goto Implementation')
 
+      nmap('<C-/>', 'gcc', 'Comment toggle current line')
+
       -- See `:help K` for why this keymap
       nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
 
       -- LSP Workspace functionality
-      nmap('<leader>cws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Workspace Symbols')
-      nmap('<leader>cwa', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
-      nmap('<leader>cwr', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
-      nmap('<leader>cwl', function()
+      nmap('<leader>sws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Workspace Symbols')
+      nmap('<leader>swa', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
+      nmap('<leader>swr', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
+      nmap('<leader>swl', function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
       end, 'Workspace List Folders')
 
@@ -95,10 +98,6 @@ return {
     require('mason-lspconfig').setup {
       ensure_installed = servers,
     }
-
-    -- nvim-cmp supports additional completion capabilities
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
     for _, lsp in ipairs(servers) do
       require('lspconfig')[lsp].setup {

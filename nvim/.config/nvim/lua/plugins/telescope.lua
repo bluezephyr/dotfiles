@@ -9,7 +9,8 @@ return {
         -- Fuzzy Finder Algorithm which requires local dependencies to be built.
         -- Only load if `make` is available. Make sure you have the system
         -- requirements installed.
-        'nvim-telescope/telescope-fzf-native.nvim', build = "make"
+        'nvim-telescope/telescope-fzf-native.nvim',
+        build = "make"
         -- cond = function()
         --   return vim.fn.executable 'make' == 1
         -- end,
@@ -18,7 +19,6 @@ return {
       -- https://github.com/nvim-telescope/telescope-file-browser.nvim
       -- { "nvim-telescope/telescope-file-browser.nvim" }
       -- },
-
     },
 
     config = function()
@@ -64,57 +64,48 @@ return {
         },
       })
 
-      vim.keymap.set('n', '<leader>h', function()
-        require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown { previewer = false })
-      end, { desc = 'Recent files' })
+      vim.keymap.set('n', '<leader>t', "<cmd>Telescope<CR>", { desc = 'Telescope' })
 
-      vim.keymap.set('n', '<leader>h', function()
-        require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown { previewer = false })
-      end, { desc = 'Recent files' })
+      vim.keymap.set("n", "<C-q>", function()
+        require("telescope.builtin").quickfix()
+        vim.cmd(":cclose")
+      end, { desc = "Open Quickfix" })
 
       vim.keymap.set('n', '<leader><space>', function()
-        require('telescope.builtin').buffers(require('telescope.themes').get_dropdown { previewer = false })
-      end, { desc = 'Buffers' })
-
-      vim.keymap.set('n', '<leader>/', function()
-        -- You can pass additional configuration to telescope to change theme, layout, etc.
-        require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          previewer = false,
+        require('telescope.builtin').buffers(require('telescope.themes').get_dropdown { previewer = false,
+          layout_config = {
+            width = 0.8,
+            height = 25
+          }
         })
-      end, { desc = 'Fuzzy search in current buffer' })
+      end, { desc = 'Buffers' })
 
       vim.keymap.set('n', '<leader>fa', function()
         require('telescope.builtin').find_files { find_command = { 'fd', '--hidden' } }
       end, { desc = 'Find All Files' })
 
-      vim.keymap.set('n', '<leader>ff', function()
-        require('telescope.builtin').find_files(require('telescope.themes').get_dropdown {
-          previewer = false,
-          lines = 20,
-          find_command = { 'fd' }
-        })
-      end, { desc = 'Find Files' })
-
-      vim.keymap.set('n', '<leader>F', function()
-        require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd', '--hidden' } }
+      vim.keymap.set('n', '<leader>f.', function()
+        require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = 'Find Files Relative Current' })
 
-      -- vim.keymap.set('n', '<leader>e', require('telescope').extensions.file_browser.file_browser, { desc = 'File [E]xplorer' })
+      vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
+        { desc = 'Fuzzy search in current buffer' })
 
-      vim.keymap.set('n', '<leader>t', "<cmd>Telescope<CR>", { desc = 'Telescope' })
+      vim.keymap.set('n', '<leader>h', require('telescope.builtin').oldfiles, { desc = 'Recent Files' })
+      vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = 'Find Files' })
       vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
       vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
       vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
-      vim.keymap.set('n', '<leader>fm', require('telescope.builtin').man_pages, { desc = 'Man pages' })
+      vim.keymap.set('n', '<leader>fm', require('telescope.builtin').man_pages, { desc = 'Man Pages' })
       vim.keymap.set('n', '<leader>fo', require('telescope.builtin').vim_options, { desc = 'Vim Options' })
 
-      vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = 'Search current Word' })
-      vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = 'Search by Grep' })
-      vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = 'Search Diagnostics' })
+      vim.keymap.set('n', '<leader>*', require('telescope.builtin').grep_string, { desc = 'Find Current Word' })
+      vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = 'Find by Grep' })
+      vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = 'Find Diagnostics' })
 
-      vim.keymap.set('n', '<leader>ss', function()
+      vim.keymap.set('n', '<leader>fs', function()
         require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
-        '--with-filename', '--line-number', '--column', '--smart-case', '-.' } }
+          '--with-filename', '--line-number', '--column', '--smart-case', '-.' } }
       end, { desc = 'Search Ripgrep' })
 
       -- Git commands
@@ -123,68 +114,18 @@ return {
     end
   },
 }
--- See `:help telescope.builtin`
---   vim.keymap.set('n', '<leader>h', function()
---     require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown { previewer = false })
---   end, { desc = 'Recent files' })
---
---   vim.keymap.set('n', '<leader><space>', function()
---     require('telescope.builtin').buffers(require('telescope.themes').get_dropdown { previewer = false })
---   end, { desc = 'Buffers' })
---
 --   -- vim.keymap.set('n', '<leader>/', function()
 --   --     require('telescope.builtin').current_buffer_fuzzy_find({ layout_strategy = "center", previewer = false })
 --   -- end, { desc = '[/] Fuzzily search in current buffer]' })
 --
---   vim.keymap.set('n', '<leader>/', function()
---     -- You can pass additional configuration to telescope to change theme, layout, etc.
---     require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
---       previewer = false,
---     })
---   end, { desc = 'Fuzzy search in current buffer' })
---
---   vim.keymap.set('n', '<leader>fa', function()
---     require('telescope.builtin').find_files { find_command = { 'fd', '--hidden' } }
---   end, { desc = 'Find All Files' })
---
---   vim.keymap.set('n', '<leader>ff', function()
---     require('telescope.builtin').find_files(require('telescope.themes').get_dropdown {
---       previewer = false,
---       lines = 20,
---       find_command = { 'fd' }
---     })
---   end, { desc = 'Find Files' })
---
---   vim.keymap.set('n', '<leader>F', function()
---     require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd', '--hidden' } }
---   end, { desc = 'Find Files Relative Current' })
---
 --   -- vim.keymap.set('n', '<leader>e', require('telescope').extensions.file_browser.file_browser, { desc = 'File [E]xplorer' })
---
---   vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
---   vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
---   vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
---   vim.keymap.set('n', '<leader>fm', require('telescope.builtin').man_pages, { desc = 'Man pages' })
---   vim.keymap.set('n', '<leader>fo', require('telescope.builtin').vim_options, { desc = 'Vim Options' })
---
---   vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = 'Search current Word' })
---   vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = 'Search by Grep' })
---   vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = 'Search Diagnostics' })
 --
 --   vim.keymap.set('n', '<leader>ss', function()
 --     require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
 --     '--with-filename', '--line-number', '--column', '--smart-case', '-.' } }
 --   end, { desc = 'Search Ripgrep' })
 --
---   -- Git commands
---   vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
---   vim.keymap.set('n', '<leader>gc', require('telescope.builtin').git_commits, { desc = 'Git Commits' })
--- end,
 
-
--- ["s"] = { "<cmd>lua require('telescope.builtin').vim_options(require('telescope.themes').get_dropdown{})<cr>", "Set Vim Options"},
--- ["."] = { "<cmd>cd %:p:h<CR>:pwd<CR>", "Change dir to current file" },
---
 --     f = {
 --         name = "Find",
 --         f = {
@@ -197,15 +138,4 @@ return {
 --             -- command to get this to work
 --             "<cmd>lua require('telescope.builtin').find_files({find_command = {'rg', '--files', '--hidden', '-g', '!.git'}, cwd='utils.buffer.dir()'})<cr>", "Find files (relative open buffer)",
 --         },
---         h = { "<cmd>Telescope command_history<cr>", "Command history" },
---         r = { "<cmd>Telescope registers<cr>", "Registers" },
---     },
---
---     ["C"] = { "<cmd>Telescope commands<cr>", "Commands" },
 --     ["F"] = { "<cmd>Telescope live_grep theme=ivy<cr>", "Find Text" },
---     ["K"] = { "<cmd>Telescope keymaps<cr>", "Keymaps" },
---     ["H"] = { "<cmd>Telescope help_tags previewer=false<cr>", "Help" },
---     ["M"] = { "<cmd>Telescope man_pages previewer=false<cr>", "Man Pages" },
---     ["s"] = { "<cmd>lua require('telescope.builtin').vim_options(require('telescope.themes').get_dropdown{})<cr>", "Set Vim Options"},
-
-
