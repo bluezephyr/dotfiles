@@ -37,11 +37,6 @@ return {
         vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
       end
 
-      nmap('<leader>sr', vim.lsp.buf.rename, 'Rename')
-      nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
-      nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
-      nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
-      nmap('<leader>ss', require('telescope.builtin').lsp_document_symbols, 'Document Symbols')
       nmap('<leader>sf', '<cmd>Format<CR>', 'Format current file')
 
       nmap('gd', vim.lsp.buf.definition, 'Goto Definition')
@@ -49,16 +44,26 @@ return {
       nmap('gr', require('telescope.builtin').lsp_references, 'Goto References')
       nmap('gI', vim.lsp.buf.implementation, 'Goto Implementation')
 
-      nmap('<C-/>', 'gcc', 'Comment toggle current line')
-
       -- See `:help K` for why this keymap
       nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
 
+      nmap('<leader>sr', vim.lsp.buf.rename, 'Rename')
+      nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
+      nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
+      nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
+      nmap('<leader>ss', require('telescope.builtin').lsp_document_symbols, 'Document Symbols')
+
+      vim.keymap.set('n', '<leader>st', function()
+        require('telescope.builtin').lsp_document_symbols { symbols = { 'function' } }
+      end, { desc = 'Find All Files' })
+
+
       -- LSP Workspace functionality
-      nmap('<leader>sws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Workspace Symbols')
-      nmap('<leader>swa', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
-      nmap('<leader>swr', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
-      nmap('<leader>swl', function()
+      nmap('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
+      nmap('<leader>sW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Dynamic Workspace Symbols')
+      nmap('<leader>sA', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
+      nmap('<leader>sR', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
+      nmap('<leader>sL', function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
       end, 'Workspace List Folders')
 
