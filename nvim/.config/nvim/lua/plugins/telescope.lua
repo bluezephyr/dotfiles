@@ -81,7 +81,7 @@ return {
       end, { desc = 'Buffers' })
 
       vim.keymap.set('n', '<leader>fa', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden' } }
+        require('telescope.builtin').find_files { find_command = { 'fd', '-HI' } }
       end, { desc = 'Find All Files' })
 
       vim.keymap.set('n', '<leader>f.', function()
@@ -100,13 +100,13 @@ return {
       vim.keymap.set('n', '<leader>fo', require('telescope.builtin').vim_options, { desc = 'Vim Options' })
 
       vim.keymap.set('n', '<leader>*', require('telescope.builtin').grep_string, { desc = 'Find Current Word' })
-      vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = 'Find by Grep' })
+      vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = 'Find text' })
       vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = 'Find Diagnostics' })
 
       vim.keymap.set('n', '<leader>fs', function()
         require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
-          '--with-filename', '--line-number', '--column', '--smart-case', '-.' } }
-      end, { desc = 'Search Ripgrep' })
+          '--with-filename', '--line-number', '--column', '--smart-case', '-.', '--no-ignore', '--glob=!.git/*' } }
+      end, { desc = 'Find text (all)' })
 
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
