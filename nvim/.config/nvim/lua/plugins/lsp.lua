@@ -95,7 +95,6 @@ return {
       'rust_analyzer',
       'lua_ls',
       'pyright',
-      'sourcery',
       'tsserver',
     }
 
