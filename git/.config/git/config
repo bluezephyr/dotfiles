@@ -1,0 +1,34 @@
+[user]
+	name = Blue Zephyr
+	email = blue.zephyr.git@gmail.com
+
+[includeIf "gitdir:~/repos/**"]
+	path = config-t
+
+[core]
+	excludesfile = ~/.config/git/ignore
+	editor = nvim
+	pager = less -F
+
+[alias]
+	logg = log --pretty=format:\"%C(auto)%d%h %s\" --graph --all --date=short
+	loggg = log --pretty=format:\"%C(auto)%d%h (%ad - %aN) %s\" --graph --all --date=short
+	co = checkout
+	br = branch
+	st = status
+	lll = log --graph --topo-order --abbrev-commit --date=short --decorate --all --boundary \
+		--pretty=format:'%C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%cn]%Creset %Cgreen(%ad)'
+	ll = log -20 --graph --topo-order --abbrev-commit --date=short --decorate --all --boundary \
+		--pretty=format:'%C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%cn]%Creset %Cgreen(%ad)'
+	l = log -20 --graph --topo-order --abbrev-commit --date=short --decorate --boundary \
+		--pretty=format:'%C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%cn]%Creset %Cgreen(%ad)'
+
+[diff]
+	tool = meld
+[push]
+	default = simple
+	autoSetupRemote = on
+[credential]
+	helper = cache --timeout=3600
+[init]
+	defaultBranch = master
