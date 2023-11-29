@@ -96,6 +96,7 @@ return {
       'lua_ls',
       'pyright',
       'tsserver',
+      'marksman',
     }
 
     -- Ensure the servers above are installed

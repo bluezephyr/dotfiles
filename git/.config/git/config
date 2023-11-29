@@ -2,7 +2,7 @@
 	name = Blue Zephyr
 	email = blue.zephyr.git@gmail.com
 
-[includeIf "gitdir:~/repos/**"]
+[includeIf "gitdir:~/repos/work/t/**"]
 	path = config-t
 
 [core]

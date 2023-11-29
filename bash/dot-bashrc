@@ -122,3 +122,7 @@ source /usr/share/fzf/completion.bash
 
 . "$HOME/.cargo/env"
 eval "$(starship init bash)"
+
+# Ripgrep config
+export RIPGREP_CONFIG_PATH=~/.config/rg/config
+
