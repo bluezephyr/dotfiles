@@ -1,0 +1,7 @@
+# Set the environment variable RIPGREP_CONFIG_PATH to point to this file
+# export RIPGREP_CONFIG_PATH=~/.config/rg/config
+
+# See https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file for details
+
+# Don't include git folder in hidden searches
+--glob=!.git/
