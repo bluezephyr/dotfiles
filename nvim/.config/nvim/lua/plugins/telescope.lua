@@ -90,6 +90,10 @@ return {
         require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = 'Find Files Relative Current' })
 
+      vim.keymap.set('n', '<leader>fh', function()
+        require('telescope.builtin').man_pages { sections = { 'ALL' } }
+      end, { desc = 'Man Pages' })
+
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
 
@@ -99,7 +103,6 @@ return {
       vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
       vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
       vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
-      vim.keymap.set('n', '<leader>fm', require('telescope.builtin').man_pages, { desc = 'Man Pages' })
       vim.keymap.set('n', '<leader>fo', require('telescope.builtin').vim_options, { desc = 'Vim Options' })
 
       vim.keymap.set('n', '<leader>*', require('telescope.builtin').grep_string, { desc = 'Find Current Word' })
