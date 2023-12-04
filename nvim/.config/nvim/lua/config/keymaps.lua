@@ -24,10 +24,10 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { desc = 'Exit Terminal mode' })
 
 -- Better window navigation
-vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = 'Window move down' })
-vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = 'Window move left' })
-vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = 'Window move right' })
-vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = 'Window move up' })
+-- vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = 'Window move down' })
+-- vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = 'Window move left' })
+-- vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = 'Window move right' })
+-- vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = 'Window move up' })
 
 -- Resize with arrows
 vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = 'Increase vertical window size' })

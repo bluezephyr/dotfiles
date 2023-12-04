@@ -56,6 +56,14 @@ return {
   -- https://github.com/ntpeters/vim-better-whitespace
   'ntpeters/vim-better-whitespace',
 
+  -- https://github.com/christoomey/vim-tmux-navigator
+  'christoomey/vim-tmux-navigator',
+
+  { -- Theme christoomey/vim-tmux-navigator
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000
+  },
   -- .add_default_mappings() (init.lua)
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
