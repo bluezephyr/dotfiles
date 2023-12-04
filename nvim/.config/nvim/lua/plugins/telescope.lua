@@ -90,7 +90,7 @@ return {
         require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = 'Find Files Relative Current' })
 
-      vim.keymap.set('n', '<leader>fh', function()
+      vim.keymap.set('n', '<leader>fm', function()
         require('telescope.builtin').man_pages { sections = { 'ALL' } }
       end, { desc = 'Man Pages' })
 
