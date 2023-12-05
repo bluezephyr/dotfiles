@@ -102,6 +102,10 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and 
 -- Lazy
 vim.keymap.set("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
 
+-- Git
+vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git blame line" })
+vim.keymap.set("n", "<leader>gt", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "Toggle Git blame line" })
+
 -- Convenient shortcuts
 vim.keymap.set("n", "<leader>L", "<cmd>setlocal relativenumber!<CR>", { desc = 'Toggle relative line numbers' })
 vim.keymap.set("n", "<leader>a", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = 'Toggle auto format (a)' })
@@ -111,4 +115,4 @@ vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
 vim.keymap.set("n", "<leader>p", "viwp", { desc = 'Paste inside word' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
---     ["v"] = { "<cmd>edit ~/.config/nvim/init.lua<CR>", "Edit config" },
+
