@@ -83,7 +83,11 @@ return {
       end, { desc = 'Buffers' })
 
       vim.keymap.set('n', '<leader>fa', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '-HI' } }
+        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore' } }
+      end, { desc = 'Find All Files' })
+
+      vim.keymap.set('n', '<c-p>', function()
+        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
       end, { desc = 'Find All Files' })
 
       vim.keymap.set('n', '<leader>f.', function()
@@ -99,7 +103,6 @@ return {
 
       vim.keymap.set('n', '<leader>h', require('telescope.builtin').oldfiles, { desc = 'Recent Files' })
       vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = 'Find Files' })
-      vim.keymap.set('n', '<c-p>', require('telescope.builtin').find_files, { desc = 'Find Files' })
       vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
       vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
       vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
