@@ -34,3 +34,5 @@
 	defaultBranch = master
 [rebase]
 	autosquash = true
+[pull]
+	ff = only
