@@ -64,6 +64,17 @@ return {
     name = "catppuccin",
     priority = 1000
   },
+
+  {
+    'akinsho/bufferline.nvim',
+    version = "*",
+    dependencies = 'nvim-tree/nvim-web-devicons',
+
+    config = function()
+      require("bufferline").setup{}
+    end,
+  },
+
   -- .add_default_mappings() (init.lua)
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
