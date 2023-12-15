@@ -40,15 +40,10 @@ return {
     -- end
   },
 
-
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   },
-
-  -- Airline (alternative to lualine)
-  -- use "vim-airline/vim-airline"
-  -- use "vim-airline/vim-airline-themes"
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
@@ -73,7 +68,6 @@ return {
 
   -- Git related plugins
   'tpope/vim-fugitive',
-  'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
@@ -97,7 +91,7 @@ return {
     dependencies = 'nvim-tree/nvim-web-devicons',
 
     config = function()
-      require("bufferline").setup{}
+      require("bufferline").setup {}
     end,
   },
 

@@ -17,4 +17,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- All plugins are added to separate files in ~/.config/nvim/lua/plugins
+-- See https://github.com/folke/lazy.nvim?tab=readme-ov-file#-structuring-your-plugins
+-- for details about customizing plugins
 require('lazy').setup('plugins')
