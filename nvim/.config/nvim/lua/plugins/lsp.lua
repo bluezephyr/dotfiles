@@ -4,8 +4,9 @@ return {
   'neovim/nvim-lspconfig',
   dependencies = {
     -- Automatically install LSPs to stdpath for neovim
-    'williamboman/mason.nvim',
+    { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
     'williamboman/mason-lspconfig.nvim',
+    'WhoIsSethDaniel/mason-tool-installer.nvim',
 
     -- Useful status updates for LSP
     -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -16,7 +17,8 @@ return {
       opts = {}
     },
 
-    -- Additional lua configuration, makes nvim stuff amazing!
+    -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
+    -- used for completion, annotations and signatures of Neovim apis
     'folke/neodev.nvim',
   },
 

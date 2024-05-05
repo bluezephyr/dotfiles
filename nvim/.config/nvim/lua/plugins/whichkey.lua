@@ -2,9 +2,11 @@
 -- https://github.com/folke/which-key.nvim
 return {
   'folke/which-key.nvim',
+  event = 'VimEnter',
   opts = {
     window = {
-      border = "rounded"
+      border = "rounded",
+      position = "bottom"-- bottom, top
     },
     show_help = false,
     triggers_nowait = {

@@ -66,7 +66,45 @@ return {
         },
       })
 
+      -- See `:help telescope.builtin`
+      local builtin = require 'telescope.builtin'
+
       vim.keymap.set('n', '<leader>t', "<cmd>Telescope<CR>", { desc = 'Telescope' })
+
+      vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
+      vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
+      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
+      vim.keymap.set('n', '<leader>fs', builtin.builtin, { desc = '[F]ind [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord' })
+      vim.keymap.set('n', '<leader>*',  builtin.grep_string, { desc = '[F]ind current [W]ord' })
+      vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
+      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep' })
+      vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
+      vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
+      vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
+      vim.keymap.set('n', '<leader>h',  builtin.oldfiles, { desc = 'Recent Files' })
+      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      vim.keymap.set('n', '<c-p>', function()
+        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+      end, { desc = 'Find All Files' })
+
+      vim.keymap.set('n', '<leader>sa', function()
+        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore' } }
+      end, { desc = '[F]ind [A]ll Files' })
+
+      vim.keymap.set('n', '<leader>f.', function()
+        require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
+      end, { desc = '[F]ind [F]iles Relative Current' })
+
+      -- Shortcut for searching your Neovim configuration files
+      vim.keymap.set('n', '<leader>fn', function()
+        builtin.find_files { cwd = vim.fn.stdpath 'config' }
+      end, { desc = '[F]ind [N]eovim files' })
+
+      vim.keymap.set('n', '<leader>fm', function()
+        require('telescope.builtin').man_pages { sections = { 'ALL' } }
+      end, { desc = '[F]ind [M]an Pages' })
 
       vim.keymap.set("n", "<C-q>", function()
         require("telescope.builtin").quickfix()
@@ -82,35 +120,8 @@ return {
         })
       end, { desc = 'Buffers' })
 
-      vim.keymap.set('n', '<leader>fa', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore' } }
-      end, { desc = 'Find All Files' })
-
-      vim.keymap.set('n', '<c-p>', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
-      end, { desc = 'Find All Files' })
-
-      vim.keymap.set('n', '<leader>f.', function()
-        require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
-      end, { desc = 'Find Files Relative Current' })
-
-      vim.keymap.set('n', '<leader>fm', function()
-        require('telescope.builtin').man_pages { sections = { 'ALL' } }
-      end, { desc = 'Man Pages' })
-
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
-
-      vim.keymap.set('n', '<leader>h', require('telescope.builtin').oldfiles, { desc = 'Recent Files' })
-      vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = 'Find Files' })
-      vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = 'Help' })
-      vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = 'Keymaps' })
-      vim.keymap.set('n', '<leader>fc', require('telescope.builtin').commands, { desc = 'Commands' })
-      vim.keymap.set('n', '<leader>fo', require('telescope.builtin').vim_options, { desc = 'Vim Options' })
-
-      vim.keymap.set('n', '<leader>*', require('telescope.builtin').grep_string, { desc = 'Find Current Word' })
-      vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = 'Find text' })
-      vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = 'Find Diagnostics' })
 
       vim.keymap.set('n', '<leader>fs', function()
         require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
@@ -123,28 +134,3 @@ return {
     end
   },
 }
---   -- vim.keymap.set('n', '<leader>/', function()
---   --     require('telescope.builtin').current_buffer_fuzzy_find({ layout_strategy = "center", previewer = false })
---   -- end, { desc = '[/] Fuzzily search in current buffer]' })
---
---   -- vim.keymap.set('n', '<leader>e', require('telescope').extensions.file_browser.file_browser, { desc = 'File [E]xplorer' })
---
---   vim.keymap.set('n', '<leader>ss', function()
---     require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
---     '--with-filename', '--line-number', '--column', '--smart-case', '-.' } }
---   end, { desc = 'Search Ripgrep' })
---
-
---     f = {
---         name = "Find",
---         f = {
---             -- "<cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{previewer = false, hidden = true})<cr>",
---             "<cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{previewer = false, find_command = {'rg', '--files', '--hidden', '-g', '!.git'}})<cr>",
---             "Find files (relative cwd)",
---         },
---         ["."] = {
---             -- TODO: Need to understand how to use the 'utils.buffer.dir()'
---             -- command to get this to work
---             "<cmd>lua require('telescope.builtin').find_files({find_command = {'rg', '--files', '--hidden', '-g', '!.git'}, cwd='utils.buffer.dir()'})<cr>", "Find files (relative open buffer)",
---         },
---     ["F"] = { "<cmd>Telescope live_grep theme=ivy<cr>", "Find Text" },

@@ -1,12 +1,18 @@
 -- Note that a lot of keymaps are set in other files. Typically in the
 -- configuration files for specific plugins.
 
+-- Document existing key chains
+require('which-key').register {
+  ['<leader>c'] = { name = '[C]ode', _     = 'which_key_ignore' },
+  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  ['<leader>f'] = { name = '[F]ind', _     = 'which_key_ignore' },
+  ['<leader>r'] = { name = '[R]ename', _   = 'which_key_ignore' },
+  ['<leader>t'] = { name = '[T]oggle', _   = 'which_key_ignore' },
+}
+
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-
--- Edit configuration
-vim.keymap.set("n", "<leader>ec", ":e ~/.config/nvim/init.lua<CR>", { desc = 'Edit nvim configuration' })
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -85,15 +91,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- Command to toggle vim options
 -- See also https://neovim.io/doc/user/lua.html#lua-vim-options
 function Toggle_formatoption(option)
-    local action
-    if vim.opt.formatoptions:get()[option] then
-        vim.opt.formatoptions:remove(option)
-        action = " disabled"
-    else
-        vim.opt.formatoptions:append(option)
-        action = " enabled"
-    end
-    vim.notify("formatoptions " .. option .. action)
+  local action
+  if vim.opt.formatoptions:get()[option] then
+    vim.opt.formatoptions:remove(option)
+    action = " disabled"
+  else
+    vim.opt.formatoptions:append(option)
+    action = " enabled"
+  end
+  vim.notify("formatoptions " .. option .. action)
 end
 
 -- Clear search with <esc>
@@ -108,9 +114,9 @@ vim.keymap.set("n", "<leader>ga", "<cmd>Git blame<cr>", { desc = "Git blame" })
 vim.keymap.set("n", "<leader>gt", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "Toggle Git blame line" })
 
 -- Convenient shortcuts
-vim.keymap.set("n", "<leader>L", "<cmd>setlocal relativenumber!<CR>", { desc = 'Toggle relative line numbers' })
-vim.keymap.set("n", "<leader>a", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = 'Toggle auto format (a)' })
-vim.keymap.set("n", "<leader>W", "<cmd>set invwrap<CR>", { desc = 'Toggle wrap mode' })
+vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
+vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
+vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]rap mode' })
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
 vim.keymap.set("n", "<leader>p", "viwp", { desc = 'Paste inside word' })
