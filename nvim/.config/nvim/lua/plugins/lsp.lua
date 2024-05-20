@@ -39,7 +39,7 @@ return {
         vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
       end
 
-      nmap('<leader>sf', '<cmd>Format<CR>', 'Format current file')
+      nmap('<leader>sF', '<cmd>Format<CR>', 'Format current file')
 
       nmap('gd', vim.lsp.buf.definition, 'Goto Definition')
       nmap('gD', vim.lsp.buf.declaration, 'Goto Declaration')
@@ -53,12 +53,13 @@ return {
       nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
       nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
       nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
-      nmap('<leader>ss', require('telescope.builtin').lsp_document_symbols, 'Document Symbols')
+      vim.keymap.set('n', '<leader>ss', function()
+        require('telescope.builtin').lsp_document_symbols({ symbol_width = 75 })
+      end, { desc = 'Document Symbols' })
 
-      vim.keymap.set('n', '<leader>st', function()
-        require('telescope.builtin').lsp_document_symbols { symbols = { 'function' } }
-      end, { desc = 'Find All Files' })
-
+      vim.keymap.set('n', '<leader>sf', function()
+        require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 50 })
+      end, { desc = 'Document Functions' })
 
       -- LSP Workspace functionality
       nmap('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
