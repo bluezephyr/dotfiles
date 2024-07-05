@@ -53,13 +53,12 @@ return {
       nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
       nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
       nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
-      vim.keymap.set('n', '<leader>ss', function()
-        require('telescope.builtin').lsp_document_symbols({ symbol_width = 75 })
-      end, { desc = 'Document Symbols' })
-
-      vim.keymap.set('n', '<leader>sf', function()
-        require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 50 })
-      end, { desc = 'Document Functions' })
+      nmap('<leader>ss', function()
+        require('telescope.builtin').lsp_document_symbols({ symbol_width = 100 })
+      end, 'Document Symbols')
+      nmap('<leader>sf', function()
+        require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 100 })
+      end, 'Document Functions')
 
       -- LSP Workspace functionality
       nmap('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
@@ -69,6 +68,9 @@ return {
       nmap('<leader>sL', function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
       end, 'Workspace List Folders')
+
+      -- Clang specific
+      nmap('<A-o>', ':ClangdSwitchSourceHeader<CR>', 'Switch source/header file')
 
       -- Create a command `:Format` local to the LSP buffer
       vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)

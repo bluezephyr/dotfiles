@@ -123,10 +123,11 @@ return {
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
 
+      -- TODO: Remap - duplicate
       vim.keymap.set('n', '<leader>fs', function()
         require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
           '--with-filename', '--line-number', '--column', '--smart-case', '-.', '--no-ignore', '--glob=!.git/*' } }
-      end, { desc = 'Find text (all)' })
+      end, { desc = '[F]ind text (all)' })
 
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })

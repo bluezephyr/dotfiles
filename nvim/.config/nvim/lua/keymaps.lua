@@ -3,7 +3,7 @@
 
 -- Document existing key chains
 require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _     = 'which_key_ignore' },
+  ['<leader>s'] = { name = '[S]ource', _   = 'which_key_ignore' },
   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
   ['<leader>f'] = { name = '[F]ind', _     = 'which_key_ignore' },
   ['<leader>r'] = { name = '[R]ename', _   = 'which_key_ignore' },
@@ -111,7 +111,7 @@ vim.keymap.set("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
 -- Git
 vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git blame line" })
 vim.keymap.set("n", "<leader>ga", "<cmd>Git blame<cr>", { desc = "Git blame" })
-vim.keymap.set("n", "<leader>gt", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "Toggle Git blame line" })
+vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
 
 -- Convenient shortcuts
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
@@ -119,7 +119,7 @@ vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { des
 vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]rap mode' })
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
-vim.keymap.set("n", "<leader>p", "viwp", { desc = 'Paste inside word' })
+vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 
