@@ -121,6 +121,16 @@ information.
 
 `sudo pacman -Syu nodejs npm`
 
+
+### Tokei
+
+Program that displays statistics about code (number of lines, comments, etc)
+grouped by language. Install using cargo. See
+https://github.com/XAMPPRocky/tokei for more information.
+
+`cargo install tokei`
+
+
 ### Spotify
 
 `sudo pacman -Syu spotify-launcher`
