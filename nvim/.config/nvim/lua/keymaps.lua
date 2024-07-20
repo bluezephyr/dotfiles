@@ -1,14 +1,14 @@
 -- Note that a lot of keymaps are set in other files. Typically in the
 -- configuration files for specific plugins.
 
--- Document existing key chains
-require('which-key').register {
-  ['<leader>s'] = { name = '[S]ource', _   = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>f'] = { name = '[F]ind', _     = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _   = 'which_key_ignore' },
-  ['<leader>t'] = { name = '[T]oggle', _   = 'which_key_ignore' },
-}
+local wk = require("which-key")
+
+wk.add({
+    { "<leader>f", group = "[F]ind" },
+    { "<leader>s", group = "[S]ource" },
+    { "<leader>t", group = "[T]oggle" },
+    { "<leader>g", group = "[G]it" },
+})
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`

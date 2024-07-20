@@ -8,7 +8,7 @@ return {
       border = "rounded",
       position = "bottom"-- bottom, top
     },
-    show_help = false,
+    show_help = true,
     triggers_nowait = {
       -- marks
       "`",

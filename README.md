@@ -112,6 +112,12 @@ The setup and configuration for Neovim requires that the following is installed
 
 * Node.js and npm
 
+In order to use the clipboard, a clipboard provider must be available. For X11,
+`xclip` can be used.
+
+```
+sudo pacman -Syu xclip
+```
 
 ### Node.js
 
