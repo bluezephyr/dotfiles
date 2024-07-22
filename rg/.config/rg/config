@@ -5,3 +5,4 @@
 
 # Don't include git folder in hidden searches
 --glob=!.git/
+--smart-case
