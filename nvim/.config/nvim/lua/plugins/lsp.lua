@@ -95,6 +95,7 @@ return {
       'pyright',
       'tsserver',
       'marksman',
+      'taplo',
     }
 
     -- Ensure the servers above are installed
