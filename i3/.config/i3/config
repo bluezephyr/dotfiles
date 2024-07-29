@@ -95,6 +95,10 @@ bindsym $mod+Shift+8    move container to workspace  $ws8
 bindsym $mod+Shift+9    move container to workspace  $ws9
 bindsym $mod+Shift+0    move container to workspace  $ws10
 
+# Move the current workspace to the next output
+# (effectively toggles when you only have two outputs)
+bindsym $mod+x move workspace to output next
+
 # resize window (you can also use the mouse for that):
 #mode "resize" {
 # These bindings trigger as soon as you enter the resize mode
@@ -284,6 +288,8 @@ set $ws10 "10"
 # assign [class="Xfce4-terminal"] $ws1
 # assign [class="Thunar"] $ws4
 # assign [class="(?i)firefox"] $ws5
+# assign [class="(?i)firefox"] $ws10
+for_window [class=Spotify] move window to workspace 10
 
 # automatic set focus new window if it opens on another workspace than the current:
 # for_window [class=Xfce4-terminal] focus
@@ -349,13 +355,16 @@ exec --no-startup-id dex --autostart --environment i3
 
 # start a script to setup displays
 # uncomment the next line, use arandr to setup displays and save the file as monitor:
-exec --no-startup-id ~/.screenlayout/usb3-and-laptop.sh
+# exec --no-startup-id ~/.screenlayout/usb3-and-laptop.sh
 
-bindsym $mod+d exec --no-startup-id ~/.screenlayout/usb3-only.sh
+# Automatically detect screen resolution
+exec_always --no-startup-id autorandr --change
 
-# set wallpaper
-# exec --no-startup-id sleep 2 && nitrogen --restore
-exec --no-startup-id sleep 1 && feh --bg-fill /usr/share/endeavouros/backgrounds/wallpapers/4k-moving-fantasy-forest-desktop.png
+# Set wallpaper
+# Note that the postswitch script in autorandr needs to trigger reload of the
+# wallpaper when the monitor setup has changed. See
+# ~/.config/autorandr/postswitch
+exec --no-startup-id sleep 1 && feh --bg-fill ~/wallpapers/firewatch.png
 
 # set powersavings for display:
 exec --no-startup-id xset s 480 dpms 600 600 600

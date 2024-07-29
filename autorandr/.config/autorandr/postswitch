@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# notify-send -i display "Display profile" "$AUTORANDR_CURRENT_PROFILE"
+dunstify "Display profile $AUTORANDR_CURRENT_PROFILE"
+
+# Run feh to update the wallpaper according to the new monitor config
+if [ -e ~/.fehbg ]
+then
+    ~/.fehbg
+fi

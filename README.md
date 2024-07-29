@@ -42,7 +42,24 @@ configuration based on connected devices. Install using:
 yay -S autorandr
 ```
 
-Configuration files are stored in `.config/autorandr`.
+Configuration files are stored in `.config/autorandr`. Autorandr is executed
+automatically when monitors are plugged in/unplugged but in order to have it
+run also when the laptop lid is opened/closed, this must be monitored
+separatedly. One way to do it is using ACPI. Install `acpid` using:
+
+```
+yay -S acpid
+```
+
+Copy the `~/dotfiles/scripts/autorandr.sh` script to `/etc/acpi/` and modify
+the `handler.sh` script in `/etc/acpi` by adding a call to
+`/etc/acpi/autorandr.sh` when the lid is opened/closed. Make sure that the
+scripts are executable and that the acpid service is enabled:
+
+```
+sudo chmod a+c /etc/acpi/autorandr.sh
+sudo systemctl enable --now acpid
+```
 
 ## Hyprland
 
