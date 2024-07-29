@@ -26,6 +26,24 @@ For this purpose, `picom` is recommended. Install using:
 
 `sudo pacman -Syu picom`
 
+### Keymap
+
+To use a keyboard map with international layout without dead keys (US
+International without dead keys) on X11, use the following command:
+
+`setxkbmap -layout us -variant altgr-intl -option nodeadkeys`
+
+### Monitors
+
+The utility `autorandr` can be used to automatically select a display
+configuration based on connected devices. Install using:
+
+```
+yay -S autorandr
+```
+
+Configuration files are stored in `.config/autorandr`.
+
 ## Hyprland
 
 Hyprland is a tiling window manager for Wayland. Install with `yay`. Also
