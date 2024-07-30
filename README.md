@@ -61,6 +61,16 @@ sudo chmod a+c /etc/acpi/autorandr.sh
 sudo systemctl enable --now acpid
 ```
 
+### Polybar
+
+Polybar is a status bar for i3. Install using
+
+```
+yay polybar
+```
+
+The configuration is in `.config/polybar`.
+
 ## Hyprland
 
 Hyprland is a tiling window manager for Wayland. Install with `yay`. Also
