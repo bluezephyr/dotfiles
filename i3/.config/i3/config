@@ -180,11 +180,11 @@ bindsym $mod+g layout tabbed
 bindsym $mod+o layout toggle split
 
 # toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
+bindsym $mod+Shift+f floating toggle
 
 # change focus between tiling / floating windows
 # Disabled - use mouse
-#bindsym $mod+space focus mode_toggle
+bindsym $mod+Shift+space focus mode_toggle
 
 # focus the parent/child container
 bindsym $mod+a focus parent
@@ -389,6 +389,7 @@ for_window [class="Galculator" instance="galculator"] floating enable
 for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
 
 # set floating (nontiling) for special apps
+for_window [class="Blueman-manager" instance="blueman-manager"] floating enable
 for_window [class="Xsane" instance="xsane"] floating enable
 for_window [class="pavucontrol" instance="pavucontrol"] floating enable
 for_window [class="qt5ct" instance="qt5ct"] floating enable
