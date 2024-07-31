@@ -14,7 +14,7 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-export EDITOR=nvim
-export OPENER=nvim
+export EDITOR=/home/jens/.local/bin/nvim
+export OPENER=/home/jens/.local/bin/nvim
 
 . "$HOME/.cargo/env"

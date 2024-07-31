@@ -71,6 +71,19 @@ yay polybar
 
 The configuration is in `.config/polybar`.
 
+### Scratchpads
+
+A script (`scratchpad-kitty.sh`) to show a scratchpad with a kitty terminal
+running tmux is written based on information here:
+https://www.reddit.com/r/i3wm/comments/kjendc/scratchpad/
+
+The script requires `xdotool`. Install using
+
+```
+yay xdotool
+```
+
+
 ## Hyprland
 
 Hyprland is a tiling window manager for Wayland. Install with `yay`. Also

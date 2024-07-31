@@ -59,8 +59,11 @@ new_window pixel 1
 # hide_edge_borders both
 
 # Set inner/outer gaps
-gaps inner 6
+gaps inner 10
 gaps outer 3
+
+gaps horizontal 800
+smart_gaps inverse_outer
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -270,6 +273,12 @@ for_window [class=Spotify] move window to workspace 10
 # for_window [class="Google-chrome"] focus
 # for_window [class=Thunar] focus
 
+###############
+# Scratchpads #
+###############
+bindsym $mod+t exec ~/.config/i3/scripts/scratchpad-kitty.sh
+for_window [class=scratchpad-kitty], move scratchpad
+
 ##############
 # compositor #
 ##############
@@ -447,7 +456,7 @@ bindsym $mod+space exec rofi -modi drun -show drun \
 
 ## rofi bindings for window menu ($mod+t /F10 optional disabled)
 
-bindsym $mod+t exec rofi -show window \
+bindsym $mod+y exec rofi -show window \
 		-config ~/.config/rofi/rofidmenu.rasi
 
 #bindsym F10 exec rofi -show window \
