@@ -59,11 +59,15 @@ new_window pixel 1
 # hide_edge_borders both
 
 # Set inner/outer gaps
-gaps inner 10
-gaps outer 3
+gaps inner 8
+gaps top 0
 
 gaps horizontal 800
 smart_gaps inverse_outer
+
+# Toggle horizontal gaps for the current window. smart_gaps must be set to
+# `inverse_outer` in order for it to be meaningful.
+bindsym $mod+g exec ~/.config/i3/scripts/toggle-horizontal-gaps.sh
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -178,8 +182,6 @@ bindsym $mod+minus split v
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
-bindsym $mod+g layout tabbed
 bindsym $mod+o layout toggle split
 
 # toggle tiling / floating
