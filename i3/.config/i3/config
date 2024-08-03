@@ -62,7 +62,7 @@ new_window pixel 1
 gaps inner 8
 gaps top 0
 
-gaps horizontal 800
+gaps horizontal 0
 smart_gaps inverse_outer
 
 # Toggle horizontal gaps for the current window. smart_gaps must be set to
