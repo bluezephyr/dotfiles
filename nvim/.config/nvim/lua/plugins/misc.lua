@@ -62,8 +62,10 @@ return {
 
   -- Tim Pope
   -- https://github.com/tpope/vim-unimpaired, etc
-  -- 'tpope/vim-unimpaired',
-  -- 'tpope/vim-surround',
+  'tpope/vim-unimpaired',
+
+  -- https://github.com/tpope/vim-surround, etc
+  'tpope/vim-surround',
 
   -- Git related plugins
   'tpope/vim-fugitive',
