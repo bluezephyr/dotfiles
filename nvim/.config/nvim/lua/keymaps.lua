@@ -123,3 +123,5 @@ vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 
+-- Re-mappings for commenting (new in 0.10)
+vim.keymap.set({ "v", "n" }, "<leader>c", "gcc", { desc = 'Comment line (toggle)', remap = true })
