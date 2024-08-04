@@ -472,5 +472,5 @@ bindsym $mod+y exec rofi -show window \
 
 
 # Set natural scrolling on the touch pad
-exec --no-startup-id xinput set-prop "FTCS1000:00 2808:0101 Touchpad" "libinput Natural Scrolling Enabled" 1
+exec_always --no-startup-id xinput set-prop "FTCS1000:00 2808:0101 Touchpad" "libinput Natural Scrolling Enabled" 1
 
