@@ -93,4 +93,11 @@ return {
       require("bufferline").setup {}
     end,
   },
+
+  { -- Plugin for the built in commenting https://github.com/folke/ts-comments.nvim
+    "folke/ts-comments.nvim",
+    opts = {},
+    event = "VeryLazy",
+    enabled = vim.fn.has("nvim-0.10.0") == 1,
+  }
 }
