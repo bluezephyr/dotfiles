@@ -1,3 +1,5 @@
+-- lazy.nvim is a modern plugin manager for Neovim.
+-- https://github.com/folke/lazy.nvim
 return {
   {
     "folke/lazydev.nvim",
