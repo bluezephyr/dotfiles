@@ -110,6 +110,7 @@ return {
     -- The lang parameter does not seem to work for cpp files. Local fix below
     config = function()
       vim.cmd [[ au FileType cpp setlocal commentstring=//\ %s ]]
+      vim.cmd [[ au FileType c setlocal commentstring=//\ %s ]]
     end,
   }
 }
