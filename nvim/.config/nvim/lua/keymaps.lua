@@ -49,6 +49,8 @@ vim.keymap.set('n', '<leader>w',  "<cmd>wall!<CR>", { desc = 'Write all buffers'
 vim.keymap.set('n', '<leader>q',  "<cmd>bdelete<CR>", { desc = 'Close buffer' })
 vim.keymap.set('n', '<leader>Q',  "<cmd>qa<CR>", { desc = 'Close nvim' })
 vim.keymap.set('n', '<leader>x',  "<cmd>wqa<CR>", { desc = 'Close nvim and save all' })
+vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
+vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })
@@ -121,8 +123,6 @@ vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
 vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
-vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
-vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 
 -- Re-mappings for commenting (new in 0.10)
 vim.keymap.set({ "v", "n" }, "<leader>c", "gcc", { desc = 'Comment line (toggle)', remap = true })
