@@ -42,10 +42,13 @@ configuration based on connected devices. Install using:
 yay -S autorandr
 ```
 
-Configuration files are stored in `.config/autorandr`. Autorandr is executed
-automatically when monitors are plugged in/unplugged but in order to have it
-run also when the laptop lid is opened/closed, this must be monitored
-separatedly. One way to do it is using ACPI. Install `acpid` using:
+Configuration files are stored in `.config/autorandr`. To create a new
+configuration, start by setting it up using ARandR. Then save the configuration
+using `autorandr -s <config-name>`.
+
+Autorandr is executed automatically when monitors are plugged in/unplugged but
+in order to have it run also when the laptop lid is opened/closed, this must be
+monitored separatedly. One way to do it is using ACPI. Install `acpid` using:
 
 ```
 yay -S acpid
