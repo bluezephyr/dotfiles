@@ -113,8 +113,12 @@ vim.keymap.set("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
 
 -- Git
 vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git blame line" })
-vim.keymap.set("n", "<leader>ga", "<cmd>Git blame<cr>", { desc = "Git blame" })
+vim.keymap.set("n", "<leader>gB", function() require('gitsigns').blame_line{full=true} end, { desc = "Git blame line full" })
+vim.keymap.set("n", "<leader>ga", "<cmd>Gitsigns blame<cr>", { desc = "Git blame" })
+vim.keymap.set("n", "<leader>gd", function() require('gitsigns').diffthis() end, { desc = "Git diff this" })
+vim.keymap.set("n", "<leader>gp", "<cmd>Gitsigns preview_hunk<cr>", { desc = "Git preview hunk" })
 vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
+vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T]oggle Git [Signs]" })
 
 -- Convenient shortcuts
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
