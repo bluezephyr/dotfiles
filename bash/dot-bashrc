@@ -121,7 +121,7 @@ source /usr/share/fzf/key-bindings.bash
 source /usr/share/fzf/completion.bash
 
 ## Open file from command line
-#alias open=xdg-open
+alias open=xdg-open
 
 . "$HOME/.cargo/env"
 eval "$(starship init bash)"
