@@ -1,0 +1,4 @@
+git:
+  log:
+    showGraph: always
+  allBranchesLogCmd: "git log --graph --all --oneline --color=always --abbrev-commit --decorate --date=relative"

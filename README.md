@@ -189,6 +189,19 @@ information.
 `sudo pacman -Syu nodejs npm`
 
 
+### Lazygit
+
+(Lazygit)[https://github.com/jesseduffield/lazygit] is a terminal gui git tool.
+
+Use the following steps to install on Ubuntu:
+
+```
+LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+tar xf lazygit.tar.gz lazygit
+install lazygit ~/.local/bin
+```
+
 ### Tokei
 
 Program that displays statistics about code (number of lines, comments, etc)
