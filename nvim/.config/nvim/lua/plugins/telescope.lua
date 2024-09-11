@@ -80,7 +80,7 @@ return {
       vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
-      vim.keymap.set('n', '<leader>h',  builtin.oldfiles, { desc = 'Recent Files' })
+      vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       vim.keymap.set('n', '<c-p>', function()
@@ -125,6 +125,15 @@ return {
 
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
+
+      -- load refactoring Telescope extension
+      require("telescope").load_extension("refactoring")
+
+      vim.keymap.set(
+        { "n", "x" },
+        "<leader>r",
+        function() require('telescope').extensions.refactoring.refactors() end, { desc = 'Refactor' }
+      )
       vim.keymap.set('n', '<leader>gc', require('telescope.builtin').git_commits, { desc = 'Git Commits' })
     end
   },

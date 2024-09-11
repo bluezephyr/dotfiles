@@ -121,5 +121,18 @@ return {
       vim.cmd [[ au FileType cpp setlocal commentstring=//\ %s ]]
       vim.cmd [[ au FileType c setlocal commentstring=//\ %s ]]
     end,
+
+    -- Refactoring plugin https://github.com/ThePrimeagen/refactoring.nvim
+    -- Some config also in telescope.lua
+    {
+      "ThePrimeagen/refactoring.nvim",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+        "nvim-treesitter/nvim-treesitter",
+      },
+      config = function()
+        require("refactoring").setup()
+      end,
+    },
   }
 }
