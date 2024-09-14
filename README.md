@@ -7,6 +7,8 @@ The different folders contain the actual configuration files for applications.
 Stow is used to deploy the configuration files to their correct locations.
 See the stow section below for more information.
 
+See the [notes](./doc/notes.md) file for usage and general hints.
+
 
 ## Workstation Preparations
 
@@ -214,6 +216,21 @@ https://github.com/XAMPPRocky/tokei for more information.
 ### Spotify
 
 `sudo pacman -Syu spotify-launcher`
+
+### Nmap
+
+Depending on the distro/environment, nmap is installed in different ways.
+
+* Snap - Note! To work in sudo-mode, the following is also needed:
+
+```
+sudo snap install nmap
+snap connect nmap:network-control
+```
+
+* APT
+
+`sudo apt install nmap`
 
 ## Stow
 
