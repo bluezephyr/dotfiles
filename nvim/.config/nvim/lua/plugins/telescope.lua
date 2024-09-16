@@ -96,6 +96,11 @@ return {
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[F]ind [N]eovim files' })
 
+      -- Shortcut to search for files in the index
+      vim.keymap.set('n', '<leader>fi', function()
+        require('telescope.builtin').find_files { cwd = vim.fn.expand('~/index'), find_command = { 'fd', '--type', 'file', '--hidden', '--follow' } }
+      end, { desc = '[F]ind [I]ndex' })
+
       vim.keymap.set('n', '<leader>fm', function()
         require('telescope.builtin').man_pages { sections = { 'ALL' } }
       end, { desc = '[F]ind [M]an Pages' })
