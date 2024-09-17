@@ -98,7 +98,7 @@ return {
 
       -- Shortcut to search for files in the index
       vim.keymap.set('n', '<leader>fi', function()
-        require('telescope.builtin').find_files { cwd = vim.fn.expand('~/index'), find_command = { 'fd', '--type', 'file', '--hidden', '--follow' } }
+        require('telescope.builtin').find_files { cwd = vim.fn.expand('~/index'), find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--strip-cwd-prefix' } }
       end, { desc = '[F]ind [I]ndex' })
 
       vim.keymap.set('n', '<leader>fm', function()
