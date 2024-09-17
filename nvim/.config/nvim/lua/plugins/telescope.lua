@@ -15,16 +15,19 @@ return {
         --   return vim.fn.executable 'make' == 1
         -- end,
       },
-      -- TODO: Add Telescope file browser
-      -- https://github.com/nvim-telescope/telescope-file-browser.nvim
-      -- { "nvim-telescope/telescope-file-browser.nvim" }
-      -- },
+      {
+        "nvim-telescope/telescope-live-grep-args.nvim",
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = "^1.0.0",
+      },
     },
 
     config = function()
       -- Enable telescope fzf native, if installed
       pcall(require('telescope').load_extension, 'fzf')
-      -- pcall(require('telescope').load_extension, 'file_browser')
+
+      local lga_actions = require('telescope-live-grep-args.actions')
 
       require('telescope').setup({
         defaults = {
@@ -34,6 +37,10 @@ return {
               ['<C-j>'] = require("telescope.actions").move_selection_next,
               ['<C-k>'] = require "telescope.actions".move_selection_previous,
               ['<C-x>'] = require("telescope.actions").delete_buffer,
+              ["<C-h>"] = lga_actions.quote_prompt(),
+              ['<C-i>'] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+              ['<C-t>'] = lga_actions.quote_prompt({ postfix = " --type " }),
+              -- ['<C-space>'] = actions.to_fuzzy_refine,
               ['<ESC>'] = require("telescope.actions").close,
             },
             n = {
@@ -57,12 +64,6 @@ return {
               previewer = true,
             }
           },
-          -- }, extensions = {
-          --     file_browser = {
-          --         -- theme = "dropdown",
-          --         -- disables netrw and use telescope-file-browser in its place
-          -- hijack_netrw = true,
-          -- },
         },
       })
 
@@ -73,15 +74,20 @@ return {
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
       vim.keymap.set('n', '<leader>ft', builtin.builtin, { desc = '[F]ind [T]elescope' })
-      vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord' })
       vim.keymap.set('n', '<leader>f*', builtin.grep_string, { desc = '[F]ind current [W]ord' })
       vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
-      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep' })
       vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
       vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      -- Live grep args
+      require('telescope').load_extension('live_grep_args')
+      local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
+      vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = '[F]ind by [G]rep' })
+      vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection, { desc = '[F]ind by [G]rep' })
+      vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor, { desc = '[F]ind current [W]ord' })
 
       vim.keymap.set('n', '<c-p>', function()
         require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
@@ -121,12 +127,6 @@ return {
 
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
-
-      -- TODO: Remap - duplicate
-      vim.keymap.set('n', '<leader>fs', function()
-        require('telescope.builtin').live_grep { vimgrep_arguments = { 'rg', '--color=never', '--no-heading',
-          '--with-filename', '--line-number', '--column', '--smart-case', '-.', '--no-ignore', '--glob=!.git/*' } }
-      end, { desc = '[F]ind text (all)' })
 
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
