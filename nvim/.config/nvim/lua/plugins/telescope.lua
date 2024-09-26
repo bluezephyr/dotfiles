@@ -139,7 +139,7 @@ return {
         "<leader>r",
         function() require('telescope').extensions.refactoring.refactors() end, { desc = 'Refactor' }
       )
-      vim.keymap.set('n', '<leader>gc', require('telescope.builtin').git_commits, { desc = 'Git Commits' })
+      vim.keymap.set('n', '<leader>gl', require('telescope.builtin').git_commits, { desc = 'Git Log' })
     end
   },
 }
