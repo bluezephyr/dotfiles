@@ -37,7 +37,7 @@ return {
               ['<C-j>'] = require("telescope.actions").move_selection_next,
               ['<C-k>'] = require "telescope.actions".move_selection_previous,
               ['<C-x>'] = require("telescope.actions").delete_buffer,
-              ["<C-h>"] = lga_actions.quote_prompt(),
+              ["<C-h>"] = lga_actions.quote_prompt({ postfix = " -F " }),
               ['<C-i>'] = lga_actions.quote_prompt({ postfix = " --iglob " }),
               ['<C-t>'] = lga_actions.quote_prompt({ postfix = " --type " }),
               -- ['<C-space>'] = actions.to_fuzzy_refine,
@@ -46,7 +46,7 @@ return {
             n = {
               ['<C-j>'] = require("telescope.actions").move_selection_next,
               ['<C-k>'] = require "telescope.actions".move_selection_previous,
-              ['<C-x>'] = require('telescope.actions').delete_buffer,
+              ['<C-x>'] = require("telescope.actions").delete_buffer,
             },
           },
           results_title = false,
