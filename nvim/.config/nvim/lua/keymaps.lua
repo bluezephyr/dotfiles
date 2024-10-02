@@ -8,7 +8,8 @@ wk.add({
     { "<leader>s", group = "[S]ource" },
     { "<leader>t", group = "[T]oggle" },
     { "<leader>g", group = "[G]it" },
-    { "<leader>b", group = "[B]build" },
+    { "<leader>b", group = "[B]uild" },
+    { "<leader>d", group = "[D]ebug" },
 })
 
 -- Keymaps for better default experience
