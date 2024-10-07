@@ -9,6 +9,7 @@ wk.add({
     { "<leader>t", group = "[T]oggle" },
     { "<leader>g", group = "[G]it" },
     { "<leader>b", group = "[B]build" },
+    { "<leader>d", group = "[D]ebug" },
 })
 
 -- Keymaps for better default experience
