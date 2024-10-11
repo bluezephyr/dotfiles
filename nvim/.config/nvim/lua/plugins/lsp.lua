@@ -80,20 +80,19 @@ return {
     require('mason').setup()
 
     -- Enable the following language servers
-    -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
     local servers = {
       'clangd',
       'jsonls',
-      'rust_analyzer',
       'lua_ls',
       'pyright',
       'marksman',
       'taplo',
+      'rust_analyzer',
     }
 
-    -- Ensure the servers above are installed
+    -- Ensure that the followin servers are installed
     require('mason-lspconfig').setup {
-      ensure_installed = servers,
+      servers,
     }
 
     for _, lsp in ipairs(servers) do
@@ -112,6 +111,5 @@ return {
     local runtime_path = vim.split(package.path, ';')
     table.insert(runtime_path, 'lua/?.lua')
     table.insert(runtime_path, 'lua/?/init.lua')
-
   end
 }

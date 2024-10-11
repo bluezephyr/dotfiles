@@ -4,10 +4,12 @@ return {
         dependencies = {
             "rcarriga/nvim-dap-ui",
             "nvim-neotest/nvim-nio",
+            "jay-babu/mason-nvim-dap.nvim",
         },
         config = function()
             local dapui = require('dapui')
             local dap = require("dap")
+            local mason_nvim_dap = require("mason-nvim-dap")
             local keymap = vim.keymap.set
             local opts = { noremap = true, silent = true }
 
@@ -69,43 +71,33 @@ return {
             vim.fn.sign_define("DapStopped", { text = "!", texthl = "", linehl = "", numhl = "" })
 
             ---- Keymaps ----
-            keymap('n', '<Leader>dc', function() dap.continue() end, { desc = "confinue" })
-            keymap('n', '<Leader>do', function() dap.step_over() end, { desc = "step over" })
-            keymap('n', '<Leader>di', function() dap.step_into() end, { desc = "step into" })
-            keymap('n', '<Leader>dO', function() dap.step_out() end, { desc = "step out" })
-            keymap('n', '<Leader>db', function() dap.toggle_breakpoint() end, { desc = "toggle breakpoint" })
-            keymap("n", '<Leader>dq', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" })
+            keymap('n', '<F5>', function() dap.continue() end, { desc = "continue" })
+            keymap('n', '<F10>', function() dap.step_over() end, { desc = "step over" })
+            keymap('n', '<F11>', function() dap.step_into() end, { desc = "step into" })
+            keymap('n', '<F22>', function() dap.step_out() end, { desc = "step out" })                         -- Shift-f10 -> f22
+            keymap('n', '<F9>', function() dap.toggle_breakpoint() end, { desc = "toggle breakpoint" })
+            keymap("n", '<F17>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" }) -- Shift-f5 -> f17
             keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "run to cursor" })
             keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "restart" })
-            keymap("n", '<Leader>dw', function() dapui.elements.watches.add(vim.fn.expand("<cword>")) end, { desc = "add watch" })
+            keymap("n", '<Leader>dw', function() dapui.elements.watches.add(vim.fn.expand("<cword>")) end,
+                { desc = "add watch" })
             -- keymap("n", "<Leader>dw", "<CMD>lua require('dapui').float_element('watches', { enter = true })<CR>", opts)
             -- keymap("n", "<Leader>ds", "<CMD>lua require('dapui').float_element('scopes', { enter = true })<CR>", opts)
             -- keymap("n", "<Leader>dr", "<CMD>lua require('dapui').float_element('repl', { enter = true })<CR>", opts)
 
             ---- DAP language adapters ----
-            dap.adapters.cppdbg = {
-                id = 'cppdbg',
-                type = 'executable',
-                command = os.getenv('HOME') .. '/.vscode/extensions/ms-vscode-cpptools/debugAdapters/bin/OpenDebugAD7',
-            }
-
-            dap.adapters.python = function(cb, config)
-                cb({
-                    type = 'executable',
-                    command = os.getenv('HOME') .. '/usr/bin/python',
-                    args = { '-m', 'debugpy.adapter' },
-                    options = {
-                        source_filetype = 'python',
-                    },
-                })
-            end
-
-            dap.configurations.python = {
-
-
-            }
-            -- load .vscode/launch.json (default path is root dir)
-            -- require('dap.ext.vscode').load_launchjs()
+            require("mason").setup()
+            mason_nvim_dap.setup({
+                automatic_installation = false,
+                ensure_installed = { "cppdbg, debugpy" },
+                handlers = {
+                    function(config)
+                        -- all sources with no handler get passed here
+                        -- Keep original functionality
+                        mason_nvim_dap.default_setup(config)
+                    end,
+                },
+            })
         end
     }
 }
