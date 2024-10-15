@@ -74,9 +74,9 @@ return {
             keymap('n', '<F5>', function() dap.continue() end, { desc = "continue" })
             keymap('n', '<F10>', function() dap.step_over() end, { desc = "step over" })
             keymap('n', '<F11>', function() dap.step_into() end, { desc = "step into" })
-            keymap('n', '<F22>', function() dap.step_out() end, { desc = "step out" })                         -- Shift-f10 -> f22
+            keymap('n', '<F22>', function() dap.step_out() end, { desc = "step out" }) -- Shift-f10 -> f22
             keymap('n', '<F9>', function() dap.toggle_breakpoint() end, { desc = "toggle breakpoint" })
-            keymap("n", '<F17>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" }) -- Shift-f5 -> f17
+            keymap("n", '<F4>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" })
             keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "run to cursor" })
             keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "restart" })
             keymap("n", '<Leader>dw', function() dapui.elements.watches.add(vim.fn.expand("<cword>")) end,
