@@ -6,7 +6,6 @@ return {
     -- Automatically install LSPs to stdpath for neovim
     { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
     'williamboman/mason-lspconfig.nvim',
-    'WhoIsSethDaniel/mason-tool-installer.nvim',
 
     -- Useful status updates for LSP
     -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -72,6 +71,33 @@ return {
       end, { desc = 'Format current buffer with LSP' })
     end
 
+    -- Use some nice look and feel
+    vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
+      config = config
+          or {
+            border = {
+              { "╭", "Comment" },
+              { "─", "Comment" },
+              { "╮", "Comment" },
+              { "│", "Comment" },
+              { "╯", "Comment" },
+              { "─", "Comment" },
+              { "╰", "Comment" },
+              { "│", "Comment" },
+            },
+          }
+      config.focus_id = ctx.method
+      if not (result and result.contents) then
+        return
+      end
+      local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+      markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
+      if vim.tbl_isempty(markdown_lines) then
+        return
+      end
+      return vim.lsp.util.open_floating_preview(markdown_lines, "markdown", config)
+    end
+
     -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
@@ -90,9 +116,9 @@ return {
       'rust_analyzer',
     }
 
-    -- Ensure that the followin servers are installed
+    -- Ensure that the following servers are installed
     require('mason-lspconfig').setup {
-      servers,
+      ensure_installed = servers,
     }
 
     for _, lsp in ipairs(servers) do

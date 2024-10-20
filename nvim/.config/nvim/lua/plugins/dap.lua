@@ -5,6 +5,7 @@ return {
             "rcarriga/nvim-dap-ui",
             "nvim-neotest/nvim-nio",
             "jay-babu/mason-nvim-dap.nvim",
+            "theHamsta/nvim-dap-virtual-text",
         },
         config = function()
             local dapui = require('dapui')
@@ -12,6 +13,8 @@ return {
             local mason_nvim_dap = require("mason-nvim-dap")
             local keymap = vim.keymap.set
             local opts = { noremap = true, silent = true }
+
+            require("nvim-dap-virtual-text").setup({})
 
             ---- DAP ui ----
             dapui.setup({
@@ -87,9 +90,17 @@ return {
 
             ---- DAP language adapters ----
             require("mason").setup()
+
+            -- Make sure to use the nvim_dap adapter name (see
+            -- https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/source.lua)
+            local adapters = {
+                'python',
+                'cppdbg',
+            }
+
             mason_nvim_dap.setup({
+                ensure_installed = adapters,
                 automatic_installation = false,
-                ensure_installed = { "cppdbg, debugpy" },
                 handlers = {
                     function(config)
                         -- all sources with no handler get passed here
