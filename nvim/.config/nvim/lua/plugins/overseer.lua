@@ -7,6 +7,7 @@ return {
   -- Disable DAP initially, enable when loading nvim-dap
   -- https://github.com/stevearc/overseer.nvim/blob/master/doc/third_party.md#dap
   -- opts = { dap = false },
+  opts = {},
 
   vim.keymap.set('n', '<leader>br', "<cmd>OverseerRun<CR>", { desc = '[B]uild [R]un' }),
   vim.keymap.set('n', '<leader>bt', "<cmd>OverseerToggle<CR>", { desc = '[B]uild [T]oggle' }),

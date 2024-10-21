@@ -5,7 +5,6 @@ return {
             "rcarriga/nvim-dap-ui",
             "nvim-neotest/nvim-nio",
             "jay-babu/mason-nvim-dap.nvim",
-            "theHamsta/nvim-dap-virtual-text",
         },
         config = function()
             local dapui = require('dapui')
@@ -14,7 +13,7 @@ return {
             local keymap = vim.keymap.set
             local opts = { noremap = true, silent = true }
 
-            require("nvim-dap-virtual-text").setup({})
+            -- require("nvim-dap-virtual-text").setup({})
 
             ---- DAP ui ----
             dapui.setup({
