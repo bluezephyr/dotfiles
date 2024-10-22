@@ -32,6 +32,7 @@ return {
 
       nmap('gd', vim.lsp.buf.definition, 'Goto Definition')
       nmap('gD', vim.lsp.buf.declaration, 'Goto Declaration')
+      nmap('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
       nmap('gr', require('telescope.builtin').lsp_references, 'Goto References')
       nmap('gI', vim.lsp.buf.implementation, 'Goto Implementation')
 
