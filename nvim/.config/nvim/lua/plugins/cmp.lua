@@ -1,8 +1,8 @@
 return {
     {
         "onsails/lspkind-nvim",
-        config = function ()
-           require('lspkind').setup()
+        config = function()
+            require('lspkind').setup()
         end
     },
     {
@@ -28,9 +28,11 @@ return {
                     end,
                 },
                 mapping = cmp.mapping.preset.insert({
-                    ['<C-b>'] = cmp.mapping.scroll_docs( -4),
+                    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
                     ['<C-f>'] = cmp.mapping.scroll_docs(4),
                     ['<CR>'] = cmp.mapping.confirm({ select = true }),
+                    ["<C-k>"] = cmp.mapping.select_prev_item(),
+                    ["<C-j>"] = cmp.mapping.select_next_item(),
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
                             cmp.select_next_item()
@@ -63,8 +65,8 @@ return {
                 },
                 sources = {
                     { name = "nvim_lsp", priority = 1000 },
-                    { name = "luasnip", priority = 15 },
-                    { name = "buffer", priority = 1 },
+                    { name = "luasnip",  priority = 15 },
+                    { name = "buffer",   priority = 1 },
                     { name = "path" },
                 },
                 window = {
@@ -117,7 +119,7 @@ return {
         "L3MON4D3/LuaSnip",
         version = "v2.*",
         dependencies = { "rafamadriz/friendly-snippets" },
-        config = function ()
+        config = function()
             require("luasnip").setup()
             require("luasnip.loaders.from_vscode").lazy_load()
         end

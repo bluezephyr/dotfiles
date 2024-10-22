@@ -40,7 +40,7 @@ local options = {
 
     -- Visual
     termguicolors = true,                    -- set term gui colors (most terminals support this)
-    textwidth = 79,
+    textwidth = 100,
     colorcolumn = "90",
     title = true,
     cursorline = true,                       -- highlight the current line
