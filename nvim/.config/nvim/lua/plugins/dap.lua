@@ -69,8 +69,8 @@ return {
             end
 
             ---- Icons ----
-            vim.fn.sign_define("DapBreakpoint", { text = "*", texthl = "", linehl = "", numhl = "" })
-            vim.fn.sign_define("DapStopped", { text = "!", texthl = "", linehl = "", numhl = "" })
+            vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "", linehl = "", numhl = "" })
+            vim.fn.sign_define("DapStopped", { text = ">", texthl = "", linehl = "", numhl = "" })
 
             ---- Keymaps ----
             keymap('n', '<F5>', function() dap.continue() end, { desc = "continue" })

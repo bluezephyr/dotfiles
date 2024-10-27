@@ -105,6 +105,7 @@ return {
 
     -- Setup mason so it can manage external tooling
     require('mason').setup()
+    local lspconfig = require("lspconfig")
 
     -- Enable the following language servers
     local servers = {
@@ -122,12 +123,47 @@ return {
       ensure_installed = servers,
     }
 
-    for _, lsp in ipairs(servers) do
-      require('lspconfig')[lsp].setup {
-        on_attach = on_attach,
-        capabilities = capabilities,
-      }
-    end
+    -- C/C++
+    lspconfig.clangd.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- JSON
+    lspconfig.jsonls.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- LUA
+    lspconfig.lua_ls.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- Python
+    lspconfig.pyright.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- TOML
+    lspconfig.taplo.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- Markdown
+    lspconfig.taplo.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+
+    -- Rust
+    lspconfig.taplo.setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
 
     -- Turn on lsp status information
     require('fidget').setup()
