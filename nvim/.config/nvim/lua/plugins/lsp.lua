@@ -154,13 +154,13 @@ return {
     }
 
     -- Markdown
-    lspconfig.taplo.setup {
+    lspconfig.marksman.setup {
       on_attach = on_attach,
       capabilities = capabilities,
     }
 
     -- Rust
-    lspconfig.taplo.setup {
+    lspconfig.rust_analyzer.setup {
       on_attach = on_attach,
       capabilities = capabilities,
     }
