@@ -32,15 +32,20 @@ return {
                     ['<C-f>'] = cmp.mapping.scroll_docs(4),
                     ['<CR>'] = cmp.mapping.confirm({ select = false }),
                     ['<Tab>'] = cmp.mapping.confirm({ select = true }),
-                    ['<S-CR>'] = cmp.mapping.confirm({ select = true}),
+                    ['<S-CR>'] = cmp.mapping.confirm({ select = true }),
                     ['<C-CR>'] = cmp.mapping.confirm({ select = true }),
                     ["<C-k>"] = cmp.mapping.select_prev_item(),
                     ["<C-j>"] = cmp.mapping.select_next_item(),
                 }),
                 formatting = {
                     format = lspkind.cmp_format({
-                        mode = "symbol_text",
+                        -- mode = "symbol_text",
+                        mode = "symbol",
+                        maxwidth = 50,
+                        ellipsis_char = '...',
+                        symbol_map = { Codeium = "", },
                         menu = ({
+                            codeium = '[Codeium]',
                             nvim_lsp = '[Lsp]',
                             luasnip = '[Luasnip]',
                             buffer = '[File]',
@@ -49,7 +54,8 @@ return {
                     }),
                 },
                 sources = {
-                    { name = "nvim_lsp", priority = 1000 },
+                    { name = "codeium",  priority = 1000 },
+                    { name = "nvim_lsp", priority = 500 },
                     { name = "luasnip",  priority = 15 },
                     { name = "buffer",   priority = 1 },
                     { name = "path" },
