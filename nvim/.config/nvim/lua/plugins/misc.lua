@@ -95,13 +95,16 @@ return {
     end,
   },
 
-  -- https://github.com/MeanderingProgrammer/render-markdown.nvim
+  -- https://github.com/OXY2DEV/markview.nvim
+  -- Alternative plugin: https://github.com/MeanderingProgrammer/render-markdown.nvim
   {
-    'MeanderingProgrammer/render-markdown.nvim',
-    opts = {},
-    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
-    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    "OXY2DEV/markview.nvim",
+    lazy = false, -- Recommended
+
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons"
+    }
   },
 
   -- Plugin for the built in commenting https://github.com/folke/ts-comments.nvim
