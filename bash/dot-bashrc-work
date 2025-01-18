@@ -88,10 +88,11 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
+alias l='ls -lF'
 alias ll='ls -alF'
 alias la='ls -A'
-alias l='ls -l'
-alias vim='nvim'
+alias vim=nvim
+alias vimdiff='nvim -d'
 alias fdh='fd -HI --ignore-file ~/.config/fd/ignore'
 
 # Add an "alert" alias for long running commands.  Use like so:
@@ -101,6 +102,11 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # Use fd and tmux-fzf to find and open a file in neovim
 # alias v='fd --type f --hidden --follow | fzf-tmux -p --reverse | xargs nvim'
 alias v='fdh --type f --follow | fzf-tmux -p --reverse | xargs nvim'
+
+# cd to the folder of the symlink file
+function cdl () {
+    cd "$(dirname "$(readlink "$1")")";
+}
 
 alias info='info --vi-keys'
 # Alias definitions.
@@ -139,7 +145,7 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Ripgrep configuration file path
 export RIPGREP_CONFIG_PATH=~/.config/rg/config
 
+eval "$(starship init bash)"
+
 # Setup for hma
 . "$HOME/hma/hma-settings.sh"
-
-eval "$(starship init bash)"

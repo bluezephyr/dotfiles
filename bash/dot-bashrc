@@ -81,10 +81,11 @@ fi
 # some more ls aliases
 alias l='ls -lF'
 alias ll='ls -alF'
-
+alias la='ls -A'
 alias vim=nvim
+alias vimdiff='nvim -d'
+alias fdh='fd -HI --ignore-file ~/.config/fd/ignore'
 alias top=btop
-alias fdh='fd --hidden'
 alias lgit=lazygit
 
 # Add an "alert" alias for long running commands.  Use like so:
@@ -99,6 +100,7 @@ function cdl () {
     cd "$(dirname "$(readlink "$1")")";
 }
 
+alias info='info --vi-keys'
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -118,6 +120,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+. "$HOME/.cargo/env"
 
 
 ## Personal additions below
@@ -129,9 +132,7 @@ source /usr/share/fzf/completion.bash
 ## Open file from command line
 alias open=xdg-open
 
-. "$HOME/.cargo/env"
-eval "$(starship init bash)"
-
 # Ripgrep config
 export RIPGREP_CONFIG_PATH=~/.config/rg/config
 
+eval "$(starship init bash)"
