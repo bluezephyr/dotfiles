@@ -94,6 +94,11 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # Use fd and tmux-fzf to find and open a file in neovim
 alias v='fd --type f --hidden --follow | fzf-tmux -p --reverse | xargs nvim'
 
+# cd to the folder of the symlink file
+function cdl () {
+    cd "$(dirname "$(readlink "$1")")";
+}
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
