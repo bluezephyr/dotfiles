@@ -2,5 +2,5 @@
 	name = Jens Pommer
 	email = jens.pommer@t-engineering.se
 
-[url "ssh://git@hma.t-engineering.se:4444/"]
-	pushInsteadOf = https://hma.t-engineering.se/gitea/
+[url "ssh://git@gitea.t-engineering.se:4444/"]
+	pushInsteadOf = https://gitea.t-engineering.se/
