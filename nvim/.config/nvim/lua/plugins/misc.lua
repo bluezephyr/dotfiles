@@ -79,6 +79,7 @@ return {
   'christoomey/vim-tmux-navigator',
 
   -- Theme christoomey/vim-tmux-navigator
+  -- https://github.com/catppuccin/nvim
   {
     "catppuccin/nvim",
     name = "catppuccin",

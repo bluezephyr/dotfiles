@@ -137,3 +137,6 @@ vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
 
 -- Re-mappings for commenting (new in 0.10)
 vim.keymap.set({ "v", "n" }, "<leader>c", "gcc", { desc = 'Comment line (toggle)', remap = true })
+
+-- Additional folding keymap
+vim.keymap.set({ "v", "n" }, "zh", "zc", { desc = 'Close fold under cursor', remap = true })
