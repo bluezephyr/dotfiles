@@ -140,3 +140,6 @@ vim.keymap.set({ "v", "n" }, "<leader>c", "gcc", { desc = 'Comment line (toggle)
 
 -- Additional folding keymap
 vim.keymap.set({ "v", "n" }, "zh", "zc", { desc = 'Close fold under cursor', remap = true })
+vim.keymap.set({ "v", "n" }, "<A-h>", "zc", { desc = 'Close fold under cursor', remap = true })
+vim.keymap.set({ "v", "n" }, "zl", "zo", { desc = 'Open fold under cursor', remap = true })
+vim.keymap.set({ "v", "n" }, "<A-l>", "zo", { desc = 'Open fold under cursor', remap = true })
