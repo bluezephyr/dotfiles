@@ -81,8 +81,8 @@ return {
             keymap("n", '<F4>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" })
             keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "run to cursor" })
             keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "restart" })
-            keymap("n", '<Leader>dw', function() dapui.elements.watches.add(vim.fn.expand("<cword>")) end,
-                { desc = "add watch" })
+            keymap('n', '<Leader>dj', function() dap.down() end, { desc = "callstack down" })
+            keymap('n', '<Leader>dk', function() dap.up() end, { desc = "callstack up" })
             -- keymap("n", "<Leader>dw", "<CMD>lua require('dapui').float_element('watches', { enter = true })<CR>", opts)
             -- keymap("n", "<Leader>ds", "<CMD>lua require('dapui').float_element('scopes', { enter = true })<CR>", opts)
             -- keymap("n", "<Leader>dr", "<CMD>lua require('dapui').float_element('repl', { enter = true })<CR>", opts)
