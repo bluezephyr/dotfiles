@@ -97,7 +97,7 @@ return {
         require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = '[F]ind [F]iles Relative Current' })
 
-      -- Shortcut for searching your Neovim configuration files
+      -- Shortcut for searching the Neovim configuration files
       vim.keymap.set('n', '<leader>fn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[F]ind [N]eovim files' })
@@ -110,6 +110,10 @@ return {
       vim.keymap.set('n', '<leader>fm', function()
         require('telescope.builtin').man_pages { sections = { 'ALL' } }
       end, { desc = '[F]ind [M]an Pages' })
+
+      vim.keymap.set('n', '<leader>fb', function()
+        require('telescope.builtin').marks { sections = { 'ALL' } }
+      end, { desc = '[F]ind [B]ookmarks' })
 
       vim.keymap.set("n", "<C-q>", function()
         require("telescope.builtin").quickfix()
