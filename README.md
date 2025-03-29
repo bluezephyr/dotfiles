@@ -166,9 +166,9 @@ for more information.
 
 ```
 cd ~/.local/bin
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-chmod u+x nvim.appimage
-mv nvim.appimage nvim
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+chmod u+x nvim-linux-x86_64.appimage
+mv nvim-linux-x86_64.appimage nvim
 ```
 
 The setup and configuration for Neovim requires that the following is installed
