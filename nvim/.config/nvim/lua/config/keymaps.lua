@@ -4,12 +4,12 @@
 local wk = require("which-key")
 
 wk.add({
-    { "<leader>f", group = "[F]ind" },
-    { "<leader>s", group = "[S]ource" },
-    { "<leader>t", group = "[T]oggle" },
-    { "<leader>g", group = "[G]it" },
-    { "<leader>b", group = "[B]uild" },
-    { "<leader>d", group = "[D]ebug" },
+  { "<leader>f", group = "[F]ind" },
+  { "<leader>s", group = "[S]ource" },
+  { "<leader>t", group = "[T]oggle" },
+  { "<leader>g", group = "[G]it" },
+  { "<leader>b", group = "[B]uild" },
+  { "<leader>d", group = "[D]ebug" },
 })
 
 -- Keymaps for better default experience
@@ -46,11 +46,11 @@ vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = 'Increase h
 -- Buffer management
 vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
-vim.keymap.set('n', '<leader>w',  "<cmd>wall!<CR>", { desc = 'Write all buffers' })
-vim.keymap.set('n', '<leader>q',  "<cmd>bdelete<CR>", { desc = 'Close buffer' })
-vim.keymap.set('n', '<leader>e',  "<cmd>qa<CR>", { desc = 'Exit nvim' })
-vim.keymap.set('n', '<leader>z',  "<cmd>split<CR>", { desc = 'Split window' })
-vim.keymap.set('n', '<leader>x',  "<cmd>close<CR>", { desc = 'Close window' })
+vim.keymap.set('n', '<leader>w', "<cmd>wall!<CR>", { desc = 'Write all buffers' })
+vim.keymap.set('n', '<leader>q', "<cmd>bdelete<CR>", { desc = 'Close buffer' })
+vim.keymap.set('n', '<leader>e', "<cmd>qa<CR>", { desc = 'Exit nvim' })
+vim.keymap.set('n', '<leader>z', "<cmd>split<CR>", { desc = 'Split window' })
+vim.keymap.set('n', '<leader>x', "<cmd>close<CR>", { desc = 'Close window' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
 
@@ -114,8 +114,10 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and 
 vim.keymap.set("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
 
 -- Git
+local gs = package.loaded.gitsigns
 vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git blame line" })
-vim.keymap.set("n", "<leader>gB", function() require('gitsigns').blame_line{full=true} end, { desc = "Git blame line full" })
+vim.keymap.set("n", "<leader>gB", function() require('gitsigns').blame_line { full = true } end,
+  { desc = "Git blame line full" })
 vim.keymap.set("n", "<leader>ge", "<cmd>Gitsigns blame<cr>", { desc = "Git blame" })
 vim.keymap.set("n", "<leader>gd", function() require('gitsigns').diffthis() end, { desc = "Git diff this" })
 vim.keymap.set("n", "<leader>gp", "<cmd>Gitsigns preview_hunk_inline<cr>", { desc = "Git preview hunk inline" })
@@ -126,6 +128,17 @@ vim.keymap.set("n", "<leader>gu", "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = 
 vim.keymap.set("n", "<leader>gv", "<cmd>Gitsigns select_hunk<cr>", { desc = "Git select hunk" })
 vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
 vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T]oggle Git [Signs]" })
+vim.keymap.set('n', ']c', function()
+  if vim.wo.diff then return ']c' end
+  vim.schedule(function() gs.next_hunk({ target = 'all' }) end)
+  return '<Ignore>'
+end, { desc = 'Next git hunk', expr = true })
+
+vim.keymap.set('n', '[c', function()
+  if vim.wo.diff then return '[c' end
+  vim.schedule(function() gs.prev_hunk({ target = 'all' }) end)
+  return '<Ignore>'
+end, { desc = 'Previous git hunk', expr = true })
 
 -- Convenient shortcuts
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
