@@ -8,6 +8,22 @@ case $- in
       *) return;;
 esac
 
+# Start tmux automatically if not already inside one
+# and make sure that it replaces the bash process with tmux (to avoid multiple
+# ctrl-d to exit)
+if command -v tmux &> /dev/null; then
+  if [ -z "$TMUX" ] && [ -z "$NO_TMUX" ]; then
+    # Use a session name unique to this terminal
+    # Find the lowest available session number
+    for i in $(seq 1 100); do
+	if ! tmux has-session -t "$i" 2>/dev/null; then
+	    exec tmux new-session -s "$i"
+	    break
+	fi
+    done
+  fi
+fi
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -88,12 +104,17 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
-alias l='ls -lF'
 alias ll='ls -alF'
 alias la='ls -A'
+alias l='ls -lF'
+
 alias vim=nvim
 alias vimdiff='nvim -d'
+
+alias cdp='cd -P'
+alias vim='nvim'
 alias fdh='fd -HI --ignore-file ~/.config/fd/ignore'
+alias lgit=lazygit
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -145,7 +166,20 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Ripgrep configuration file path
 export RIPGREP_CONFIG_PATH=~/.config/rg/config
 
-eval "$(starship init bash)"
-
 # Setup for hma
 . "$HOME/hma/hma-settings.sh"
+
+eval "$(starship init bash)"
+
+# Add ~/scripts to PATH if not already present
+SCRIPTS_PATH="$HOME/.local/scripts"
+if ! echo "$PATH" | /bin/grep -Eq "(^|:)$SCRIPTS_PATH($|:)" ; then
+  PATH="$PATH:$SCRIPTS_PATH"
+fi
+
+# fnm (Node.js version manager)
+FNM_PATH="/home/jens/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "`fnm env`"
+fi
