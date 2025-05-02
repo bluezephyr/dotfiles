@@ -93,6 +93,10 @@ return {
         require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
       end, { desc = 'Find All Files' })
 
+      vim.keymap.set('n', '<leader>fa', function()
+        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+      end, { desc = 'Find All Files' })
+
       vim.keymap.set('n', '<leader>f.', function()
         require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = '[F]ind [F]iles Relative Current' })
