@@ -4,7 +4,12 @@ return {
   'neovim/nvim-lspconfig',
   dependencies = {
     -- Automatically install LSPs to stdpath for neovim
-    { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+    -- NOTE: Must be loaded before dependants
+    {
+      'williamboman/mason.nvim',
+      config = true
+    },
+
     'williamboman/mason-lspconfig.nvim',
 
     -- Useful status updates for LSP
@@ -15,6 +20,22 @@ return {
       event = "LspAttach",
       opts = {}
     },
+
+    -- https://github.com/folke/lazydev.nvim
+    {
+      "folke/lazydev.nvim",
+      ft = "lua", -- only load on lua files
+      opts = {
+        library = {
+          -- See the configuration section for more details
+          -- Load luvit types when the `vim.uv` word is found
+          { path = "luvit-meta/library", words = { "vim%.uv" } },
+        },
+      },
+    },
+
+    -- https://github.com/Bilal2453/luvit-meta
+    { "Bilal2453/luvit-meta", lazy = true }, -- optional `vim.uv` typings
   },
 
   config = function()
@@ -119,6 +140,8 @@ return {
     }
 
     -- Ensure that the following servers are installed
+    -- https://github.com/williamboman/mason-lspconfig.nvim
+    ---@diagnostic disable-next-line: missing-fields
     require('mason-lspconfig').setup {
       ensure_installed = servers,
     }

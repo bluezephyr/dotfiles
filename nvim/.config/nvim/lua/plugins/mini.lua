@@ -9,6 +9,8 @@ return {
       require('mini.bracketed').setup()
       require('mini.basics').setup()
       require('mini.operators').setup()
+      local statusline = require('mini.statusline')
+      statusline.setup { use_icons = true }
     end
   },
 }

@@ -11,12 +11,10 @@ return {
         -- requirements installed.
         'nvim-telescope/telescope-fzf-native.nvim',
         build = "make"
-        -- cond = function()
-        --   return vim.fn.executable 'make' == 1
-        -- end,
       },
       {
-        "nvim-telescope/telescope-live-grep-args.nvim",
+        -- https://github.com/nvim-telescope/telescope-live-grep-args.nvim
+        'nvim-telescope/telescope-live-grep-args.nvim',
         -- This will not install any breaking changes.
         -- For major updates, this must be adjusted manually.
         version = "^1.0.0",
@@ -31,7 +29,7 @@ return {
 
       require('telescope').setup({
         defaults = {
-          path_display = { "smart" },
+          path_display = { "absolute" },
           mappings = {
             i = {
               ['<C-j>'] = require("telescope.actions").move_selection_next,
@@ -85,9 +83,11 @@ return {
       -- Live grep args
       require('telescope').load_extension('live_grep_args')
       local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
-      vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = '[F]ind by [G]rep' })
+      vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+        { desc = '[F]ind by [G]rep' })
       vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection, { desc = '[F]ind by [G]rep' })
-      vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor, { desc = '[F]ind current [W]ord' })
+      vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor,
+        { desc = '[F]ind current [W]ord' })
 
       vim.keymap.set('n', '<c-p>', function()
         require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
