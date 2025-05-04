@@ -25,8 +25,8 @@ return {
       -- Enable telescope fzf native, if installed
       pcall(require('telescope').load_extension, 'fzf')
 
-      local lga_actions = require('telescope-live-grep-args.actions')
 
+      local lga_actions = require('telescope-live-grep-args.actions')
       require('telescope').setup({
         defaults = {
           path_display = { "absolute" },
@@ -83,22 +83,26 @@ return {
       -- Live grep args
       require('telescope').load_extension('live_grep_args')
       local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
+
       vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
         { desc = '[F]ind by [G]rep' })
-      vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection, { desc = '[F]ind by [G]rep' })
+
+      vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection,
+        { desc = '[F]ind by [G]rep' })
+
       vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor,
         { desc = '[F]ind current [W]ord' })
 
       vim.keymap.set('n', '<c-p>', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+        builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
       end, { desc = 'Find All Files' })
 
       vim.keymap.set('n', '<leader>fa', function()
-        require('telescope.builtin').find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+        builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
       end, { desc = 'Find All Files' })
 
       vim.keymap.set('n', '<leader>f.', function()
-        require('telescope.builtin').find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
+        builtin.find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
       end, { desc = '[F]ind [F]iles Relative Current' })
 
       -- Shortcut for searching the Neovim configuration files
@@ -108,24 +112,27 @@ return {
 
       -- Shortcut to search for files in the index
       vim.keymap.set('n', '<leader>fi', function()
-        require('telescope.builtin').find_files { cwd = vim.fn.expand('~/index'), find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--strip-cwd-prefix' } }
+        builtin.find_files {
+          cwd = vim.fn.expand('~/index'),
+          find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--strip-cwd-prefix' }
+        }
       end, { desc = '[F]ind [I]ndex' })
 
       vim.keymap.set('n', '<leader>fm', function()
-        require('telescope.builtin').man_pages { sections = { 'ALL' } }
+        builtin.man_pages { sections = { 'ALL' } }
       end, { desc = '[F]ind [M]an Pages' })
 
       vim.keymap.set('n', '<leader>fb', function()
-        require('telescope.builtin').marks { sections = { 'ALL' } }
+        builtin.marks { sections = { 'ALL' } }
       end, { desc = '[F]ind [B]ookmarks' })
 
       vim.keymap.set("n", "<C-q>", function()
-        require("telescope.builtin").quickfix()
+        builtin.quickfix()
         vim.cmd(":cclose")
       end, { desc = "Open Quickfix" })
 
       vim.keymap.set('n', '<leader><space>', function()
-        require('telescope.builtin').buffers(require('telescope.themes').get_dropdown { previewer = false,
+        builtin.buffers(require('telescope.themes').get_dropdown { previewer = false,
           layout_config = {
             width = 0.8,
             height = 25
@@ -136,17 +143,21 @@ return {
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
 
+      vim.keymap.set('n', '<leader>fp', function()
+        builtin.find_files {
+          cwd = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy")
+        }
+      end, { desc = '[F]ind [P]lugins' })
+
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
 
       -- load refactoring Telescope extension
       require("telescope").load_extension("refactoring")
+      vim.keymap.set({ "n", "x" }, "<leader>r", function()
+        require('telescope').extensions.refactoring.refactors()
+      end, { desc = 'Refactor' })
 
-      vim.keymap.set(
-        { "n", "x" },
-        "<leader>r",
-        function() require('telescope').extensions.refactoring.refactors() end, { desc = 'Refactor' }
-      )
       vim.keymap.set('n', '<leader>gl', require('telescope.builtin').git_commits, { desc = 'Git Log' })
     end
   },
