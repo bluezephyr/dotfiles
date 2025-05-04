@@ -31,12 +31,6 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Use ESC to exit insert mode in :term
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { desc = 'Exit Terminal mode' })
 
--- Better window navigation
--- vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = 'Window move down' })
--- vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = 'Window move left' })
--- vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = 'Window move right' })
--- vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = 'Window move up' })
-
 -- Resize with arrows
 vim.keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = 'Increase vertical window size' })
 vim.keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = 'Decrease vertical window size' })
@@ -68,19 +62,14 @@ vim.keymap.set("v", ">", ">gv", { desc = '' })
 vim.keymap.set("v", "y", "myy`y", { desc = '' })
 vim.keymap.set("v", "Y", "myY`y", { desc = '' })
 
--- Move text up and down
-vim.keymap.set("v", "<A-j>", ":m .+1<CR>==", { desc = 'Move text down' })
-vim.keymap.set("v", "<A-k>", ":m .-2<CR>==", { desc = 'Move text up' })
-vim.keymap.set("n", "<A-j>", ":m .+1<CR>==", { desc = 'Move text down' })
-vim.keymap.set("n", "<A-k>", ":m .-2<CR>==", { desc = 'Move text up' })
-vim.keymap.set("v", "p", '"_dP', { desc = '' })
-
 -- Visual Block --
 -- Move text up and down
-vim.keymap.set("x", "J", ":move '>+1<CR>gv-gv", { desc = 'Move down' })
-vim.keymap.set("x", "K", ":move '<-2<CR>gv-gv", { desc = 'Move up' })
-vim.keymap.set("x", "<A-j>", ":move '>+1<CR>gv-gv", { desc = '' })
-vim.keymap.set("x", "<A-k>", ":move '<-2<CR>gv-gv", { desc = '' })
+vim.keymap.set("v", "J", ":move '>+1<CR>gv-gv", { desc = 'Move down' })
+vim.keymap.set("v", "K", ":move '<-2<CR>gv-gv", { desc = 'Move up' })
+
+-- Quickfix list
+vim.keymap.set("n", "<A-j>", "<cmd>cnext<CR>", { desc = 'Next quickfix' })
+vim.keymap.set("n", "<A-k>", "<cmd>cprevious<CR>", { desc = 'Previous quickfix' })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -147,6 +136,7 @@ vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
 vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
+vim.keymap.set("v", "p", '"_dP', { desc = '' })
 
 -- Re-mappings for commenting (new in 0.10)
 vim.keymap.set({ "v", "n" }, "<leader>c", "gcc", { desc = 'Comment line (toggle)', remap = true })
