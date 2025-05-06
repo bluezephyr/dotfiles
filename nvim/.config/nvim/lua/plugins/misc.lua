@@ -5,9 +5,18 @@ return {
     config = true,
   },
 
-  { -- Autocompletion
+  {
+    -- Autocompletion
+    -- https://github.com/hrsh7th/nvim-cmp
+    -- https://github.com/hrsh7th/cmp-nvim-lsp
+    -- https://github.com/L3MON4D3/LuaSnip
+    -- https://github.com/saadparwaiz1/cmp_luasnip
     'hrsh7th/nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
+    dependencies = {
+      'hrsh7th/cmp-nvim-lsp',
+      'L3MON4D3/LuaSnip',
+      'saadparwaiz1/cmp_luasnip'
+    },
   },
 
   -- Clear search highlights after you move your cursor.
@@ -84,17 +93,4 @@ return {
     end,
 
   },
-
-  -- Refactoring plugin https://github.com/ThePrimeagen/refactoring.nvim
-  -- Some config also in telescope.lua
-  {
-    "ThePrimeagen/refactoring.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    config = function()
-      require("refactoring").setup {}
-    end,
-  }
 }

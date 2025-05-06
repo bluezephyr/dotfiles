@@ -151,13 +151,6 @@ return {
 
       -- Git commands
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
-
-      -- load refactoring Telescope extension
-      require("telescope").load_extension("refactoring")
-      vim.keymap.set({ "n", "x" }, "<leader>r", function()
-        require('telescope').extensions.refactoring.refactors()
-      end, { desc = 'Refactor' })
-
       vim.keymap.set('n', '<leader>gl', require('telescope.builtin').git_commits, { desc = 'Git Log' })
     end
   },
