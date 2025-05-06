@@ -5,21 +5,8 @@ return {
     config = true,
   },
 
-  {
-    -- Autocompletion
-    -- https://github.com/hrsh7th/nvim-cmp
-    -- https://github.com/hrsh7th/cmp-nvim-lsp
-    -- https://github.com/L3MON4D3/LuaSnip
-    -- https://github.com/saadparwaiz1/cmp_luasnip
-    'hrsh7th/nvim-cmp',
-    dependencies = {
-      'hrsh7th/cmp-nvim-lsp',
-      'L3MON4D3/LuaSnip',
-      'saadparwaiz1/cmp_luasnip'
-    },
-  },
-
   -- Clear search highlights after you move your cursor.
+  -- https://github.com/haya14busa/is.vim
   'haya14busa/is.vim',
 
   -- Adds git releated signs to the gutter, as well as utilities for managing changes
@@ -37,42 +24,15 @@ return {
     },
   },
 
-  -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
-  'tpope/vim-repeat',
-
   -- https://github.com/christoomey/vim-tmux-navigator
   'christoomey/vim-tmux-navigator',
 
-  -- Theme christoomey/vim-tmux-navigator
-  -- https://github.com/catppuccin/nvim
-  {
-    "catppuccin/nvim",
-    name = "catppuccin",
-    priority = 1000
-  },
-
-  {
-    'akinsho/bufferline.nvim',
-    version = "*",
-    dependencies = 'nvim-tree/nvim-web-devicons',
-
-    config = function()
-      require("bufferline").setup {}
-    end,
-  },
-
-  -- https://github.com/OXY2DEV/markview.nvim
-  -- Alternative plugin: https://github.com/MeanderingProgrammer/render-markdown.nvim
-  {
-    "OXY2DEV/markview.nvim",
-    lazy = false, -- Recommended
-
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons"
-    }
-  },
+  -- TODD: Remove these?
+  -- Detect tabstop and shiftwidth automatically
+  -- https://github.com/tpope/vim-sleuth
+  -- 'tpope/vim-sleuth',
+  -- https://github.com/tpope/vim-repeat
+  -- 'tpope/vim-repeat',
 
   -- Plugin for the built in commenting https://github.com/folke/ts-comments.nvim
   {
@@ -91,6 +51,5 @@ return {
       vim.cmd [[ au FileType cpp setlocal commentstring=//\ %s ]]
       vim.cmd [[ au FileType c setlocal commentstring=//\ %s ]]
     end,
-
   },
 }
