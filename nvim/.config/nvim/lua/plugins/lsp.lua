@@ -5,21 +5,12 @@ return {
   dependencies = {
     -- Automatically install LSPs to stdpath for neovim
     -- NOTE: Must be loaded before dependants
-    {
-      'williamboman/mason.nvim',
-      config = true
-    },
-
+    { 'williamboman/mason.nvim', opts = {} },
     'williamboman/mason-lspconfig.nvim',
+    'WhoIsSethDaniel/mason-tool-installer.nvim',
 
     -- Useful status updates for LSP
-    -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-    {
-      'j-hui/fidget.nvim',
-      tag = "legacy",
-      event = "LspAttach",
-      opts = {}
-    },
+    { 'j-hui/fidget.nvim',       opts = {} },
 
     -- https://github.com/folke/lazydev.nvim
     {
@@ -36,62 +27,92 @@ return {
 
     -- https://github.com/Bilal2453/luvit-meta
     { "Bilal2453/luvit-meta", lazy = true }, -- optional `vim.uv` typings
-  },
 
+  },
   config = function()
     --  This function gets run when an LSP connects to a particular buffer.
-    local on_attach = function(_, bufnr)
-      local nmap = function(keys, func, desc)
-        if desc then
-          desc = 'LSP: ' .. desc
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+      callback = function(event)
+        local map = function(keys, func, desc, mode)
+          mode = mode or 'n'
+          vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
-        vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+        map('<leader>sF', '<cmd>Format<CR>', 'Format current file')
+
+        map('gd', vim.lsp.buf.definition, 'Goto Definition')
+        map('gD', vim.lsp.buf.declaration, 'Goto Declaration')
+        map('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
+        map('gr', require('telescope.builtin').lsp_references, 'Goto References')
+        map('gI', vim.lsp.buf.implementation, 'Goto Implementation')
+
+        -- See `:help K` for why this keymap
+        map('K', vim.lsp.buf.hover, 'Hover Documentation')
+
+        map('<leader>sr', vim.lsp.buf.rename, 'Rename')
+        map('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
+        map('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
+        map('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
+        map('<leader>ss', function()
+          require('telescope.builtin').lsp_document_symbols({ symbol_width = 100 })
+        end, 'Document Symbols')
+        map('<leader>sf', function()
+          require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 100 })
+        end, 'Document Functions')
+
+        -- LSP Workspace functionality
+        map('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
+        map('<leader>sW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Dynamic Workspace Symbols')
+        map('<leader>sA', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
+        map('<leader>sR', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
+        map('<leader>sL', function()
+          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end, 'Workspace List Folders')
+
+        -- Clang specific
+        map('<A-o>', ':ClangdSwitchSourceHeader<CR>', 'Switch source/header file')
+
+        -- Create a command `:Format` local to the LSP buffer
+        vim.api.nvim_buf_create_user_command(0, 'Format', function(_)
+          if vim.lsp.buf.format then
+            vim.lsp.buf.format()
+          elseif vim.lsp.buf.formatting then
+            vim.lsp.buf.formatting()
+          end
+        end, { desc = 'Format current buffer with LSP' })
+
+        -- The following two autocommands are used to highlight references of the
+        -- word under your cursor when your cursor rests there for a little while.
+        --    See `:help CursorHold` for information about when this is executed
+        --
+        -- When you move your cursor, the highlights will be cleared (the second autocommand).
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+        if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+          local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+          vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+            buffer = event.buf,
+            group = highlight_augroup,
+            callback = vim.lsp.buf.document_highlight,
+          })
+
+          vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+            buffer = event.buf,
+            group = highlight_augroup,
+            callback = vim.lsp.buf.clear_references,
+          })
+
+          vim.api.nvim_create_autocmd('LspDetach', {
+            group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+            callback = function(event2)
+              vim.lsp.buf.clear_references()
+              vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+            end,
+          })
+        end
       end
-
-      nmap('<leader>sF', '<cmd>Format<CR>', 'Format current file')
-
-      nmap('gd', vim.lsp.buf.definition, 'Goto Definition')
-      nmap('gD', vim.lsp.buf.declaration, 'Goto Declaration')
-      nmap('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
-      nmap('gr', require('telescope.builtin').lsp_references, 'Goto References')
-      nmap('gI', vim.lsp.buf.implementation, 'Goto Implementation')
-
-      -- See `:help K` for why this keymap
-      nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-
-      nmap('<leader>sr', vim.lsp.buf.rename, 'Rename')
-      nmap('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
-      nmap('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
-      nmap('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
-      nmap('<leader>ss', function()
-        require('telescope.builtin').lsp_document_symbols({ symbol_width = 100 })
-      end, 'Document Symbols')
-      nmap('<leader>sf', function()
-        require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 100 })
-      end, 'Document Functions')
-
-      -- LSP Workspace functionality
-      nmap('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
-      nmap('<leader>sW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Dynamic Workspace Symbols')
-      nmap('<leader>sA', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
-      nmap('<leader>sR', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
-      nmap('<leader>sL', function()
-        print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-      end, 'Workspace List Folders')
-
-      -- Clang specific
-      nmap('<A-o>', ':ClangdSwitchSourceHeader<CR>', 'Switch source/header file')
-
-      -- Create a command `:Format` local to the LSP buffer
-      vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-        if vim.lsp.buf.format then
-          vim.lsp.buf.format()
-        elseif vim.lsp.buf.formatting then
-          vim.lsp.buf.formatting()
-        end
-      end, { desc = 'Format current buffer with LSP' })
-    end
+    })
 
     -- Use some nice look and feel
     vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
@@ -128,68 +149,55 @@ return {
     require('mason').setup()
     local lspconfig = require("lspconfig")
 
+    -- See `:help lspconfig-all` for a list of all the pre-configured LSPs
+    -- Some languages (like typescript) have entire language plugins that can be useful:
+    --    https://github.com/pmizio/typescript-tools.nvim
+
     -- Enable the following language servers
     local servers = {
-      'clangd',
-      'jsonls',
-      'lua_ls',
-      'pyright',
-      'marksman',
-      'taplo',
-      'rust_analyzer',
+      clangd = {},
+      jsonls = {},
+      pyright = {},
+      marksman = {},
+      taplo = {},
+      rust_analyzer = {},
+      bashls = {},
+      lua_ls = {
+        settings = {
+          Lua = {
+            completion = {
+              callSnippet = 'Replace',
+            },
+            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+            diagnostics = { disable = { 'missing-fields' } },
+          },
+        },
+      },
     }
 
-    -- Ensure that the following servers are installed
-    -- https://github.com/williamboman/mason-lspconfig.nvim
+    local ensure_installed = vim.tbl_keys(servers or {})
+    vim.list_extend(ensure_installed, {
+      'stylua',   -- Used to format Lua code
+    })
+    require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
     ---@diagnostic disable-next-line: missing-fields
     require('mason-lspconfig').setup {
-      ensure_installed = servers,
+      ensure_installed = {},   -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+      automatic_installation = false,
+      handlers = {
+        function(server_name)
+          local server = servers[server_name] or {}
+          -- This handles overriding only values explicitly passed
+          -- by the server configuration above. Useful when disabling
+          -- certain features of an LSP (for example, turning off formatting for ts_ls)
+          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+          require('lspconfig')[server_name].setup(server)
+        end,
+      },
     }
-
-    -- C/C++
-    lspconfig.clangd.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- JSON
-    lspconfig.jsonls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- LUA
-    lspconfig.lua_ls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- Python
-    lspconfig.pyright.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- TOML
-    lspconfig.taplo.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- Markdown
-    lspconfig.marksman.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
-    -- Rust
-    lspconfig.rust_analyzer.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
-
     -- Turn on lsp status information
-    require('fidget').setup()
+    -- require('fidget').setup()
 
     -- Example custom configuration for lua
     --
