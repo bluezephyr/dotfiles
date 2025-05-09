@@ -41,12 +41,13 @@ vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = 'Increase h
 vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>w', "<cmd>wall!<CR>", { desc = 'Write all buffers' })
-vim.keymap.set('n', '<leader>q', "<cmd>bdelete<CR>", { desc = 'Close buffer' })
+vim.keymap.set('n', '<leader>q', require('mini.bufremove').delete, { desc = 'Close buffer' })
 vim.keymap.set('n', '<leader>e', "<cmd>qa<CR>", { desc = 'Exit nvim' })
-vim.keymap.set('n', '<leader>z', "<cmd>split<CR>", { desc = 'Split window' })
+vim.keymap.set('n', '<leader>-', "<cmd>split<CR>", { desc = 'Split window horizontally' })
+vim.keymap.set('n', '<leader>\\', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>x', "<cmd>close<CR>", { desc = 'Close window' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
-vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = 'Write buffer' })
+vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", require('save_file').save_file, { desc = 'Write buffer' })
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })

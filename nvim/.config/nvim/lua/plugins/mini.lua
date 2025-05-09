@@ -5,6 +5,7 @@ return {
     version = false,
     config = function()
       require('mini.ai').setup()
+      require('mini.bufremove').setup()
       require('mini.surround').setup()
       require('mini.bracketed').setup()
       require('mini.basics').setup()
