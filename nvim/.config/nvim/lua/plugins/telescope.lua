@@ -70,7 +70,8 @@ return {
 
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
-      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
       vim.keymap.set('n', '<leader>ft', builtin.builtin, { desc = '[F]ind [T]elescope' })
       vim.keymap.set('n', '<leader>f*', builtin.grep_string, { desc = '[F]ind current [W]ord' })
       vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
@@ -84,8 +85,9 @@ return {
       require('telescope').load_extension('live_grep_args')
       local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 
-      vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
-        { desc = '[F]ind by [G]rep' })
+      -- Handled by fzflua.lua
+      -- vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+      --   { desc = '[F]ind by [G]rep' })
 
       vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection,
         { desc = '[F]ind by [G]rep' })
@@ -106,9 +108,10 @@ return {
       end, { desc = '[F]ind [F]iles Relative Current' })
 
       -- Shortcut for searching the Neovim configuration files
-      vim.keymap.set('n', '<leader>fn', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[F]ind [N]eovim files' })
+      -- Handled by fzflua.lua
+      -- vim.keymap.set('n', '<leader>fn', function()
+      --   builtin.find_files { cwd = vim.fn.stdpath 'config' }
+      -- end, { desc = '[F]ind [N]eovim files' })
 
       -- Shortcut to search for files in the index
       vim.keymap.set('n', '<leader>fi', function()
