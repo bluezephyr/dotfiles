@@ -135,6 +135,7 @@ vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = 
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
 vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]rap mode' })
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
+vim.keymap.set("n", "<leader>u", "<cmd>cd ..<CR>:pwd<CR>", { desc = 'Change dir to parent directory' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
 vim.keymap.set("n", "<leader>p", 'viw"_dP', { desc = 'Paste inside word' })
 vim.keymap.set("v", "p", '"_dP', { desc = '' })
