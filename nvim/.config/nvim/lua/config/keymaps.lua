@@ -38,10 +38,11 @@ vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = 'Decrease ho
 vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = 'Increase horizontal window size' })
 
 -- Buffer management
+-- See also plugins/snacks.lua
 vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>w', "<cmd>wall!<CR>", { desc = 'Write all buffers' })
-vim.keymap.set('n', '<leader>q', require('mini.bufremove').delete, { desc = 'Close buffer' })
+-- vim.keymap.set('n', '<leader>q', require('mini.bufremove').delete, { desc = 'Close buffer' })
 vim.keymap.set('n', '<leader>e', "<cmd>qa<CR>", { desc = 'Exit nvim' })
 vim.keymap.set('n', '<leader>-', "<cmd>split<CR>", { desc = 'Split window horizontally' })
 vim.keymap.set('n', '<leader>\\', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })

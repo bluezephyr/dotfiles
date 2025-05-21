@@ -1,10 +1,14 @@
 return {
+  -- https://github.com/ibhagwan/fzf-lua
   "ibhagwan/fzf-lua",
   -- https://github.com/echasnovski/mini.icons
   dependencies = { "echasnovski/mini.icons" },
   opts = {
     winopts = {
-      preview = { layout = "vertical" }
+      fullscreen = true
+      -- preview = {
+      -- layout = "horizontal",
+      -- }
     },
   },
   keys = {
@@ -42,7 +46,14 @@ return {
     {
       "<leader>fg",
       function()
-        require("fzf-lua").live_grep()
+        require("fzf-lua").live_grep({
+          winopts = {
+            fullscreen = false,
+            preview = {
+              layout = "vertical",
+            }
+          },
+        })
       end,
       desc = "Live grep (fzf)"
     }
