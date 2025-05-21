@@ -1,34 +1,42 @@
+local grep_opts = {
+  "rg",
+  "--vimgrep",
+  "--hidden",
+  -- "--follow",
+  "--glob",
+  '"!**/.git/*"',
+  "--column",
+  "--line-number",
+  "--no-heading",
+  "--color=always",
+  "--smart-case",
+  "--max-columns=4096",
+  "-e",
+}
+
 return {
   "ibhagwan/fzf-lua",
   -- https://github.com/echasnovski/mini.icons
   dependencies = { "echasnovski/mini.icons" },
   opts = {
     winopts = {
-      preview = { layout = "vertical" }
+      fullscreen = true,
+      preview = { layout = "horizontal" }
     },
+    grep = {
+      cwd_prompt = false,
+      -- prompt = Utils.icons.misc.search .. " ",
+      input_prompt = "Grep For ❯ ",
+      cmd = table.concat(grep_opts, " "),
+      hidden = true,
+      -- follow = true,
+    }
   },
   keys = {
     {
-      "<leader>mf",
-      function()
-        require("fzf-lua").files()
-      end,
-      desc = "Find Files (fzf)"
-    },
-    {
       "<leader>ff",
       function()
-        require("fzf-lua").files({
-          toggle_ignore = true,
-          toggle_ignore_flag = "--no-ignore-vcs",
-          -- Add '--no-ignore-vcs' to have ignored files shown by default
-          fd_opts = "--color=never --hidden --type f --type l --exclude .git",
-          -- Add the default actions explicitly to get a help text
-          actions = {
-            ["alt-i"] = require("fzf-lua.actions").toggle_ignore,
-            ["alt-h"] = require("fzf-lua.actions").toggle_hidden
-          },
-        })
+        require("fzf-lua").files()
       end,
       desc = "Find Files (fzf)"
     },
@@ -40,11 +48,39 @@ return {
       desc = "Find Neovim Config (fzf)"
     },
     {
+      "<leader>fi",
+      function()
+        require("fzf-lua").files({ cwd = vim.fn.expand('~/index/') })
+      end,
+      desc = "Find Index (fzf)"
+    },
+    {
       "<leader>fg",
       function()
         require("fzf-lua").live_grep()
       end,
       desc = "Live grep (fzf)"
+    },
+    {
+      "<leader>fw",
+      function()
+        require("fzf-lua").grep_cword()
+      end,
+      desc = "Grep word (fzf)"
+    },
+    {
+      "<leader>fz",
+      function()
+        require("fzf-lua").builtin()
+      end,
+      desc = "Buitin (fzf)"
+    },
+    {
+      "<leader><leader>",
+      function()
+        require("fzf-lua").buffers({ previewer = false, winopts = { fullscreen = false }})
+      end,
+      desc = "Buffers",
     }
   }
 }
