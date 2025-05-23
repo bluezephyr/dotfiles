@@ -56,6 +56,20 @@ return {
         })
       end,
       desc = "Live grep (fzf)"
+    },
+    {
+      "<leader>fz",
+      function()
+        require("fzf-lua").builtin()
+      end,
+      desc = "Buitin (fzf)"
+    },
+    {
+      "<leader><leader>",
+      function()
+        require("fzf-lua").buffers({ previewer = false, winopts = { fullscreen = false } })
+      end,
+      desc = "Buffers",
     }
   }
 }

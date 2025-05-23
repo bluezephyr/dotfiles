@@ -79,7 +79,9 @@ return {
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
       vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Live grep args
       require('telescope').load_extension('live_grep_args')
@@ -134,14 +136,15 @@ return {
         vim.cmd(":cclose")
       end, { desc = "Open Quickfix" })
 
-      vim.keymap.set('n', '<leader><space>', function()
-        builtin.buffers(require('telescope.themes').get_dropdown { previewer = false,
-          layout_config = {
-            width = 0.8,
-            height = 25
-          }
-        })
-      end, { desc = 'Buffers' })
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader><space>', function()
+      --   builtin.buffers(require('telescope.themes').get_dropdown { previewer = false,
+      --     layout_config = {
+      --       width = 0.8,
+      --       height = 25
+      --     }
+      --   })
+      -- end, { desc = 'Buffers' })
 
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzy search in current buffer' })
