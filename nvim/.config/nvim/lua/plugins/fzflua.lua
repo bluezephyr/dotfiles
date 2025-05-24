@@ -1,14 +1,26 @@
+local grep_opts = {
+  "--hidden",
+  "--iglob",
+  '"!**/.git/*"',
+  "--column",
+  "--line-number",
+  "--no-heading",
+  "--color=always",
+  "--smart-case",
+  "--max-columns=4096",
+  "-e",
+}
+
 return {
   -- https://github.com/ibhagwan/fzf-lua
   "ibhagwan/fzf-lua",
+  lazy = false,
   -- https://github.com/echasnovski/mini.icons
   dependencies = { "echasnovski/mini.icons" },
   opts = {
     winopts = {
       fullscreen = true
-      -- preview = {
-      -- layout = "horizontal",
-      -- }
+      -- preview = { layout = "horizontal" }
     },
   },
   keys = {
@@ -47,15 +59,29 @@ return {
       "<leader>fg",
       function()
         require("fzf-lua").live_grep({
+          winopts = { preview = { layout = "horizontal", } },
+          rg_opts = table.concat(grep_opts, " "),
+          hidden = true,
+        })
+      end,
+      desc = "Live grep (fzf)"
+    },
+    {
+      "<leader>fu",
+      function()
+        require("fzf-lua").live_grep({
+          grep = {
+            glob_flag      = "--iglob", -- for case sensitive globs use '--glob'
+            glob_separator = "%s%-%-" -- query separator pattern (lua): ' --'
+          },
           winopts = {
-            fullscreen = false,
             preview = {
-              layout = "vertical",
+              layout = "horizontal",
             }
           },
         })
       end,
-      desc = "Live grep (fzf)"
+      desc = "Live grep glob (fzf)"
     },
     {
       "<leader>fz",
