@@ -1,14 +1,14 @@
-local grep_opts = {
-  "--hidden",
-  "--iglob",
-  '"!**/.git/*"',
-  "--column",
-  "--line-number",
-  "--no-heading",
-  "--color=always",
-  "--smart-case",
-  "--max-columns=4096",
-  "-e",
+-- Options for rg to ignore .git
+local rg_opts =
+"--hidden --iglob '!**/.git/*' --column --line-number --no-heading --color=always --smart-case --max-columns=4096 -e"
+
+local fzf_git_winopts = {
+  winopts = {
+    preview = {
+      layout = "vertical",
+      vertical = "down:70%",
+    },
+  },
 }
 
 return {
@@ -22,23 +22,25 @@ return {
       fullscreen = true
       -- preview = { layout = "horizontal" }
     },
+    files = {
+      -- toggle_ignore = true,
+      -- toggle_ignore_flag = "--no-ignore-vcs",
+      file_icons = false,
+    }
   },
   keys = {
-    {
-      "<leader>mf",
-      function()
-        require("fzf-lua").files()
-      end,
-      desc = "Find Files (fzf)"
-    },
+    { "<leader>fk", function() require("fzf-lua").keymaps() end,               desc = "[F]ind [K]eymaps" },
+    { "<leader>fh", function() require("fzf-lua").help_tags() end,             desc = "[F]ind [H]elp" },
+    { "<leader>fc", function() require("fzf-lua").commands() end,              desc = "[F]ind [C]ommands" },
+    { "<leader>fd", function() require("fzf-lua").workspace_diagnostics() end, desc = "[F]ind [D]iagnostics" },
+    { "<leader>fo", function() require("fzf-lua").nvim_options() end,          desc = "[F]ind Vim [O]ptions" },
+    { "<leader>fm", function() require("fzf-lua").manpages() end,              desc = "[F]ind [M]anpages" },
     {
       "<leader>ff",
       function()
         require("fzf-lua").files({
           toggle_ignore = true,
           toggle_ignore_flag = "--no-ignore-vcs",
-          -- Add '--no-ignore-vcs' to have ignored files shown by default
-          fd_opts = "--color=never --hidden --type f --type l --exclude .git",
           -- Add the default actions explicitly to get a help text
           actions = {
             ["alt-i"] = require("fzf-lua.actions").toggle_ignore,
@@ -46,42 +48,46 @@ return {
           },
         })
       end,
-      desc = "Find Files (fzf)"
+      desc = "[F]ind [F]iles"
+    },
+    {
+      "<leader>f.",
+      function()
+        require("fzf-lua").files({
+          cwd = vim.fn.expand('%:p:h'),
+          -- Add the default actions explicitly to get a help text
+          actions = {
+            ["alt-i"] = require("fzf-lua.actions").toggle_ignore,
+            ["alt-h"] = require("fzf-lua.actions").toggle_hidden
+          },
+        })
+      end,
+      desc = "[F]ind Files Relative Current"
     },
     {
       "<leader>fn",
       function()
         require("fzf-lua").files({ cwd = vim.fn.stdpath('config') })
       end,
-      desc = "Find Neovim Config (fzf)"
+      desc = "[F]ind [N]eovim Config"
     },
     {
       "<leader>fg",
       function()
         require("fzf-lua").live_grep({
           winopts = { preview = { layout = "horizontal", } },
-          rg_opts = table.concat(grep_opts, " "),
+          rg_opts = rg_opts,
           hidden = true,
         })
       end,
-      desc = "Live grep (fzf)"
+      desc = "Live [G]rep (fzf)"
     },
     {
-      "<leader>fu",
+      "<leader>fw",
       function()
-        require("fzf-lua").live_grep({
-          grep = {
-            glob_flag      = "--iglob", -- for case sensitive globs use '--glob'
-            glob_separator = "%s%-%-" -- query separator pattern (lua): ' --'
-          },
-          winopts = {
-            preview = {
-              layout = "horizontal",
-            }
-          },
-        })
+        require("fzf-lua").grep_cword()
       end,
-      desc = "Live grep glob (fzf)"
+      desc = "Grep [W]ord (fzf)"
     },
     {
       "<leader>fz",
@@ -96,6 +102,8 @@ return {
         require("fzf-lua").buffers({ previewer = false, winopts = { fullscreen = false } })
       end,
       desc = "Buffers",
-    }
+    },
+    { "<leader>gs", function() require("fzf-lua").git_status(fzf_git_winopts) end, desc = "[G]it [S]tatus" },
+    { "<leader>gl", function() require("fzf-lua").git_commits(fzf_git_winopts) end, desc = "[G]it [L]og" },
   }
 }

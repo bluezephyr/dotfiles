@@ -68,16 +68,16 @@ return {
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
 
-      vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
-      vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
       -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
+      -- vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
       -- vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
-      vim.keymap.set('n', '<leader>ft', builtin.builtin, { desc = '[F]ind [T]elescope' })
+      -- vim.keymap.set('n', '<leader>ft', builtin.builtin, { desc = '[F]ind [T]elescope' })
       vim.keymap.set('n', '<leader>f*', builtin.grep_string, { desc = '[F]ind current [W]ord' })
-      vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
-      vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
-      vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
-      vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
+      -- vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
+      -- vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
+      -- vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
+      -- vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
       vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
 
       -- Handled by fzflua
@@ -94,20 +94,21 @@ return {
       vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection,
         { desc = '[F]ind by [G]rep' })
 
-      vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor,
-        { desc = '[F]ind current [W]ord' })
+      -- Handled by fzflua.lua
+      -- vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor,
+      --   { desc = '[F]ind current [W]ord' })
 
-      vim.keymap.set('n', '<c-p>', function()
-        builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
-      end, { desc = 'Find All Files' })
+      -- vim.keymap.set('n', '<c-p>', function()
+      --   builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+      -- end, { desc = 'Find All Files' })
 
-      vim.keymap.set('n', '<leader>fa', function()
-        builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
-      end, { desc = 'Find All Files' })
+      -- vim.keymap.set('n', '<leader>fa', function()
+      --   builtin.find_files { find_command = { 'fd', '--hidden', '--no-ignore-vcs' } }
+      -- end, { desc = 'Find All Files' })
 
-      vim.keymap.set('n', '<leader>f.', function()
-        builtin.find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
-      end, { desc = '[F]ind [F]iles Relative Current' })
+      -- vim.keymap.set('n', '<leader>f.', function()
+      --   builtin.find_files { cwd = vim.fn.expand('%:p:h'), find_command = { 'fd' } }
+      -- end, { desc = '[F]ind [F]iles Relative Current' })
 
       -- Shortcut for searching the Neovim configuration files
       -- Handled by fzflua.lua
@@ -123,9 +124,10 @@ return {
         }
       end, { desc = '[F]ind [I]ndex' })
 
-      vim.keymap.set('n', '<leader>fm', function()
-        builtin.man_pages { sections = { 'ALL' } }
-      end, { desc = '[F]ind [M]an Pages' })
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader>fm', function()
+      --   builtin.man_pages { sections = { 'ALL' } }
+      -- end, { desc = '[F]ind [M]an Pages' })
 
       vim.keymap.set('n', '<leader>fb', function()
         builtin.marks { sections = { 'ALL' } }
@@ -156,8 +158,9 @@ return {
       end, { desc = '[F]ind [P]lugins' })
 
       -- Git commands
-      vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
-      vim.keymap.set('n', '<leader>gl', require('telescope.builtin').git_commits, { desc = 'Git Log' })
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Git Status' })
+      -- vim.keymap.set('n', '<leader>gl', require('telescope.builtin').git_commits, { desc = 'Git Log' })
     end
   },
 }
