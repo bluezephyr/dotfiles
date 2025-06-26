@@ -52,6 +52,4 @@ return {
       vim.cmd [[ au FileType c setlocal commentstring=//\ %s ]]
     end,
   },
-
-
 }
