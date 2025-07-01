@@ -10,6 +10,7 @@ return {
       require('mini.bracketed').setup()
       require('mini.basics').setup()
       require('mini.operators').setup()
+      require('mini.icons').setup()
 
       local statusline = require('mini.statusline')
       statusline.setup({

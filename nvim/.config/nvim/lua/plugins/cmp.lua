@@ -50,9 +50,9 @@ return {
             mode = "symbol",
             maxwidth = 50,
             ellipsis_char = '...',
-            symbol_map = { Codeium = "", },
+            -- symbol_map = { Codeium = "", },
             menu = ({
-              codeium = '[Codeium]',
+              -- codeium = '[Codeium]',
               nvim_lsp = '[Lsp]',
               luasnip = '[Luasnip]',
               buffer = '[File]',
@@ -61,7 +61,7 @@ return {
           }),
         },
         sources = {
-          { name = "codeium",  priority = 1000 },
+          -- { name = "codeium",  priority = 1000 },
           { name = "nvim_lsp", priority = 500 },
           { name = "luasnip",  priority = 15 },
           { name = "buffer",   priority = 1 },
