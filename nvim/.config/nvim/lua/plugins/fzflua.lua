@@ -26,7 +26,13 @@ return {
       -- toggle_ignore = true,
       -- toggle_ignore_flag = "--no-ignore-vcs",
       file_icons = false,
-    }
+    },
+    -- keymap = {
+    --   builtin = {
+    --     ["<C-d>"] = "preview-page-down",
+    --     ["<C-u>"] = "preview-page-up",
+    --   },
+    -- },
   },
   keys = {
     { "<leader>fk", function() require("fzf-lua").keymaps() end,               desc = "[F]ind [K]eymaps" },
@@ -75,7 +81,7 @@ return {
       "<leader>fg",
       function()
         require("fzf-lua").live_grep({
-          winopts = { preview = { layout = "horizontal", } },
+          winopts = { preview = { layout = "vertical", } },
           rg_opts = rg_opts,
           hidden = true,
         })
@@ -103,7 +109,58 @@ return {
       end,
       desc = "Buffers",
     },
-    { "<leader>gs", function() require("fzf-lua").git_status(fzf_git_winopts) end, desc = "[G]it [S]tatus" },
+    { "<leader>gs", function() require("fzf-lua").git_status(fzf_git_winopts) end,  desc = "[G]it [S]tatus" },
     { "<leader>gl", function() require("fzf-lua").git_commits(fzf_git_winopts) end, desc = "[G]it [L]og" },
+
+    -- LSP keymaps. See lsp.lua for other configuration
+    -- for details of the lsp filtering
+    {
+      "<leader>ss",
+      function()
+        require("fzf-lua").lsp_document_symbols({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: Document Symbols"
+    },
+    {
+      "<leader>sw",
+      function()
+        require("fzf-lua").lsp_workspace_symbols({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: Workspace Symbols"
+    },
+    {
+      "<leader>si",
+      function()
+        require("fzf-lua").lsp_incoming_calls({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: Incoming Calls"
+    },
+    {
+      "gr",
+      function()
+        require("fzf-lua").lsp_references({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: References"
+    },
   }
 }

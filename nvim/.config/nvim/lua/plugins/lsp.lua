@@ -1,5 +1,6 @@
 -- LSP settings
 -- LSP Configuration & Plugins
+-- See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
@@ -39,12 +40,14 @@ return {
           vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
-        map('<leader>sF', '<cmd>Format<CR>', 'Format current file')
+        -- More keymaps are located in the fzflua.lua file
+
+        map('<leader>sf', '<cmd>Format<CR>', 'Format current file')
 
         map('gd', vim.lsp.buf.definition, 'Goto Definition')
         map('gD', vim.lsp.buf.declaration, 'Goto Declaration')
         map('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
-        map('gr', require('telescope.builtin').lsp_references, 'Goto References')
+        -- map('gr', require('telescope.builtin').lsp_references, 'Goto References')
         map('gI', vim.lsp.buf.implementation, 'Goto Implementation')
 
         -- See `:help K` for why this keymap
@@ -54,24 +57,6 @@ return {
         map('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
         map('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
         map('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
-        map('<leader>ss', function()
-          require('telescope.builtin').lsp_document_symbols({ symbol_width = 100 })
-        end, 'Document Symbols')
-        map('<leader>sf', function()
-          require('telescope.builtin').lsp_document_symbols({ symbols = 'function', symbol_width = 100 })
-        end, 'Document Functions')
-
-        -- LSP Workspace functionality
-        map('<leader>sw', require('telescope.builtin').lsp_workspace_symbols, 'Workspace Symbols')
-        map('<leader>sW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Dynamic Workspace Symbols')
-        map('<leader>sA', vim.lsp.buf.add_workspace_folder, 'Workspace Add Folder')
-        map('<leader>sR', vim.lsp.buf.remove_workspace_folder, 'Workspace Remove Folder')
-        map('<leader>sL', function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, 'Workspace List Folders')
-
-        -- Clang specific
-        map('<A-o>', ':ClangdSwitchSourceHeader<CR>', 'Switch source/header file')
 
         -- Create a command `:Format` local to the LSP buffer
         vim.api.nvim_buf_create_user_command(0, 'Format', function(_)
