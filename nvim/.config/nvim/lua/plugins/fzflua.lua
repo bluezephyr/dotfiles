@@ -151,6 +151,18 @@ return {
       desc = "LSP: Incoming Calls"
     },
     {
+      "<leader>sf",
+      function()
+        require("fzf-lua").lsp_finder({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: Find all locations"
+    },
+    {
       "gr",
       function()
         require("fzf-lua").lsp_references({

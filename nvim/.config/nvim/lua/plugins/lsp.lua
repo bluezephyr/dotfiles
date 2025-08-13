@@ -42,7 +42,7 @@ return {
 
         -- More keymaps are located in the fzflua.lua file
 
-        map('<leader>sf', '<cmd>Format<CR>', 'Format current file')
+        map('<leader>sF', '<cmd>Format<CR>', 'Format current file')
 
         map('gd', vim.lsp.buf.definition, 'Goto Definition')
         map('gD', vim.lsp.buf.declaration, 'Goto Declaration')
