@@ -132,6 +132,11 @@ source /usr/share/fzf/completion.bash
 ## Open file from command line
 alias open=xdg-open
 
+## Cura slicer
+## See https://community.ultimaker.com/topic/44396-cura-crashes-when-trying-to-use-open-files-arch-linux/
+alias cura='cura -platformtheme gtk3'
+
+
 # Ripgrep config
 export RIPGREP_CONFIG_PATH=~/.config/rg/config
 
