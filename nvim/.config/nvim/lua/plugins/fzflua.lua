@@ -174,5 +174,17 @@ return {
       end,
       desc = "LSP: References"
     },
+    {
+      "<leader>sD",
+      function()
+        require("fzf-lua").lsp_document_diagnostics({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" }
+          }
+        })
+      end,
+      desc = "LSP: Show All Diagnostics"
+    },
   }
 }
