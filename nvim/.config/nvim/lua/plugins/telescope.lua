@@ -129,9 +129,9 @@ return {
       --   builtin.man_pages { sections = { 'ALL' } }
       -- end, { desc = '[F]ind [M]an Pages' })
 
-      vim.keymap.set('n', '<leader>fb', function()
-        builtin.marks { sections = { 'ALL' } }
-      end, { desc = '[F]ind [B]ookmarks' })
+      -- vim.keymap.set('n', '<leader>fb', function()
+      --   builtin.marks { sections = { 'ALL' } }
+      -- end, { desc = '[F]ind [B]ookmarks' })
 
       vim.keymap.set("n", "<C-q>", function()
         builtin.quickfix()

@@ -91,7 +91,9 @@ return {
     {
       "<leader>fw",
       function()
-        require("fzf-lua").grep_cword()
+        require("fzf-lua").grep_cword({
+          winopts = { preview = { layout = "vertical", } },
+        })
       end,
       desc = "Grep [W]ord (fzf)"
     },
@@ -101,6 +103,24 @@ return {
         require("fzf-lua").builtin()
       end,
       desc = "Buitin (fzf)"
+    },
+    {
+      "<leader>fb",
+      function()
+        require("fzf-lua").marks({
+          winopts = { preview = { layout = "vertical", } },
+        })
+      end,
+      desc = "[F]ind marks"
+    },
+    {
+      "<leader>'",
+      function()
+        require("fzf-lua").marks({
+          winopts = { preview = { layout = "vertical", } },
+        })
+      end,
+      desc = "[F]ind marks"
     },
     {
       "<leader><leader>",
