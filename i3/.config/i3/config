@@ -69,7 +69,9 @@ smart_gaps inverse_outer
 # `inverse_outer` in order for it to be meaningful.
 bindsym $mod+g exec ~/.config/i3/scripts/toggle-horizontal-gaps.sh
 
+# Automatically arrange the windows on the workspace
 bindsym $mod+m exec ~/.config/i3/scripts/master-stack.sh
+bindsym $mod+equal exec ~/.config/i3/scripts/equalize-windows.sh
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -183,7 +185,7 @@ bindsym $mod+minus split v
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 
-# change container layout (stacked, tabbed, toggle split)
+# change container layout (horizontal/vertical)
 bindsym $mod+o layout toggle split
 
 # toggle tiling / floating
