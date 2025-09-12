@@ -69,6 +69,8 @@ smart_gaps inverse_outer
 # `inverse_outer` in order for it to be meaningful.
 bindsym $mod+g exec ~/.config/i3/scripts/toggle-horizontal-gaps.sh
 
+bindsym $mod+m exec ~/.config/i3/scripts/master-stack.sh
+
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
 
