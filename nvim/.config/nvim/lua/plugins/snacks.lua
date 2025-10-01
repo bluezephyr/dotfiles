@@ -5,6 +5,13 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
+    picker = {
+      layout = {
+        cycle = true,
+        preset = "vertical",
+        fullscreen = true,
+      },
+    },
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
@@ -23,7 +30,19 @@ return {
     -- words = { enabled = true },
   },
   keys = {
-    { "<leader>n", function() require("snacks").picker.notifications() end, desc = "Notification History" },
-    { "<leader>q", function() require("snacks").bufdelete() end, desc = "Close buffer" },
+    {
+      "<leader>n",
+      function()
+        require("snacks").picker.notifications()
+      end,
+      desc = "Notification History",
+    },
+    {
+      "<leader>q",
+      function()
+        require("snacks").bufdelete()
+      end,
+      desc = "Close buffer",
+    },
   },
 }

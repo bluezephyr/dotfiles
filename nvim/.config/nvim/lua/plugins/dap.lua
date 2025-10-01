@@ -68,6 +68,23 @@ return {
         dapui.open()
       end
 
+      -- Wrap dap.run to intercept Python launch requests and set the 'cwd' to Neovim's
+      -- current directory if it's missing from the configuration.
+      local original_run = dap.run
+      dap.run = function(config, ...)
+        if config.type == 'python' and config.request == 'launch' then
+          if config.cwd == nil then
+            config.cwd = vim.fn.getcwd()
+
+            require("snacks").notify("CWD was not set, defaulting to " .. config.cwd, {
+              title = "DAP CWD Fix",
+              level = vim.log.levels.INFO,
+            })
+          end
+        end
+        return original_run(config, ...)
+      end
+
       ---- Icons ----
       vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "", linehl = "", numhl = "" })
       vim.fn.sign_define("DapStopped", { text = ">", texthl = "", linehl = "", numhl = "" })
