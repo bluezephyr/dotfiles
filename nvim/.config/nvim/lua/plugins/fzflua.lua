@@ -41,6 +41,18 @@ return {
     { "<leader>fd", function() require("fzf-lua").workspace_diagnostics() end, desc = "[F]ind [D]iagnostics" },
     { "<leader>fo", function() require("fzf-lua").nvim_options() end,          desc = "[F]ind Vim [O]ptions" },
     { "<leader>fm", function() require("fzf-lua").manpages() end,              desc = "[F]ind [M]anpages" },
+    { "<leader>fr", function() require("fzf-lua").oldfiles() end,              desc = "[F]ind [R]ecent" },
+    { "<leader>h", function() require("fzf-lua").oldfiles() end,               desc = "Recent Files" },
+    {
+      "<leader>fi",
+      function()
+        require("fzf-lua").files({
+          cwd = vim.fn.expand('~/index'),
+          fd_opts = "--type file --hidden --follow --strip-cwd-prefix",
+        })
+      end,
+      desc = "[F]ind [I]ndex"
+    },
     {
       "<leader>ff",
       function()

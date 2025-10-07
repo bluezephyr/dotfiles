@@ -78,7 +78,7 @@ return {
       -- vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
       -- vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       -- vim.keymap.set('n', '<leader>fo', builtin.vim_options, { desc = '[F]ind Vim [O]ptions' })
-      vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
+      -- vim.keymap.set('n', '<leader>h', builtin.oldfiles, { desc = 'Recent Files' })
 
       -- Handled by fzflua
       -- vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
@@ -117,12 +117,13 @@ return {
       -- end, { desc = '[F]ind [N]eovim files' })
 
       -- Shortcut to search for files in the index
-      vim.keymap.set('n', '<leader>fi', function()
-        builtin.find_files {
-          cwd = vim.fn.expand('~/index'),
-          find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--strip-cwd-prefix' }
-        }
-      end, { desc = '[F]ind [I]ndex' })
+      -- Handled by fzflua.lua
+      -- vim.keymap.set('n', '<leader>fi', function()
+      --   builtin.find_files {
+      --     cwd = vim.fn.expand('~/index'),
+      --     find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--strip-cwd-prefix' }
+      --   }
+      -- end, { desc = '[F]ind [I]ndex' })
 
       -- Handled by fzflua
       -- vim.keymap.set('n', '<leader>fm', function()
