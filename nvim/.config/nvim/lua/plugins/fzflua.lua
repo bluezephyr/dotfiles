@@ -19,7 +19,7 @@ return {
   dependencies = { "echasnovski/mini.icons" },
   opts = {
     winopts = {
-      fullscreen = true
+      fullscreen = true,
       -- preview = { layout = "horizontal" }
     },
     files = {
@@ -35,23 +35,71 @@ return {
     -- },
   },
   keys = {
-    { "<leader>fk", function() require("fzf-lua").keymaps() end,               desc = "[F]ind [K]eymaps" },
-    { "<leader>fh", function() require("fzf-lua").help_tags() end,             desc = "[F]ind [H]elp" },
-    { "<leader>fc", function() require("fzf-lua").commands() end,              desc = "[F]ind [C]ommands" },
-    { "<leader>fd", function() require("fzf-lua").workspace_diagnostics() end, desc = "[F]ind [D]iagnostics" },
-    { "<leader>fo", function() require("fzf-lua").nvim_options() end,          desc = "[F]ind Vim [O]ptions" },
-    { "<leader>fm", function() require("fzf-lua").manpages() end,              desc = "[F]ind [M]anpages" },
-    { "<leader>fr", function() require("fzf-lua").oldfiles() end,              desc = "[F]ind [R]ecent" },
-    { "<leader>h", function() require("fzf-lua").oldfiles() end,               desc = "Recent Files" },
+    {
+      "<leader>fk",
+      function()
+        require("fzf-lua").keymaps()
+      end,
+      desc = "[F]ind [K]eymaps",
+    },
+    {
+      "<leader>fh",
+      function()
+        require("fzf-lua").help_tags()
+      end,
+      desc = "[F]ind [H]elp",
+    },
+    {
+      "<leader>fc",
+      function()
+        require("fzf-lua").commands()
+      end,
+      desc = "[F]ind [C]ommands",
+    },
+    {
+      "<leader>fd",
+      function()
+        require("fzf-lua").workspace_diagnostics()
+      end,
+      desc = "[F]ind [D]iagnostics",
+    },
+    {
+      "<leader>fo",
+      function()
+        require("fzf-lua").nvim_options()
+      end,
+      desc = "[F]ind Vim [O]ptions",
+    },
+    {
+      "<leader>fm",
+      function()
+        require("fzf-lua").manpages()
+      end,
+      desc = "[F]ind [M]anpages",
+    },
+    {
+      "<leader>fr",
+      function()
+        require("fzf-lua").oldfiles()
+      end,
+      desc = "[F]ind [R]ecent",
+    },
+    {
+      "<leader>h",
+      function()
+        require("fzf-lua").oldfiles()
+      end,
+      desc = "Recent Files",
+    },
     {
       "<leader>fi",
       function()
         require("fzf-lua").files({
-          cwd = vim.fn.expand('~/index'),
+          cwd = vim.fn.expand("~/index"),
           fd_opts = "--type file --hidden --follow --strip-cwd-prefix",
         })
       end,
-      desc = "[F]ind [I]ndex"
+      desc = "[F]ind [I]ndex",
     },
     {
       "<leader>ff",
@@ -62,77 +110,77 @@ return {
           -- Add the default actions explicitly to get a help text
           actions = {
             ["alt-i"] = require("fzf-lua.actions").toggle_ignore,
-            ["alt-h"] = require("fzf-lua.actions").toggle_hidden
+            ["alt-h"] = require("fzf-lua.actions").toggle_hidden,
           },
         })
       end,
-      desc = "[F]ind [F]iles"
+      desc = "[F]ind [F]iles",
     },
     {
       "<leader>f.",
       function()
         require("fzf-lua").files({
-          cwd = vim.fn.expand('%:p:h'),
+          cwd = vim.fn.expand("%:p:h"),
           -- Add the default actions explicitly to get a help text
           actions = {
             ["alt-i"] = require("fzf-lua.actions").toggle_ignore,
-            ["alt-h"] = require("fzf-lua.actions").toggle_hidden
+            ["alt-h"] = require("fzf-lua.actions").toggle_hidden,
           },
         })
       end,
-      desc = "[F]ind Files Relative Current"
+      desc = "[F]ind Files Relative Current",
     },
     {
       "<leader>fn",
       function()
-        require("fzf-lua").files({ cwd = vim.fn.stdpath('config') })
+        require("fzf-lua").files({ cwd = vim.fn.stdpath("config") })
       end,
-      desc = "[F]ind [N]eovim Config"
+      desc = "[F]ind [N]eovim Config",
     },
     {
       "<leader>fg",
       function()
         require("fzf-lua").live_grep({
-          winopts = { preview = { layout = "vertical", } },
+          winopts = { preview = { layout = "vertical" } },
           rg_opts = rg_opts,
           hidden = true,
         })
       end,
-      desc = "Live [G]rep (fzf)"
+      desc = "Live [G]rep (fzf)",
     },
     {
       "<leader>fw",
       function()
         require("fzf-lua").grep_cword({
-          winopts = { preview = { layout = "vertical", } },
+          winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "Grep [W]ord (fzf)"
+      desc = "Grep [W]ord (fzf)",
     },
     {
       "<leader>fz",
       function()
         require("fzf-lua").builtin()
       end,
-      desc = "Buitin (fzf)"
+      desc = "Buitin (fzf)",
     },
     {
       "<leader>fb",
       function()
         require("fzf-lua").marks({
-          winopts = { preview = { layout = "vertical", } },
+          winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "[F]ind marks"
+      desc = "[F]ind marks",
     },
     {
       "<leader>'",
       function()
         require("fzf-lua").marks({
-          winopts = { preview = { layout = "vertical", } },
+          winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "[F]ind marks"
+      desc = "[F]ind marks",
     },
     {
       "<leader><leader>",
@@ -141,8 +189,35 @@ return {
       end,
       desc = "Buffers",
     },
-    { "<leader>gs", function() require("fzf-lua").git_status(fzf_git_winopts) end,  desc = "[G]it [S]tatus" },
-    { "<leader>gl", function() require("fzf-lua").git_commits(fzf_git_winopts) end, desc = "[G]it [L]og" },
+    {
+      "<leader>gs",
+      function()
+        require("fzf-lua").git_status(fzf_git_winopts)
+      end,
+      desc = "[G]it [S]tatus",
+    },
+    {
+      "<leader>gl",
+      function()
+        require("fzf-lua").git_commits(fzf_git_winopts)
+      end,
+      desc = "[G]it [L]og",
+    },
+    {
+      "<leader>m",
+      function()
+        require("fzf-lua").fzf_exec(vim.split(vim.fn.execute("messages"), "\n"), {
+          prompt = "Messages> ",
+          fzf_opts = { ["--no-sort"] = true },
+          actions = {
+            ["default"] = function(selected)
+              vim.notify(table.concat(selected, "\n"))
+            end,
+          },
+        })
+      end,
+      desc = "[M]essages",
+    },
 
     -- LSP keymaps. See lsp.lua for other configuration
     -- for details of the lsp filtering
@@ -152,11 +227,11 @@ return {
         require("fzf-lua").lsp_document_symbols({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: Document Symbols"
+      desc = "LSP: Document Symbols",
     },
     {
       "<leader>sw",
@@ -164,11 +239,11 @@ return {
         require("fzf-lua").lsp_workspace_symbols({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: Workspace Symbols"
+      desc = "LSP: Workspace Symbols",
     },
     {
       "<leader>si",
@@ -176,11 +251,11 @@ return {
         require("fzf-lua").lsp_incoming_calls({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: Incoming Calls"
+      desc = "LSP: Incoming Calls",
     },
     {
       "<leader>sf",
@@ -188,11 +263,11 @@ return {
         require("fzf-lua").lsp_finder({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: Find all locations"
+      desc = "LSP: Find all locations",
     },
     {
       "gr",
@@ -200,11 +275,11 @@ return {
         require("fzf-lua").lsp_references({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: References"
+      desc = "LSP: References",
     },
     {
       "<leader>sD",
@@ -212,11 +287,11 @@ return {
         require("fzf-lua").lsp_document_diagnostics({
           winopts = {
             fullscreen = true,
-            preview = { layout = "vertical" }
-          }
+            preview = { layout = "vertical" },
+          },
         })
       end,
-      desc = "LSP: Show All Diagnostics"
+      desc = "LSP: Show All Diagnostics",
     },
-  }
+  },
 }
