@@ -18,15 +18,15 @@ return {
   -- https://github.com/echasnovski/mini.icons
   dependencies = { "echasnovski/mini.icons" },
   opts = {
+    "borderless-full",
     winopts = {
       fullscreen = true,
-      -- preview = { layout = "horizontal" }
     },
-    files = {
-      -- toggle_ignore = true,
-      -- toggle_ignore_flag = "--no-ignore-vcs",
-      file_icons = false,
-    },
+   -- files = {
+    --   -- toggle_ignore = true,
+    --   -- toggle_ignore_flag = "--no-ignore-vcs",
+    --   -- file_icons = false,
+    -- },
     -- keymap = {
     --   builtin = {
     --     ["<C-d>"] = "preview-page-down",
