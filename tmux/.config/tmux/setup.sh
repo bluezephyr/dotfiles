@@ -1,5 +1,5 @@
 #!/bin/bash
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
 
 # start a server but don't attach to it
 tmux start-server
@@ -8,7 +8,7 @@ tmux start-server
 tmux new-session -d
 
 # install the plugins
-~/.tmux/plugins/tpm/scripts/install_plugins.sh
+~/.config/tmux/plugins/tpm/scripts/install_plugins.sh
 
 # killing the server is not required, I guess
 tmux kill-server
