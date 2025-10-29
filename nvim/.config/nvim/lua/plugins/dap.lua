@@ -100,6 +100,8 @@ return {
       keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "restart" })
       keymap('n', '<Leader>dj', function() dap.down() end, { desc = "callstack down" })
       keymap('n', '<Leader>dk', function() dap.up() end, { desc = "callstack up" })
+      keymap('n', '<Leader>do', function() dapui.open() end, { desc = "open UI" })
+      keymap('n', '<Leader>dc', function() dapui.close() end, { desc = "open UI" })
 
       -- Keymap: Print variable under cursor in hex using gdb
       keymap('n', '<leader>dx', function()
