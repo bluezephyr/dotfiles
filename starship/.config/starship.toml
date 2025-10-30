@@ -1,3 +1,19 @@
+format = '''
+[┌───────────────────](bold green)
+[│](bold green)$directory$all[└$character](bold green)'''
+
+add_newline = true
+
+[character]
+success_symbol = '[─>](bold green)'
+error_symbol = '[─>](bold red)'
+
+[directory]
+truncation_length = 8
+truncation_symbol = '…/'
+truncate_to_repo  = false
+read_only = " 󰌾"
+
 [aws]
 symbol = "  "
 
@@ -12,9 +28,6 @@ symbol = " "
 
 [dart]
 symbol = " "
-
-[directory]
-read_only = " 󰌾"
 
 [docker_context]
 symbol = " "
