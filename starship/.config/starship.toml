@@ -16,7 +16,7 @@ $directory\
 ${custom.directory_separator_not_git}\
 ${custom.directory_separator_git}\
 $symbol($git_branch[](fg:green))\
-$symbol( $git_commit$git_status$git_metrics$git_state)$fill$cmd_duration$nodejs$all\
+$symbol($git_commit(fg:green)$git_status$git_metrics$git_state)$fill$cmd_duration$nodejs$all\
 $character"""
 
 [fill]
@@ -33,13 +33,16 @@ read_only = " 󰌾"
 [git_branch]
 symbol = " "
 # symbol = " "
-format = "[ $symbol$branch(:$remote_branch) ]($style)"
+format = "[ $symbol$branch ]($style)"
+style = "fg:black bg:green"
+
+[git_commit]
+format = "[ $hash$tag ]($style)"
 style = "fg:black bg:green"
 
 [custom.directory_separator_git]
 description = "Output a styled separator right after the directory when inside a git repository."
 command = ""
-# format = "[](fg:#3B76F0 bg:#FCF392)"
 format = "[](fg:mauve bg:green)"
 # Only when inside git repository
 when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
