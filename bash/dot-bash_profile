@@ -14,6 +14,11 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# Replace cd with zoxide: https://github.com/ajeetdsouza/zoxide
+if [ -f "$HOME/.local/bin/zoxide" ] ; then
+    eval "$(zoxide init --cmd cd bash)"
+fi
+
 export EDITOR=/home/jens/.local/bin/nvim
 export OPENER=/home/jens/.local/bin/nvim
 
