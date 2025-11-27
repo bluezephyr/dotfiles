@@ -119,6 +119,7 @@ vim.keymap.set("n", "<leader>gu", "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = 
 vim.keymap.set("n", "<leader>gv", "<cmd>Gitsigns select_hunk<cr>", { desc = "Git select hunk" })
 vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
 vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T]oggle Git [Signs]" })
+vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
 vim.keymap.set('n', ']c', function()
   if vim.wo.diff then return ']c' end
   vim.schedule(function() gs.next_hunk({ target = 'all' }) end)
