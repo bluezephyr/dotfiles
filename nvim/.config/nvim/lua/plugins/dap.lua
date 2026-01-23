@@ -90,18 +90,19 @@ return {
       vim.fn.sign_define("DapStopped", { text = ">", texthl = "", linehl = "", numhl = "" })
 
       ---- Keymaps ----
-      keymap('n', '<F5>', function() dap.continue() end, { desc = "continue" })
-      keymap('n', '<F10>', function() dap.step_over() end, { desc = "step over" })
-      keymap('n', '<F11>', function() dap.step_into() end, { desc = "step into" })
-      keymap('n', '<F22>', function() dap.step_out() end, { desc = "step out" }) -- Shift-f10 -> f22
-      keymap('n', '<F9>', function() dap.toggle_breakpoint() end, { desc = "toggle breakpoint" })
-      keymap("n", '<F4>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "terminate" })
-      keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "run to cursor" })
-      keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "restart" })
-      keymap('n', '<Leader>dj', function() dap.down() end, { desc = "callstack down" })
-      keymap('n', '<Leader>dk', function() dap.up() end, { desc = "callstack up" })
-      keymap('n', '<Leader>do', function() dapui.open() end, { desc = "open UI" })
-      keymap('n', '<Leader>dc', function() dapui.close() end, { desc = "open UI" })
+      keymap('n', '<F5>', function() dap.continue() end, { desc = "DAP: continue" })
+      keymap('n', '<F10>', function() dap.step_over() end, { desc = "DAP: step over" })
+      keymap('n', '<F11>', function() dap.step_into() end, { desc = "DAP: step into" })
+      keymap('n', '<F8>', function() dap.step_out() end, { desc = "DAP: step out" })
+      keymap('n', '<F9>', function() dap.toggle_breakpoint() end, { desc = "DAP: toggle breakpoint" })
+      keymap('n', '<F4>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "DAP: terminate" })
+      keymap('n', '<F6>', function() dap.run_to_cursor() end, { desc = "DAP: run to cursor" })
+      keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "DAP: run to cursor" })
+      keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "DAP: restart" })
+      keymap('n', '<Leader>dj', function() dap.down() end, { desc = "DAP: callstack down" })
+      keymap('n', '<Leader>dk', function() dap.up() end, { desc = "DAP: callstack up" })
+      keymap('n', '<Leader>do', function() dapui.open() end, { desc = "DAP: open UI" })
+      keymap('n', '<Leader>dc', function() dapui.close() end, { desc = "DAP: open UI" })
 
       -- Keymap: Print variable under cursor in hex using gdb
       keymap('n', '<leader>dx', function()
