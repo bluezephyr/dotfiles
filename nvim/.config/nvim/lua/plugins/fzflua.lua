@@ -40,56 +40,56 @@ return {
       function()
         require("fzf-lua").keymaps()
       end,
-      desc = "[F]ind [K]eymaps",
+      desc = "Keymaps",
     },
     {
-      "<leader>fh",
+      "<leader>h",
       function()
         require("fzf-lua").help_tags()
       end,
-      desc = "[F]ind [H]elp",
+      desc = "Help tags",
     },
     {
       "<leader>fc",
       function()
         require("fzf-lua").commands()
       end,
-      desc = "[F]ind [C]ommands",
+      desc = "Commands",
     },
     {
       "<leader>fd",
       function()
         require("fzf-lua").workspace_diagnostics()
       end,
-      desc = "[F]ind [D]iagnostics",
+      desc = "Diagnostics",
     },
     {
       "<leader>fo",
       function()
         require("fzf-lua").nvim_options()
       end,
-      desc = "[F]ind Vim [O]ptions",
+      desc = "Vim Options",
     },
     {
       "<leader>fm",
       function()
         require("fzf-lua").manpages()
       end,
-      desc = "[F]ind [M]anpages",
+      desc = "Manpages",
     },
     {
       "<leader>fr",
       function()
-        require("fzf-lua").oldfiles()
+        require("fzf-lua").resume()
       end,
-      desc = "[F]ind [R]ecent",
+      desc = "Resume",
     },
     {
-      "<leader>h",
+      "<leader>fh",
       function()
         require("fzf-lua").oldfiles()
       end,
-      desc = "Recent Files",
+      desc = "History",
     },
     {
       "<leader>fi",
@@ -99,7 +99,7 @@ return {
           fd_opts = "--type file --hidden --follow --strip-cwd-prefix",
         })
       end,
-      desc = "[F]ind [I]ndex",
+      desc = "Index",
     },
     {
       "<leader>ff",
@@ -114,7 +114,7 @@ return {
           },
         })
       end,
-      desc = "[F]ind [F]iles",
+      desc = "Files",
     },
     {
       "<leader>f.",
@@ -128,14 +128,14 @@ return {
           },
         })
       end,
-      desc = "[F]ind Files Relative Current",
+      desc = "Files in current folder",
     },
     {
       "<leader>fn",
       function()
         require("fzf-lua").files({ cwd = vim.fn.stdpath("config") })
       end,
-      desc = "[F]ind [N]eovim Config",
+      desc = "Neovim config",
     },
     {
       "<leader>fg",
@@ -146,7 +146,7 @@ return {
           hidden = true,
         })
       end,
-      desc = "Live [G]rep (fzf)",
+      desc = "Live Grep (fzf)",
     },
     {
       "<leader>fw",
@@ -155,7 +155,7 @@ return {
           winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "Grep [W]ord (fzf)",
+      desc = "Grep Word (fzf)",
     },
     {
       "<leader>fz",
@@ -171,7 +171,7 @@ return {
           winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "[F]ind marks",
+      desc = "Marks",
     },
     {
       "<leader>'",
@@ -180,7 +180,7 @@ return {
           winopts = { preview = { layout = "vertical" } },
         })
       end,
-      desc = "[F]ind marks",
+      desc = "Marks",
     },
     {
       "<leader><leader>",
@@ -194,14 +194,14 @@ return {
       function()
         require("fzf-lua").git_status(fzf_git_winopts)
       end,
-      desc = "[G]it [S]tatus",
+      desc = "Git status",
     },
     {
       "<leader>gl",
       function()
         require("fzf-lua").git_commits(fzf_git_winopts)
       end,
-      desc = "[G]it [L]og",
+      desc = "Git log",
     },
     {
       "<leader>m",
@@ -216,7 +216,7 @@ return {
           },
         })
       end,
-      desc = "[M]essages",
+      desc = "Messages",
     },
 
     -- LSP keymaps. See lsp.lua for other configuration

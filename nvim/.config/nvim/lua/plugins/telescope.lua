@@ -73,7 +73,7 @@ return {
       -- vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
       -- vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
       -- vim.keymap.set('n', '<leader>ft', builtin.builtin, { desc = '[F]ind [T]elescope' })
-      vim.keymap.set('n', '<leader>f*', builtin.grep_string, { desc = '[F]ind current [W]ord' })
+      vim.keymap.set('n', '<leader>f*', builtin.grep_string, { desc = 'Grep current word' })
       -- vim.keymap.set('n', '<leader>fc', builtin.commands, { desc = '[F]ind [C]ommands' })
       -- vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
       -- vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
@@ -91,8 +91,8 @@ return {
       -- vim.keymap.set('n', '<leader>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
       --   { desc = '[F]ind by [G]rep' })
 
-      vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection,
-        { desc = '[F]ind by [G]rep' })
+      -- vim.keymap.set('v', '<leader>fg', live_grep_args_shortcuts.grep_visual_selection,
+      --   { desc = '[F]ind by [G]rep' })
 
       -- Handled by fzflua.lua
       -- vim.keymap.set('n', '<leader>fw', live_grep_args_shortcuts.grep_word_under_cursor,
@@ -156,7 +156,7 @@ return {
         builtin.find_files {
           cwd = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy")
         }
-      end, { desc = '[F]ind [P]lugins' })
+      end, { desc = 'Plugins' })
 
       -- Git commands
       -- Handled by fzflua
