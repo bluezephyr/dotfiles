@@ -46,8 +46,8 @@ for win in "${windows[@]}"; do
 done
 
 # Resize explicitly: left 40%, right 60%
-i3-msg "[con_mark=$mark_name] focus; resize set 60 ppt"
-i3-msg "focus left; resize set 40 ppt"
+i3-msg "[con_mark=$mark_name] focus; resize set 65 ppt"
+i3-msg "focus left; resize set 35 ppt"
 
 # Return focus to master
 i3-msg "[con_mark=$mark_name] focus" >/dev/null

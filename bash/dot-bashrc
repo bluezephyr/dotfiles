@@ -141,3 +141,4 @@ alias cura='cura -platformtheme gtk3'
 export RIPGREP_CONFIG_PATH=~/.config/rg/config
 
 eval "$(starship init bash)"
+eval "$(zoxide init --cmd cd bash)"
