@@ -17,23 +17,26 @@ return {
   lazy = false,
   -- https://github.com/echasnovski/mini.icons
   dependencies = { "echasnovski/mini.icons" },
-  opts = {
-    "borderless-full",
-    winopts = {
-      fullscreen = true,
-    },
-   -- files = {
-    --   -- toggle_ignore = true,
-    --   -- toggle_ignore_flag = "--no-ignore-vcs",
-    --   -- file_icons = false,
-    -- },
-    -- keymap = {
-    --   builtin = {
-    --     ["<C-d>"] = "preview-page-down",
-    --     ["<C-u>"] = "preview-page-up",
-    --   },
-    -- },
-  },
+  opts = function()
+    local function copy_entry(selected)
+      if not selected or not selected[1] then
+        return
+      end
+      vim.fn.setreg("+", selected[1])
+      vim.notify("Copied: " .. selected[1])
+    end
+
+    return {
+      "borderless-full",
+      winopts = { fullscreen = true },
+
+      defaults = {
+        actions = {
+          ["ctrl-y"] = copy_entry,
+        },
+      },
+    }
+  end,
   keys = {
     {
       "<leader>fk",
@@ -90,6 +93,13 @@ return {
         require("fzf-lua").oldfiles()
       end,
       desc = "History",
+    },
+    {
+      "<leader>fs",
+      function()
+        require("fzf-lua").search_history()
+      end,
+      desc = "Search History",
     },
     {
       "<leader>fi",
