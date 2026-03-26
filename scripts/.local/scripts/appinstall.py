@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import namedtuple
 
 # Define the Job namedtuple
-Job = namedtuple("Job", ["func", "args", "name"])
+Job = namedtuple("Job", ["func", "args", "name", "installer"])
 
 class AppInstaller:
     def __init__(self, apps_file):
@@ -74,15 +74,17 @@ class AppInstaller:
             print(f"Failed to create symlink: {e}")
 
     # --- Installation Functions ---
+    def apt_installer(self, package):
+        try:
+            subprocess.run(["sudo", "apt", "update"], check=True)
+            subprocess.run(["sudo", "apt", "install", "-y", package], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"APT installation failed: {e}")
 
     def install_nvim_appimage(self, attributes):
-        if self.is_installed("nvim") and not self.ask_to_update("Neovim"):
-            return
-
         url = "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
         target = self.bin_dir / "nvim"
 
-        print("Downloading Neovim AppImage...")
         try:
             urllib.request.urlretrieve(url, target)
             target.chmod(target.stat().st_mode | 0o100)
@@ -91,26 +93,21 @@ class AppInstaller:
             print(f"Failed to download Neovim: {e}")
 
     def install_fd_apt(self, attributes):
-        if self.is_installed("fd") and not self.ask_to_update("fd"):
-            return
-
-        print("Installing fd-find via apt...")
-        try:
-            subprocess.run(["sudo", "apt", "update"], check=True)
-            subprocess.run(["sudo", "apt", "install", "-y", "fd-find"], check=True)
-            self.create_symlink("fdfind", "fd")
-        except subprocess.CalledProcessError as e:
-            print(f"APT installation failed: {e}")
+        self.apt_installer("fd-find")
+        self.create_symlink("fdfind", "fd")
 
     def install_fzf_apt(self, attributes):
-        pass
+        self.apt_installer("fzf")
 
     # --- Core Processing ---
 
     def install(self, job):
         """Run the installation for the provided job"""
         print("-" * 30)
-        print(f"Processing: {job.name}")
+        print(f"Installing: {job.name} via {job.installer}")
+        if self.is_installed(job.name) and not self.ask_to_update(job.name):
+            return
+
         job.func(job.args)
 
     def process_list(self):
@@ -139,7 +136,8 @@ class AppInstaller:
                     jobs.append(Job(
                         func=self.installers[installer_key],
                         args=attributes,
-                        name=app_name
+                        name=app_name,
+                        installer=installer_type
                     ))
                 else:
                     print(f"No installer for {app_name} via {installer_type}")
