@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
+import argparse
 import os
+import re
 import shutil
 import subprocess
 import urllib.request
-import argparse
-from pathlib import Path
 from collections import namedtuple
+from pathlib import Path
 
 # Define the Job namedtuple
 Job = namedtuple("Job", ["func", "args", "name", "installer"])
@@ -30,6 +31,8 @@ class AppInstaller:
             ("nvim", "appimage"): self.install_nvim_appimage,
             ("fd", "apt"): self.install_fd_apt,
             ("fzf", "apt"): self.install_fzf_apt,
+            ("bash-profile", "config"): self.install_bash_profile,
+            ("bashrc", "config"): self.install_bashrc,
         }
 
         # Initialize environment and cleanup
@@ -98,6 +101,85 @@ class AppInstaller:
 
     def install_fzf_apt(self, attributes):
         self.apt_installer("fzf")
+
+    def update_config_file(self, file_path, marker_name, content):
+        """Updates a block of text in a file delimited by # start <marker_name> and # end <marker_name>.
+        Creates the file and parent directories if they don't exist. """
+        target = Path(file_path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.touch()
+
+        start_marker = f"# start {marker_name}"
+        end_marker = f"# end {marker_name}"
+        new_block = f"{start_marker}\n{content.strip()}\n{end_marker}"
+
+        current_content = target.read_text()
+
+        # Use re.escape so marker names with special chars don't break the regex
+        pattern = re.compile(
+            rf"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
+            re.DOTALL
+        )
+
+        if pattern.search(current_content):
+            updated_content = pattern.sub(new_block, current_content)
+        else:
+            # Ensure a newline if the file has content but doesn't end with a newline
+            prefix = "\n" if current_content and not current_content.endswith("\n") else ""
+            updated_content = f"{current_content}{prefix}{new_block}\n"
+
+        target.write_text(updated_content)
+
+    def install_bash_profile(self, attributes):
+        if not attributes:
+            print("Error: No source file provided for bash_profile")
+            return
+
+        source_path = Path(attributes[0])
+        if not source_path.exists():
+            print(f"Error: Source file {source_path} not found")
+            return
+
+        profile_path = self.home / ".config" / "bash" / "profile_custom"
+        content_to_add = source_path.read_text()
+
+        self.update_config_file(
+            file_path=profile_path,
+            marker_name="custom_bash_profile",
+            content=content_to_add
+        )
+
+    def install_bash_profile(self, attributes):
+        try:
+            source_path = Path(attributes[0])
+            content_to_add = source_path.read_text()
+            profile_path = self.home / ".config" / "bash" / "profile_custom"
+
+            self.update_config_file(
+                file_path=profile_path,
+                marker_name="custom_bash_profile",
+                content=content_to_add
+            )
+        except IndexError:
+            print("Error: No source file provided for bash_profile")
+        except (OSError, IOError) as e:
+            print(f"Error: Could not read source file {attributes[0] if attributes else 'unknown'}: {e}")
+
+
+    def install_bashrc(self, attributes):
+        if not attributes:
+            print("Error: No source file provided for bashrc")
+            return
+
+        source_path = Path(attributes[0])
+        if not source_path.exists():
+            print(f"Error: Source file {source_path} not found")
+            return
+
+        bashrc = self.home / ".config" / "bash" / "bashrc_custom"
+        bashrc.parent.mkdir(parents=True, exist_ok=True)
+        bashrc.touch()
+
 
     # --- Core Processing ---
 
