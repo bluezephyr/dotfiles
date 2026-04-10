@@ -4,7 +4,7 @@ return {
 
   dependencies = {
     "folke/snacks.nvim",
-    "nvim-treesitter/nvim-treesitter",
+    -- "nvim-treesitter/nvim-treesitter",
   },
 
   opts = {

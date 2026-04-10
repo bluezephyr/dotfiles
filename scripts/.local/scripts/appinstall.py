@@ -467,10 +467,36 @@ Examples:
         "app_args",
         nargs="*",
         help="Application name, installer type, and optional attributes (for interactive mode)"
-    )    installers_to_run = installer.create_jobs(install_requests)
+    )
 
+    args = parser.parse_args()
+
+    installer = AppInstaller()
+    installations = []
+
+    if args.list:
+        installer.list_installers()
+        return
+
+    if args.file:
+        try:
+            installations = read_installations(args.file)
+        except FileNotFoundError as e:
+            parser.error(str(e))
+    elif args.app_args:
+        if len(args.app_args) < 2:
+            parser.error("Interactive mode requires at least <application_name> and <installer_type>")
+        app_name = args.app_args[0]
+        installer_type = args.app_args[1]
+        attributes = args.app_args[2:] if len(args.app_args) > 2 else []
+        installations = [(app_name, installer_type, attributes)]
+    else:
+        parser.error("Mode selection required")
+
+    installers_to_run = installer.create_jobs(installations)
     for installer_obj in installers_to_run:
         installer.install(installer_obj)
+
 
 if __name__ == "__main__":
     main()
