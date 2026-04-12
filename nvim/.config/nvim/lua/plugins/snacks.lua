@@ -4,6 +4,27 @@ return {
   priority = 1000,
   lazy = false,
   ---@type snacks.Config
+  config = function(_, opts)
+    require("snacks").setup(opts)
+    -- Workaround for https://github.com/folke/snacks.nvim/issues/2539
+    -- Patch win:dim() to floor dimension values, avoiding
+    -- "Invalid 'height': Number is not integral" errors.
+    local Win = require("snacks.win")
+    local orig_dim = Win.dim
+    if orig_dim then
+      Win.dim = function(self, ...)
+        local ret = orig_dim(self, ...)
+        if ret then
+          for _, key in ipairs({ "height", "width", "row", "col" }) do
+            if type(ret[key]) == "number" then
+              ret[key] = math.floor(ret[key])
+            end
+          end
+        end
+        return ret
+      end
+    end
+  end,
   opts = {
     picker = {
       layout = {
