@@ -2,7 +2,7 @@
 return {
     "kevinhwang91/nvim-ufo",
     dependencies = { "kevinhwang91/promise-async" },
-    lazy = false,
+    lazy = true,
     init = function ()
         vim.opt.foldcolumn = "1"
         vim.opt.foldlevel = 99

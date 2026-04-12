@@ -10,7 +10,7 @@ local fzf_git_winopts = {
     },
   },
 }
-
+ 
 return {
   -- https://github.com/ibhagwan/fzf-lua
   "ibhagwan/fzf-lua",

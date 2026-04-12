@@ -3,6 +3,7 @@ return {
   {
     'echasnovski/mini.nvim',
     version = false,
+    event = "VeryLazy",
     config = function()
       require('mini.ai').setup()
       -- require('mini.bufremove').setup()
@@ -11,6 +12,9 @@ return {
       require('mini.basics').setup()
       require('mini.operators').setup()
       require('mini.icons').setup()
+      require('mini.trailspace').setup()
+
+      vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' })
 
       local statusline = require('mini.statusline')
       statusline.setup({
