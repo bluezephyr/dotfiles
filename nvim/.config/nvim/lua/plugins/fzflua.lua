@@ -10,7 +10,7 @@ local fzf_git_winopts = {
     },
   },
 }
- 
+
 return {
   -- https://github.com/ibhagwan/fzf-lua
   "ibhagwan/fzf-lua",
@@ -191,6 +191,13 @@ return {
         })
       end,
       desc = "Marks",
+    },
+    {
+      "<leader>/",
+      function()
+        require("fzf-lua").lgrep_curbuf()
+      end,
+      desc = "Fuzzy search in current buffer",
     },
     {
       "<leader><leader>",

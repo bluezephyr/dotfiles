@@ -149,8 +149,9 @@ return {
       --   })
       -- end, { desc = 'Buffers' })
 
-      vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
-        { desc = 'Fuzzy search in current buffer' })
+      -- Handled by fzflua
+      -- vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
+      --   { desc = 'Fuzzy search in current buffer' })
 
       vim.keymap.set('n', '<leader>fp', function()
         builtin.find_files {
