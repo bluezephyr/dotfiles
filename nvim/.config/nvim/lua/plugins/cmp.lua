@@ -96,15 +96,23 @@ return {
           },
         }
       })
+      local cmdline_mapping = cmp.mapping.preset.cmdline({
+        ["<C-j>"] = { c = cmp.mapping.select_next_item() },
+        ["<C-k>"] = { c = cmp.mapping.select_prev_item() },
+        -- The cmdline preset maps C-n/C-p to cmp selection by default.
+        -- Use fallback to restore Vim's default: command history navigation.
+        ["<C-n>"] = { c = function(fallback) fallback() end },
+        ["<C-p>"] = { c = function(fallback) fallback() end },
+      })
       cmp.setup.cmdline(":", {
-        mapping = cmp.mapping.preset.cmdline(),
+        mapping = cmdline_mapping,
         sources = cmp.config.sources {
           { name = "path" },
           { name = "cmdline" },
         },
       })
       cmp.setup.cmdline({ "/", "?" }, {
-        mapping = cmp.mapping.preset.cmdline(),
+        mapping = cmdline_mapping,
         sources = {
           { name = "buffer" },
         },
