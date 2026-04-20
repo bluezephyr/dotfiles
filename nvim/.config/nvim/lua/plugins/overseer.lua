@@ -19,7 +19,7 @@ return {
 
   vim.keymap.set('n', '<leader>br', "<cmd>OverseerRun<CR>", { desc = '[B]uild [R]un' }),
   vim.keymap.set('n', '<F3>', "<cmd>OverseerRun<CR>", { desc = '[B]uild [R]un' }),
-  vim.keymap.set('n', '<leader>bt', function() require("build_log").toggle() end, { desc = '[B]uild [T]oggle log' }),
+  vim.keymap.set('n', '<leader>l', function() require("build_log").toggle() end, { desc = 'Build [l]og' }),
   vim.keymap.set('n', '<F2>', "<cmd>OverseerToggle<CR>", { desc = '[B]uild [T]oggle' }),
   vim.keymap.set('n', '<leader>bo', "<cmd>OverseerOpen<CR>", { desc = '[B]uild [O]pen' }),
   vim.keymap.set('n', '<leader>bc', "<cmd>OverseerClose<CR>", { desc = '[B]uild [C]lose' }),
