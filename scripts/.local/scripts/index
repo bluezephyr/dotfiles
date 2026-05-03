@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+import argparse
+import sys
+from pathlib import Path
+
+
+def delete_link(index_base, link_name):
+    """Delete a symlink within the index directory."""
+    target_link = index_base / link_name
+
+    if target_link.is_symlink():
+        target_link.unlink()
+        print(f"Deleted symlink '{link_name}' from index.")
+    elif target_link.exists():
+        print(f"Error: '{link_name}' is not a symlink.")
+        sys.exit(1)
+    else:
+        print(f"Error: No symlink named '{link_name}' found in index.")
+        sys.exit(1)
+
+
+def create_link(index_base, src, name=None):
+    """Create a symlink and any necessary subdirectories."""
+    src_path = Path(src).resolve()
+    link_name = name if name else src_path.name
+    dest_path = index_base / link_name
+
+    if not src_path.exists():
+        print(f"Error: Source file '{src_path}' does not exist.")
+        sys.exit(1)
+
+    if dest_path.exists() or dest_path.is_symlink():
+        print(f"Error: A link or file '{link_name}' already exists in the index.")
+        sys.exit(1)
+
+    try:
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        dest_path.symlink_to(src_path)
+        print(f"Created link at {dest_path} -> {src_path}")
+    except Exception as e:
+        print(f"An unexpected error occurred during creation: {e}")
+        sys.exit(1)
+
+
+def list_links(index_base):
+    """Recursively lists all files and symlinks in the index with indentation."""
+    if not index_base.exists():
+        print(f"Index directory {index_base} does not exist.")
+        return
+
+    print(f"Index: {index_base}")
+    # rglob('*') finds everything recursively
+    # We sort them to ensure the tree structure looks logical
+    for path in sorted(index_base.rglob('*')):
+        # Calculate depth for indentation (number of parts relative to index_base)
+        depth = len(path.relative_to(index_base).parts) - 1
+        indent = "  " * depth
+
+        # Identify if it's a symlink and where it points
+        if path.is_symlink():
+            print(f"{indent} {path.name} -> {path.resolve()}")
+        elif path.is_dir():
+            print(f"{indent} {path.name}/")
+        else:
+            print(f"{indent} {path.name}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Manage symlinks in ~/index/")
+    parser.add_argument("src", nargs="?", help="Path to source file (or link name if using -d)")
+    parser.add_argument("name", nargs="?", help="Optional name for the link")
+    parser.add_argument("-d", "--delete", action="store_true", help="Delete the symlink")
+    parser.add_argument("-l", "--list", action="store_true", help="List all links in the index")
+
+    args = parser.parse_args()
+    index_base = Path("~/index/").expanduser()
+
+    if args.list:
+        list_links(index_base)
+    elif args.delete:
+        if not args.src:
+            print("Error: Please provide the name of the link to delete.")
+            sys.exit(1)
+        delete_link(index_base, args.src)
+    else:
+        if not args.src:
+            parser.print_help()
+            sys.exit(1)
+        create_link(index_base, args.src, args.name)
+
+
+if __name__ == "__main__":
+    main()
