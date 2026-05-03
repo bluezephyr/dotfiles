@@ -73,6 +73,9 @@ vim.keymap.set("v", "K", ":move '<-2<CR>gv-gv", { desc = 'Move up' })
 vim.keymap.set("n", "<A-j>", "<cmd>cnext<CR>", { desc = 'Next quickfix' })
 vim.keymap.set("n", "<A-k>", "<cmd>cprevious<CR>", { desc = 'Previous quickfix' })
 
+-- Messages
+vim.keymap.set('n', '<leader>m', "<cmd>messages<CR>", { desc = 'Messages' })
+
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })

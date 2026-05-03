@@ -220,21 +220,6 @@ return {
       end,
       desc = "Git log",
     },
-    {
-      "<leader>m",
-      function()
-        require("fzf-lua").fzf_exec(vim.split(vim.fn.execute("messages"), "\n"), {
-          prompt = "Messages> ",
-          fzf_opts = { ["--no-sort"] = true },
-          actions = {
-            ["default"] = function(selected)
-              vim.notify(table.concat(selected, "\n"))
-            end,
-          },
-        })
-      end,
-      desc = "Messages",
-    },
 
     -- LSP keymaps. See lsp.lua for other configuration
     -- for details of the lsp filtering

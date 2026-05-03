@@ -106,7 +106,7 @@ return {
       })
       cmp.setup.cmdline(":", {
         mapping = cmdline_mapping,
-        sources = cmp.config.sources {
+        sources = {
           { name = "path" },
           { name = "cmdline" },
         },

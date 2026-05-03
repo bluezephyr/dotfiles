@@ -38,6 +38,7 @@ return {
     -- refer to the configuration section below
     -- bigfile = { enabled = true },
     bufdelete = { enabled = true },
+
     dashboard = {
       enabled = true,
       preset = {
@@ -51,14 +52,25 @@ return {
         keys = {
           { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
           { icon = " ", key = "i", desc = "Index", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.expand('~/index'), follow = true, hidden = true, title = 'Index'})" },
-          { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-          { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')", },
+          { icon = " ", key = "n", desc = "New File", action = ":ene" },
+          { icon = " ", key = "g", desc = "Grep Text", action = ":lua Snacks.dashboard.pick('live_grep')", },
           { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')", },
           { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})", },
-          { icon = " ", key = "s", desc = "Restore Session", section = "session" },
           { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil, },
           { icon = "󰟾 ", key = "M", desc = "Mason", action = ":Mason" },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        },
+      },
+      sections = {
+        { section = "header" },
+        { section = "keys", gap = 1, padding = 1 },
+        { text = {
+            { "  ", hl = "DiagnosticOk" },
+            { "v"},
+            { vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch, hl = "Error" },
+          },
+          align = "center",
+          padding = 1,
         },
       },
     },
