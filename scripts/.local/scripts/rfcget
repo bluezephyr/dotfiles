@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+import argparse
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+RFC_BASE_URL = "https://www.rfc-editor.org/rfc"
+RFC_DIR = Path("~/.local/rfc").expanduser()
+
+
+def list_rfcs(verbose=False):
+    """List all RFCs that have been downloaded to RFC_DIR."""
+    if not RFC_DIR.exists():
+        print(f"No RFCs downloaded ({RFC_DIR} does not exist).")
+        return
+
+    rfcs = sorted(RFC_DIR.glob("rfc*.txt"))
+    if not rfcs:
+        print("No RFCs downloaded.")
+        return
+
+    details = f" ({RFC_DIR})" if verbose else ""
+
+    print(f"Downloaded RFCs{details}:")
+    for path in rfcs:
+        print(f" {path.name}")
+
+
+def validate_number(number):
+    """Validate RFC number and return the canonical filename."""
+    if not number.isdigit() or int(number) <= 0:
+        print(f"Error: RFC number must be a positive integer, got '{number}'.")
+        sys.exit(1)
+    return f"rfc{int(number)}.txt"
+
+
+def delete_rfc(number):
+    """Delete a downloaded RFC from RFC_DIR."""
+    filename = validate_number(number)
+    dest = RFC_DIR / filename
+
+    if not dest.exists():
+        print(f"Error: {filename} is not downloaded.")
+        sys.exit(1)
+
+    dest.unlink()
+    print(f"Deleted {filename} from {RFC_DIR}.")
+
+
+def fetch_rfc(number):
+    """Download the given RFC to RFC_DIR if not already cached."""
+    filename = validate_number(number)
+    dest = RFC_DIR / filename
+
+    if dest.exists():
+        print(f"{filename} is already downloaded at {dest}.")
+        return
+
+    url = f"{RFC_BASE_URL}/{filename}"
+    RFC_DIR.mkdir(parents=True, exist_ok=True)
+
+    try:
+        with urllib.request.urlopen(url) as response:
+            dest.write_bytes(response.read())
+    except urllib.error.HTTPError as e:
+        print(f"Error: could not fetch {url} ({e.code} {e.reason}).")
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print(f"Error: could not fetch {url} ({e.reason}).")
+        sys.exit(1)
+
+    print(f"Downloaded {filename} to {dest}.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Fetch RFCs from https://www.rfc-editor.org/rfc and store locally in ~/.local/rfc")
+    parser.add_argument("number", nargs="?", help="RFC number")
+    parser.add_argument("-l", "--list", action="store_true", help="List all downloaded RFCs")
+    parser.add_argument("-d", "--delete", action="store_true", help="Delete a downloaded RFC")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Show extra detail in output")
+    args = parser.parse_args()
+
+    if args.list:
+        list_rfcs(verbose=args.verbose)
+    elif args.delete:
+        if not args.number:
+            print("Error: Please provide the RFC number to delete.")
+            sys.exit(1)
+        delete_rfc(args.number)
+    elif args.number:
+        fetch_rfc(args.number)
+    else:
+        parser.print_help()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
