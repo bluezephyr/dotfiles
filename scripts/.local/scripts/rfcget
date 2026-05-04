@@ -70,6 +70,7 @@ def fetch_rfc(number):
         print(f"Error: could not fetch {url} ({e.reason}).")
         sys.exit(1)
 
+    dest.chmod(0o444)
     print(f"Downloaded {filename} to {dest}.")
 
 
