@@ -12,9 +12,19 @@ return {
       require('mini.basics').setup()
       require('mini.operators').setup()
       require('mini.icons').setup()
-      require('mini.trailspace').setup()
-
-      vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' })
+      require('mini.trailspace').setup({
+        vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' }),
+        vim.keymap.set('n', '<leader>th', function()
+          local trailspace = require('mini.trailspace')
+          if vim.g.minitrailspace_disable then
+            vim.g.minitrailspace_disable = false
+            trailspace.highlight()
+          else
+            vim.g.minitrailspace_disable = true
+            trailspace.unhighlight()
+          end
+        end, { desc = '[T]oggle Whitespace [H]ighlight' }),
+      })
 
       local statusline = require('mini.statusline')
       statusline.setup({
