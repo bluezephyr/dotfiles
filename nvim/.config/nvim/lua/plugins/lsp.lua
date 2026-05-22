@@ -31,6 +31,8 @@ return {
 
   },
   config = function()
+    vim.lsp.config('gitlab_duo', { enabled = false })
+
     --  This function gets run when an LSP connects to a particular buffer.
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
@@ -49,6 +51,7 @@ return {
         map('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
         -- map('gr', require('telescope.builtin').lsp_references, 'Goto References')
         map('gI', vim.lsp.buf.implementation, 'Goto Implementation')
+        map('gh', ":LspClangdSwitchSourceHeader<CR>", 'Switch header/source')
 
         -- See `:help K` for why this keymap
         map('K', vim.lsp.buf.hover, 'Hover Documentation')

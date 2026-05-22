@@ -53,7 +53,7 @@ return {
       desc = "Help tags",
     },
     {
-      "<leader>fc",
+      "<leader>fa",
       function()
         require("fzf-lua").commands()
       end,
@@ -81,11 +81,11 @@ return {
       desc = "Manpages",
     },
     {
-      "<leader>fr",
+      "<leader>fc",
       function()
         require("fzf-lua").resume()
       end,
-      desc = "Resume",
+      desc = "Continue (resume last search)",
     },
     {
       "<leader>fh",
@@ -110,6 +110,16 @@ return {
         })
       end,
       desc = "Index",
+    },
+    {
+      "<leader>fr",
+      function()
+        require("fzf-lua").files({
+          cwd = vim.fn.expand("~/.local/rfc"),
+          fd_opts = "--type file --hidden --follow --strip-cwd-prefix",
+        })
+      end,
+      desc = "RFCs",
     },
     {
       "<leader>ff",
@@ -172,7 +182,7 @@ return {
       function()
         require("fzf-lua").builtin()
       end,
-      desc = "Buitin (fzf)",
+      desc = "Builtin (fzf)",
     },
     {
       "<leader>fb",
