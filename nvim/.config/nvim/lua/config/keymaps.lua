@@ -106,9 +106,7 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and 
 
 -- Git
 local gs = package.loaded.gitsigns
-vim.keymap.set("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git blame line" })
-vim.keymap.set("n", "<leader>gB", function() require('gitsigns').blame_line { full = true } end,
-  { desc = "Git blame line full" })
+vim.keymap.set("n", "<leader>gb", function() require('gitsigns').blame_line { full = true } end, { desc = "Git blame line full" })
 vim.keymap.set("n", "<leader>ge", "<cmd>Gitsigns blame<cr>", { desc = "Git blame" })
 vim.keymap.set("n", "<leader>gd", function() require('gitsigns').diffthis() end, { desc = "Git diff this" })
 vim.keymap.set("n", "<leader>gp", "<cmd>Gitsigns preview_hunk_inline<cr>", { desc = "Git preview hunk inline" })
@@ -117,9 +115,6 @@ vim.keymap.set("n", "<leader>gr", "<cmd>Gitsigns reset_hunk<cr>", { desc = "Git 
 vim.keymap.set("n", "<leader>ga", "<cmd>Gitsigns stage_hunk<cr>", { desc = "Git stage hunk" })
 vim.keymap.set("n", "<leader>gu", "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = "Git undo stage hunk" })
 vim.keymap.set("n", "<leader>gv", "<cmd>Gitsigns select_hunk<cr>", { desc = "Git select hunk" })
-vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
-vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T]oggle Git [Signs]" })
-vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
 vim.keymap.set('n', ']c', function()
   if vim.wo.diff then return ']c' end
   vim.schedule(function() gs.next_hunk({ target = 'all' }) end)
@@ -132,10 +127,15 @@ vim.keymap.set('n', '[c', function()
   return '<Ignore>'
 end, { desc = 'Previous git hunk', expr = true })
 
--- Convenient shortcuts
+-- Toggle shortcuts
+vim.keymap.set("n", "<leader>tg", "<cmd>Gitsigns toggle_current_line_blame<cr>", { desc = "[T]oggle [G]it blame line" })
+vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T]oggle Git [Signs]" })
+vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
 vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]rap mode' })
+
+-- Convenient shortcuts
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })
 vim.keymap.set("n", "<leader>u", "<cmd>cd ..<CR>:pwd<CR>", { desc = 'Change dir to parent directory' })
 vim.keymap.set("n", "<leader>y", "yiw", { desc = 'Yank inside word' })
@@ -150,3 +150,18 @@ vim.keymap.set({ "v", "n" }, "zh", "zc", { desc = 'Close fold under cursor', rem
 vim.keymap.set({ "v", "n" }, "<A-h>", "zc", { desc = 'Close fold under cursor', remap = true })
 vim.keymap.set({ "v", "n" }, "zl", "zo", { desc = 'Open fold under cursor', remap = true })
 vim.keymap.set({ "v", "n" }, "<A-l>", "zo", { desc = 'Open fold under cursor', remap = true })
+
+-- Buffer names
+-- Copy full path to clipboard
+vim.keymap.set('n', '<leader>fp', function()
+  local path = vim.fn.expand('%:p')
+  vim.fn.setreg('+', path)
+  print('Copied path: ' .. path)
+end, { desc = 'Copy current full path to clipboard' })
+
+-- Copy just the filename to clipboard
+vim.keymap.set('n', '<leader>fn', function()
+  local name = vim.fn.expand('%:t')
+  vim.fn.setreg('+', name)
+  print('Copied filename: ' .. name)
+end, { desc = 'Copy current filename to clipboard' })

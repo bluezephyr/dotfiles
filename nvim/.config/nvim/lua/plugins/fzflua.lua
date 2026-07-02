@@ -150,13 +150,14 @@ return {
       end,
       desc = "Files in current folder",
     },
-    {
-      "<leader>fn",
-      function()
-        require("fzf-lua").files({ cwd = vim.fn.stdpath("config") })
-      end,
-      desc = "Neovim config",
-    },
+    -- Overridden in keymaps.lua
+    -- {
+    --   "<leader>fn",
+    --   function()
+    --     require("fzf-lua").files({ cwd = vim.fn.stdpath("config") })
+    --   end,
+    --   desc = "Neovim config",
+    -- },
     {
       "<leader>fg",
       function()
