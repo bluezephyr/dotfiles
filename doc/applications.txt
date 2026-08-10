@@ -1,0 +1,7 @@
+# Configuration example file for appinstall
+# application   installer    parameters
+bash-profile    config       ./bash/profile-custom
+bashrc          config       ./bash/bashrc-custom
+nvim            appimage
+fd              apt
+fzf             apt
