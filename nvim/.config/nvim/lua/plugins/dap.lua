@@ -131,6 +131,7 @@ return {
       local adapters = {
         'python',
         'cppdbg',
+        'codelldb',
       }
 
       mason_nvim_dap.setup({
@@ -144,6 +145,13 @@ return {
           end,
         },
       })
+
+      -- Add the native GDB adapter - requires gdb 14 or greater
+      dap.adapters.gdb = {
+        type = "executable",
+        command = "gdb",
+        args = { "--interpreter=dap", "--eval-command", "set print pretty on" }
+      }
     end
   }
 }
