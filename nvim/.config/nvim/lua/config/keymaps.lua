@@ -71,8 +71,27 @@ vim.keymap.set("v", "J", ":move '>+1<CR>gv-gv", { desc = 'Move down' })
 vim.keymap.set("v", "K", ":move '<-2<CR>gv-gv", { desc = 'Move up' })
 
 -- Quickfix list
+-- Note: mini.bracketed also provides ]q/[q and ]Q/[Q for the same navigation.
+-- There is no built-in quickfix toggle; getwininfo() exposes a per-window
+-- `quickfix` flag, which is the native way to tell whether it is open.
+function Toggle_quickfix()
+  for _, win in ipairs(vim.fn.getwininfo()) do
+    if win.quickfix == 1 then
+      -- :cclose on the last window in a tabpage is an error (E444)
+      if #vim.api.nvim_tabpage_list_wins(0) > 1 then
+        vim.cmd("cclose")
+      else
+        vim.notify("Quickfix is the only window", vim.log.levels.WARN)
+      end
+      return
+    end
+  end
+  vim.cmd("copen")
+end
+
 vim.keymap.set("n", "<A-j>", "<cmd>cnext<CR>", { desc = 'Next quickfix' })
 vim.keymap.set("n", "<A-k>", "<cmd>cprevious<CR>", { desc = 'Previous quickfix' })
+vim.keymap.set("n", "<A-q>", Toggle_quickfix, { desc = 'Toggle quickfix list' })
 
 -- Messages
 vim.keymap.set('n', '<leader>m', "<cmd>messages<CR>", { desc = 'Messages' })
