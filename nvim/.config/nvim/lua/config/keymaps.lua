@@ -46,6 +46,7 @@ vim.keymap.set('n', '<leader>w', "<cmd>wall!<CR>", { desc = 'Write all buffers' 
 vim.keymap.set('n', '<leader>e', "<cmd>qa<CR>", { desc = 'Exit nvim' })
 vim.keymap.set('n', '<leader>-', "<cmd>split<CR>", { desc = 'Split window horizontally' })
 vim.keymap.set('n', '<leader>\\', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
+vim.keymap.set('n', '<leader>å', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>x', "<cmd>close<CR>", { desc = 'Close window' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", require('save_file').save_file, { desc = 'Write buffer' })
@@ -101,6 +102,13 @@ function Toggle_formatoption(option)
   vim.notify("formatoptions " .. option .. action)
 end
 
+-- Toggle LSP diagnostics for the current buffer
+function Toggle_diagnostics()
+  local enabled = vim.diagnostic.is_enabled({ bufnr = 0 })
+  vim.diagnostic.enable(not enabled, { bufnr = 0 })
+  vim.notify("diagnostics " .. (enabled and "disabled" or "enabled"))
+end
+
 -- Clear search with <esc>
 vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsearch" })
 
@@ -133,7 +141,30 @@ vim.keymap.set("n", "<leader>ts", "<cmd>Gitsigns toggle_signs<cr>", { desc = "[T
 vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
-vim.keymap.set("n", "<leader>tw", "<cmd>set invwrap<CR>", { desc = '[T]oggle [W]rap mode' })
+vim.keymap.set("n", "<leader>tw", "<cmd>setlocal wrap!<CR>", { desc = '[T]oggle [W]rap mode (window)' })
+vim.keymap.set("n", "<leader>tc", "<cmd>setlocal spell!<CR>", { desc = '[T]oggle Spell [C]heck' })
+vim.keymap.set("n", "<leader>td", Toggle_diagnostics, { desc = '[T]oggle [D]iagnostics' })
+
+-- Swedish keyboard layout
+-- The physical keys at the US `;` `'` `\` positions produce öäå on a Swedish
+-- layout. Map them back to their US meaning in Normal/Visual/Operator-pending
+-- mode. Insert mode and the command line are untouched, so öäå still type
+-- normally, and so do `f`/`t`/`r` arguments (those bypass mappings).
+-- `remap = true` is required: it makes `å` follow whatever `\` is mapped to at
+-- press time (e.g. the Neotree toggle), independent of plugin load order.
+local swedish_normal_keys = {
+  { 'ö', ';' },
+  { 'ä', "'" },
+  { 'å', '\\' },
+  { 'Ö', ':' },
+  { 'Ä', '"' },
+  { 'Å', '|' },
+}
+
+for _, keys in ipairs(swedish_normal_keys) do
+  vim.keymap.set({ 'n', 'x', 'o' }, keys[1], keys[2],
+    { remap = true, desc = 'Swedish layout: ' .. keys[2] })
+end
 
 -- Convenient shortcuts
 vim.keymap.set("n", "<leader>.", "<cmd>cd %:p:h<CR>:pwd<CR>", { desc = 'Change dir to current file' })

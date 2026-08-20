@@ -204,6 +204,15 @@ return {
       desc = "Marks",
     },
     {
+      "<leader>ä",
+      function()
+        require("fzf-lua").marks({
+          winopts = { preview = { layout = "vertical" } },
+        })
+      end,
+      desc = "Marks",
+    },
+    {
       "<leader>/",
       function()
         require("fzf-lua").lgrep_curbuf()

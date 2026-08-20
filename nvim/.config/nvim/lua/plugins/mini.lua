@@ -9,7 +9,10 @@ return {
       -- require('mini.bufremove').setup()
       require('mini.surround').setup()
       require('mini.bracketed').setup()
-      require('mini.basics').setup()
+      -- Disable the default `\` option-toggle prefix: it made `\` both a complete
+      -- mapping (Neotree) and a prefix of 11 others, forcing a 'timeoutlen' wait.
+      -- The toggles worth keeping live under <leader>t in config/keymaps.lua.
+      require('mini.basics').setup({ mappings = { option_toggle_prefix = '' } })
       require('mini.operators').setup()
       require('mini.icons').setup()
       require('mini.trailspace').setup({

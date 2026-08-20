@@ -20,6 +20,7 @@ local options = {
   showtabline = 2,                         -- always show tabs
   sidescrolloff = 8,
   signcolumn = "yes",                      -- always show the sign column, otherwise it would shift the text each time
+  spelllang = "en,sv",                     -- spell check English and Swedish (see <leader>tc)
   splitbelow = true,                       -- force all horizontal splits to go below current window
   splitright = true,                       -- force all vertical splits to go to the right of current window
 
