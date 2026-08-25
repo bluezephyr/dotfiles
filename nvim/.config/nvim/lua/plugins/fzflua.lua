@@ -222,7 +222,13 @@ return {
     {
       "<leader><leader>",
       function()
-        require("fzf-lua").buffers({ previewer = false, winopts = { fullscreen = false } })
+        require("fzf-lua").buffers({
+          previewer = false,
+          winopts = { fullscreen = false },
+          -- Also drops the current buffer when unlisted, and with it the
+          -- non-selectable header row fzf-lua adds for it.
+          ignore_current_buffer = true,
+        })
       end,
       desc = "Buffers",
     },
