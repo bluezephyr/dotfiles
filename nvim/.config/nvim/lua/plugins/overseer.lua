@@ -215,9 +215,26 @@ local function get_layout_wins()
   return wins
 end
 
--- A live task's output or a saved log, however it came to be on screen.
+-- Fills the build window until the first build of the session arrives.
+local placeholder_buf = nil
+
+local function get_placeholder_buf()
+  if not (placeholder_buf and vim.api.nvim_buf_is_valid(placeholder_buf)) then
+    placeholder_buf = vim.api.nvim_create_buf(false, true)
+    vim.bo[placeholder_buf].bufhidden = "hide"
+    -- Named, or :edit would reuse this empty buffer instead of opening its own.
+    pcall(vim.api.nvim_buf_set_name, placeholder_buf, "overseer://builds")
+    vim.bo[placeholder_buf].modifiable = false
+  end
+  return placeholder_buf
+end
+
+-- A live task's output, a saved log or the placeholder, however it came to be
+-- on screen. The placeholder counts so an empty build window keeps its tint
+-- and stays closeable with <leader>l.
 local function is_build_buf(bufnr)
-  return get_task_for_buf(bufnr) ~= nil
+  return bufnr == placeholder_buf
+    or get_task_for_buf(bufnr) ~= nil
     or vim.startswith(vim.api.nvim_buf_get_name(bufnr), LOG_ROOT .. "/")
 end
 
@@ -326,16 +343,18 @@ local function toggle_build_output()
     return
   end
 
-  local item = get_build_items()[1]
-  if not item then
-    vim.notify(MSG_NO_BUILDS, vim.log.levels.WARN)
-    return
-  end
   -- botright, not split: a plain :split divides the *current* window, so the
   -- build would land mid-layout. This spans the full width at the very bottom.
   vim.cmd("botright split")
   build_win = vim.api.nvim_get_current_win()
-  show_in_build_win(item)
+  local item = get_build_items()[1]
+  if item then
+    show_in_build_win(item)
+  else
+    -- follow_latest() swaps the first build in as soon as one runs.
+    vim.api.nvim_win_set_buf(build_win, get_placeholder_buf())
+    set_tint(build_win, true)
+  end
 end
 
 -- fzf hands back the entry string, so the picker maps labels to items itself
