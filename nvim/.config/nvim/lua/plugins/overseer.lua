@@ -252,6 +252,10 @@ end
 -- Toggling on always creates a split; toggling off destroys it, so no window you
 -- arranged is ever taken over.
 local build_win = nil
+-- What the build window is meant to show, and a guard so the seal below lets
+-- our own changes through.
+local build_buf = nil
+local setting_build_buf = false
 
 local function set_tint(win, on)
   if not win or not vim.api.nvim_win_is_valid(win) then
@@ -292,13 +296,75 @@ local function release_stale_build_win()
   if build_win and not is_build_win_live() then
     set_tint(build_win, false)
     build_win = nil
+    build_buf = nil
   end
 end
 
 local function show_in_build_win(item)
   vim.api.nvim_set_current_win(build_win)
-  open_item(item)
+  setting_build_buf = true
+  local ok = pcall(open_item, item)
+  setting_build_buf = false
+  if ok then
+    build_buf = vim.api.nvim_win_get_buf(build_win)
+  end
   set_tint(build_win, true)
+end
+
+-- Where a buffer goes when it would otherwise land in the build window: the
+-- window focused before it, else the first other one. A window already showing
+-- a build is a last resort.
+local function get_redirect_win()
+  local ordered = { vim.fn.win_getid(vim.fn.winnr("#")) }
+  vim.list_extend(ordered, get_layout_wins())
+  local fallback
+  for _, win in ipairs(ordered) do
+    if win ~= build_win and win ~= 0 and vim.api.nvim_win_is_valid(win)
+      and vim.api.nvim_win_get_config(win).relative == "" then
+      if not is_build_buf(vim.api.nvim_win_get_buf(win)) then
+        return win
+      end
+      fallback = fallback or win
+    end
+  end
+  return fallback
+end
+
+-- The build window is a slot, so nothing may quietly take it over. A buffer
+-- opened while it has focus is handed to another window instead, leaving the
+-- build on screen. With no other window there is nowhere to hand it to.
+-- Takes the arriving buffer from the event: the window still reports the old
+-- one at BufWinEnter.
+local function seal_build_win(incoming)
+  if setting_build_buf or not build_win or not vim.api.nvim_win_is_valid(build_win) then
+    return
+  end
+  if vim.api.nvim_get_current_win() ~= build_win then
+    return
+  end
+  if incoming == build_buf or not (build_buf and vim.api.nvim_buf_is_valid(build_buf)) then
+    return
+  end
+  local target = get_redirect_win()
+  if not target then
+    return
+  end
+  -- Scheduled: the command that opened the buffer is still running and would
+  -- re-assert it in this window.
+  local win, keep = build_win, build_buf
+  vim.schedule(function()
+    if not (vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_is_valid(target)) then
+      return
+    end
+    setting_build_buf = true
+    vim.api.nvim_win_set_buf(win, keep)
+    vim.api.nvim_win_set_buf(target, incoming)
+    setting_build_buf = false
+    -- Re-assert tracking: the release pass ran while the window was off-build.
+    build_win, build_buf = win, keep
+    set_tint(win, true)
+    vim.api.nvim_set_current_win(target)
+  end)
 end
 
 -- Point the build window at the newest build, on every task-list update. Only
@@ -315,7 +381,10 @@ local function follow_latest()
     end
   end
   if newest and vim.api.nvim_win_get_buf(build_win) ~= newest.bufnr then
+    setting_build_buf = true
     vim.api.nvim_win_set_buf(build_win, newest.bufnr)
+    setting_build_buf = false
+    build_buf = newest.bufnr
   end
 end
 
@@ -352,7 +421,10 @@ local function toggle_build_output()
     show_in_build_win(item)
   else
     -- follow_latest() swaps the first build in as soon as one runs.
+    setting_build_buf = true
     vim.api.nvim_win_set_buf(build_win, get_placeholder_buf())
+    setting_build_buf = false
+    build_buf = get_placeholder_buf()
     set_tint(build_win, true)
   end
 end
@@ -486,7 +558,10 @@ return {
     -- waiting for the next <leader>l.
     vim.api.nvim_create_autocmd({ "WinNew", "BufWinEnter", "WinClosed" }, {
       group = vim.api.nvim_create_augroup("overseer_build_win", { clear = true }),
-      callback = function()
+      callback = function(args)
+        if args.event == "BufWinEnter" then
+          seal_build_win(args.buf)
+        end
         release_stale_build_win()
         sweep_tints()
       end,
