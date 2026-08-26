@@ -14,6 +14,7 @@ local PICKER_PROMPT = "Builds> "
 -- tint background and its original foreground, so line numbers stay dim.
 local TINT_GROUPS = { "Normal", "EndOfBuffer", "SignColumn", "LineNr", "CursorLineNr", "FoldColumn" }
 local build_win_hl = ""
+local MSG_NO_BUILDS = "No builds"
 
 local function define_tint()
   local tint = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false }).bg
@@ -32,17 +33,14 @@ local function define_tint()
   end
   build_win_hl = table.concat(parts, ",")
 end
--- Both entry points list the current project only, so neither can claim there
--- are no builds at all.
-local MSG_NO_BUILDS = "No builds"
 
 -- task id -> log path, assigned when the task appears so the filename carries
 -- the build's start time.
 local log_path_by_task = {}
 local run_counter = 0
--- buffer -> 'changedtick' at its last save. BufUnload fires before VimLeavePre,
--- so without this both would append the same content.
-local saved_tick = {}
+-- buffer -> lines already written to its log. BufUnload fires before
+-- VimLeavePre, so both run for a build still on screen when Neovim exits.
+local saved_lines = {}
 
 -- Which project this session's builds belong to. Pinned when Neovim starts so
 -- that changing directory does not silently switch to another project's logs;
@@ -121,21 +119,25 @@ local function task_for_buf(bufnr)
   end
 end
 
--- Appends, so a buffer saved twice (once mid-build, once after) lands in one log.
+-- Appends only what the buffer gained since its last save, so a build saved
+-- twice (once mid-build, once after) lands in one log.
 local function save_buffer(bufnr)
   if not vim.api.nvim_buf_is_loaded(bufnr) then
     return
   end
-  local tick = vim.b[bufnr].changedtick
-  if saved_tick[bufnr] == tick then
-    return
-  end
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  if #lines == 0 or (#lines == 1 and lines[1] == "") then
-    return
-  end
+  -- Ownership first: this runs for every buffer that unloads, and reading a
+  -- large one costs far more than the task-list scan.
   local task = task_for_buf(bufnr)
   if not task then
+    return
+  end
+  -- Line count, not 'changedtick': that reads as -1 for every buffer once
+  -- Neovim starts exiting, which would let the whole buffer through a second
+  -- time. min() covers a buffer that Overseer refilled from the start.
+  local total = vim.api.nvim_buf_line_count(bufnr)
+  local from = math.min(saved_lines[bufnr] or 0, total)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, from, -1, false)
+  if #lines == 0 or (#lines == 1 and lines[1] == "") then
     return
   end
   local path = log_path_for(task)
@@ -146,28 +148,27 @@ local function save_buffer(bufnr)
   pcall(vim.uv.fs_chmod, path, tonumber("644", 8))
   local handle = io.open(path, "a")
   if not handle then
+    pcall(vim.uv.fs_chmod, path, tonumber("444", 8))
     return
   end
   handle:write(table.concat(lines, "\n"), "\n")
   handle:close()
   pcall(vim.uv.fs_chmod, path, tonumber("444", 8))
-  saved_tick[bufnr] = tick
+  saved_lines[bufnr] = total
   prune_logs(dir, path)
 end
 
--- One item per build: the live buffer where one exists, otherwise the saved log.
--- Keyed by the log filename so the merged list is newest-first across both.
-local function build_items()
-  local dir = project_dir()
-  local items, covered = {}, {}
+-- Builds still held in a task buffer. Reads the assigned log path rather than
+-- asking for one, so listing never allocates a filename.
+local function live_items(dir)
+  local items = {}
   for _, task in ipairs(require("overseer").list_tasks()) do
-    -- is_loaded, not just get_bufnr(): after :bd the handle stays valid but empty.
     local bufnr = task:get_bufnr()
     -- A task belongs to whichever project its log was assigned to, which is not
     -- the current one if the build directory was re-anchored since.
-    local path = bufnr and log_path_for(task)
-    if bufnr and vim.api.nvim_buf_is_loaded(bufnr) and vim.fs.dirname(path) == dir then
-      covered[path] = true
+    local path = bufnr and log_path_by_task[task.id]
+    -- is_loaded, not just get_bufnr(): after :bd the handle stays valid but empty.
+    if path and vim.api.nvim_buf_is_loaded(bufnr) and vim.fs.dirname(path) == dir then
       items[#items + 1] = {
         key = vim.fs.basename(path),
         label = ("%s  (%s)"):format(build_label(task), task.status:lower()),
@@ -175,9 +176,21 @@ local function build_items()
       }
     end
   end
+  return items
+end
+
+-- One item per build: the live buffer where one exists, otherwise the saved log.
+-- Keyed by the log filename so the merged list is newest-first across both.
+local function build_items()
+  local dir = project_dir()
+  local items = live_items(dir)
+  local covered = {}
+  for _, item in ipairs(items) do
+    covered[item.key] = true
+  end
   for _, name in ipairs(log_files(dir)) do
     local path = dir .. "/" .. name
-    if not covered[path] then
+    if not covered[name] then
       -- Drop the sort prefix; keep the time, which separates runs of one build.
       local hh, mm, label = name:match("^%d+%-(%d%d)(%d%d)%d%d%-%d+%-(.*)%.log$")
       items[#items + 1] = {
@@ -226,8 +239,14 @@ end
 local build_win = nil
 
 local function set_tint(win, on)
-  if win and vim.api.nvim_win_is_valid(win) then
-    vim.wo[win].winhighlight = on and build_win_hl or ""
+  if not win or not vim.api.nvim_win_is_valid(win) then
+    return
+  end
+  if on then
+    vim.wo[win].winhighlight = build_win_hl
+  elseif vim.wo[win].winhighlight == build_win_hl then
+    -- Leave a winhighlight set for other reasons alone.
+    vim.wo[win].winhighlight = ""
   end
 end
 
@@ -262,14 +281,20 @@ local function show_in_build_win(item)
   set_tint(build_win, true)
 end
 
--- Point the build window at the newest build, on every task-list update.
+-- Point the build window at the newest build, on every task-list update. Only
+-- live builds can be newest here, so the saved logs need not be listed.
 local function follow_latest()
   if not build_win_valid() then
     return
   end
-  local item = build_items()[1]
-  if item and item.bufnr and vim.api.nvim_win_get_buf(build_win) ~= item.bufnr then
-    vim.api.nvim_win_set_buf(build_win, item.bufnr)
+  local newest
+  for _, item in ipairs(live_items(project_dir())) do
+    if not newest or item.key > newest.key then
+      newest = item
+    end
+  end
+  if newest and vim.api.nvim_win_get_buf(build_win) ~= newest.bufnr then
+    vim.api.nvim_win_set_buf(build_win, newest.bufnr)
   end
 end
 
@@ -283,9 +308,14 @@ local function toggle_build_output()
     set_tint(win, false)
     if #layout_wins() > 1 then
       vim.api.nvim_win_close(win, false)
+      return
+    end
     -- A tabpage cannot have zero windows, so when the build is the only one it
-    -- is replaced in place by the last buffer shown, or an empty one.
-    elseif not pcall(vim.cmd, "buffer #") then
+    -- is replaced in place by the last buffer shown. That buffer must not be a
+    -- build itself, or the next toggle stacks a second build view on top of it.
+    local alt = vim.fn.bufnr("#")
+    local reusable = alt > 0 and vim.api.nvim_buf_is_valid(alt) and not is_build_buf(alt)
+    if not (reusable and pcall(vim.cmd, "buffer #")) then
       vim.cmd("enew")
     end
     return
@@ -404,8 +434,8 @@ return {
               pcall(vim.api.nvim_buf_set_name, bufnr, ("overseer://%s #%d"):format(task.name, task.id))
             end
             vim.bo[bufnr].buflisted = false
-            -- Save once the build ends; nothing is written after that, and
-            -- save_buffer()'s changedtick check absorbs the repeat events.
+            -- Save once the build ends; save_buffer() appends only new lines,
+            -- so the repeat events cost nothing.
             if task.status ~= "PENDING" and task.status ~= "RUNNING" then
               save_buffer(bufnr)
             end
