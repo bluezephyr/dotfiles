@@ -47,22 +47,20 @@ local saved_lines = {}
 -- <leader>bs re-anchors it deliberately.
 local build_root = nil
 
-local function set_build_root(dir)
-  dir = dir or vim.uv.cwd()
+local function set_build_root()
+  local dir = vim.uv.cwd()
   build_root = vim.fs.root(dir, ".git") or dir
-  return build_root
 end
 
 -- Logs are grouped per project, so a picker in one project never offers
 -- another's builds. The hash keeps repos that share a name apart.
-local function project_dir()
-  local root = build_root or set_build_root()
-  local name = (vim.fs.basename(root) or "build"):gsub("[^%w%-_.]", "_")
-  return ("%s/%s-%s"):format(LOG_ROOT, name, vim.fn.sha256(root):sub(1, 8))
+local function get_project_log_dir()
+  local name = (vim.fs.basename(build_root) or "build"):gsub("[^%w%-_.]", "_")
+  return ("%s/%s-%s"):format(LOG_ROOT, name, vim.fn.sha256(build_root):sub(1, 8))
 end
 
-local function log_files(dir)
-  dir = dir or project_dir()
+local function get_log_files(dir)
+  dir = dir or get_project_log_dir()
   if vim.fn.isdirectory(dir) == 0 then
     return {}
   end
@@ -73,7 +71,7 @@ local function log_files(dir)
 end
 
 local function prune_logs(dir, protect)
-  local files = log_files(dir)
+  local files = get_log_files(dir)
   for i = 1, #files - KEEP_LOGS do
     local path = dir .. "/" .. files[i]
     if path ~= protect then
@@ -105,13 +103,13 @@ local function log_path_for(task)
     -- The counter separates builds started within the same second.
     run_counter = run_counter + 1
     path = ("%s/%s-%d-%s.log"):format(
-      project_dir(), os.date("%Y%m%d-%H%M%S"), run_counter, build_label(task))
+      get_project_log_dir(), os.date("%Y%m%d-%H%M%S"), run_counter, build_label(task))
     log_path_by_task[task.id] = path
   end
   return path
 end
 
-local function task_for_buf(bufnr)
+local function get_task_for_buf(bufnr)
   for _, task in ipairs(require("overseer").list_tasks()) do
     if task:get_bufnr() == bufnr then
       return task
@@ -127,7 +125,7 @@ local function save_buffer(bufnr)
   end
   -- Ownership first: this runs for every buffer that unloads, and reading a
   -- large one costs far more than the task-list scan.
-  local task = task_for_buf(bufnr)
+  local task = get_task_for_buf(bufnr)
   if not task then
     return
   end
@@ -160,7 +158,7 @@ end
 
 -- Builds still held in a task buffer. Reads the assigned log path rather than
 -- asking for one, so listing never allocates a filename.
-local function live_items(dir)
+local function get_live_items(dir)
   local items = {}
   for _, task in ipairs(require("overseer").list_tasks()) do
     local bufnr = task:get_bufnr()
@@ -181,14 +179,14 @@ end
 
 -- One item per build: the live buffer where one exists, otherwise the saved log.
 -- Keyed by the log filename so the merged list is newest-first across both.
-local function build_items()
-  local dir = project_dir()
-  local items = live_items(dir)
+local function get_build_items()
+  local dir = get_project_log_dir()
+  local items = get_live_items(dir)
   local covered = {}
   for _, item in ipairs(items) do
     covered[item.key] = true
   end
-  for _, name in ipairs(log_files(dir)) do
+  for _, name in ipairs(get_log_files(dir)) do
     local path = dir .. "/" .. name
     if not covered[name] then
       -- Drop the sort prefix; keep the time, which separates runs of one build.
@@ -207,7 +205,7 @@ local function build_items()
 end
 
 -- Windows that take part in the layout - floats (notifications, pickers) do not.
-local function layout_wins()
+local function get_layout_wins()
   local wins = {}
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if vim.api.nvim_win_get_config(win).relative == "" then
@@ -219,7 +217,7 @@ end
 
 -- A live task's output or a saved log, however it came to be on screen.
 local function is_build_buf(bufnr)
-  return task_for_buf(bufnr) ~= nil
+  return get_task_for_buf(bufnr) ~= nil
     or vim.startswith(vim.api.nvim_buf_get_name(bufnr), LOG_ROOT .. "/")
 end
 
@@ -264,15 +262,20 @@ local function sweep_tints()
   end
 end
 
--- Tracking lapses once the window is gone or shows something else.
-local function build_win_valid()
-  if build_win and vim.api.nvim_win_is_valid(build_win) and is_build_buf(vim.api.nvim_win_get_buf(build_win)) then
-    return true
+-- The tracked window still exists and still shows a build.
+local function is_build_win_live()
+  return build_win ~= nil
+    and vim.api.nvim_win_is_valid(build_win)
+    and is_build_buf(vim.api.nvim_win_get_buf(build_win))
+end
+
+-- Stop tracking a window that was closed or navigated elsewhere, handing it
+-- back looking like any other. Leaves build_win nil when tracking has lapsed.
+local function release_stale_build_win()
+  if build_win and not is_build_win_live() then
+    set_tint(build_win, false)
+    build_win = nil
   end
-  -- Navigated elsewhere: hand the window back looking like any other.
-  set_tint(build_win, false)
-  build_win = nil
-  return false
 end
 
 local function show_in_build_win(item)
@@ -284,11 +287,12 @@ end
 -- Point the build window at the newest build, on every task-list update. Only
 -- live builds can be newest here, so the saved logs need not be listed.
 local function follow_latest()
-  if not build_win_valid() then
+  release_stale_build_win()
+  if not build_win then
     return
   end
   local newest
-  for _, item in ipairs(live_items(project_dir())) do
+  for _, item in ipairs(get_live_items(get_project_log_dir())) do
     if not newest or item.key > newest.key then
       newest = item
     end
@@ -302,11 +306,12 @@ end
 -- <leader>fl are left alone. The buffer stays loaded so a running build keeps
 -- filling it.
 local function toggle_build_output()
-  if build_win_valid() then
+  release_stale_build_win()
+  if build_win then
     local win = build_win
     build_win = nil
     set_tint(win, false)
-    if #layout_wins() > 1 then
+    if #get_layout_wins() > 1 then
       vim.api.nvim_win_close(win, false)
       return
     end
@@ -321,7 +326,7 @@ local function toggle_build_output()
     return
   end
 
-  local item = build_items()[1]
+  local item = get_build_items()[1]
   if not item then
     vim.notify(MSG_NO_BUILDS, vim.log.levels.WARN)
     return
@@ -336,7 +341,7 @@ end
 -- fzf hands back the entry string, so the picker maps labels to items itself
 -- rather than relying on fzf-lua parsing a path out of the entry text.
 local function pick_log()
-  local items = build_items()
+  local items = get_build_items()
   if #items == 0 then
     vim.notify(MSG_NO_BUILDS, vim.log.levels.WARN)
     return
@@ -459,13 +464,11 @@ return {
     })
 
     -- Drop the tint the moment the window stops showing a build, rather than
-    -- waiting for the next <leader>l. build_win_valid() does the clearing.
+    -- waiting for the next <leader>l.
     vim.api.nvim_create_autocmd({ "WinNew", "BufWinEnter", "WinClosed" }, {
       group = vim.api.nvim_create_augroup("overseer_build_win", { clear = true }),
       callback = function()
-        if build_win then
-          build_win_valid()
-        end
+        release_stale_build_win()
         sweep_tints()
       end,
     })
@@ -501,7 +504,8 @@ return {
   vim.keymap.set('n', '<leader>l', toggle_build_output, { desc = 'Toggle build output, [l]atest' }),
   vim.keymap.set('n', '<leader>fl', pick_log, { desc = 'Build [L]ogs (saved)' }),
   vim.keymap.set('n', '<leader>bs', function()
-    vim.notify("Build directory: " .. set_build_root())
+    set_build_root()
+    vim.notify("Build directory: " .. build_root)
   end, { desc = '[B]uild directory [S]et to cwd' }),
   vim.keymap.set('n', '<F2>', "<cmd>OverseerToggle<CR>", { desc = '[B]uild [T]oggle' }),
   vim.keymap.set('n', '<leader>bo', "<cmd>OverseerOpen<CR>", { desc = '[B]uild [O]pen' }),
