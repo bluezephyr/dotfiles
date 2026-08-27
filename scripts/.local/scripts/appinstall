@@ -1,61 +1,213 @@
 #!/usr/bin/python3
 
+"""Install and configure applications from a declarative list.
+
+List file mode:
+  %(prog)s -f <file>
+  One application per line, comments and blank lines ignored:
+    <application_name> <installer_type> [attributes...]
+
+Single application:
+  %(prog)s <application_name> <installer_type> [attributes...]
+
+Other modes:
+  %(prog)s -l   list every application and the installers it supports
+  %(prog)s -e   print an example list file, e.g. `%(prog)s -e > doc/applications.txt`
+
+Examples:
+  %(prog)s -f doc/applications.txt
+  %(prog)s nvim appimage
+  %(prog)s bashrc config ./bash/bashrc-custom
+"""
+
 import argparse
 import os
 import re
 import shutil
 import subprocess
 import urllib.request
+from collections import namedtuple
 from pathlib import Path
 
+HOME = Path.home()
+BIN_DIR = HOME / ".local" / "bin"
 
-def apt_installer(package):
-    """Install a package using apt"""
+
+# ---------------------------------------------------------------------------
+# APPLICATIONS
+# ---------------------------------------------------------------------------
+#
+# Add an application by adding an entry here. Nothing else needs to change
+# unless the application needs an installer that does not exist yet.
+#
+#   "<app name>": {
+#       "command":    executable the application provides, used to detect an
+#                     existing installation. Omit when it provides none.
+#       "installers": {"<installer type>": {<spec>}, ...}
+#   }
+#
+# An application may support any number of installer types; the one to use is
+# chosen in the list file or on the command line, never here. See INSTALL
+# MECHANISMS for the code reading each spec:
+#
+#   apt, pacman   "package"   package name, defaults to the application name
+#                 "symlink"   (source_command, link_name) made in ~/.local/bin
+#   appimage      "url"       download location
+#                 "target"    name in ~/.local/bin, defaults to the app name
+#   config        "target"    file to update, ~ is expanded
+#                 "marker"    name of the "# start/end <marker>" block to
+#                             replace. The content comes from the file given
+#                             as an attribute: `bashrc config ./bashrc-custom`
+
+APPS = {
+    "bash-profile": {
+        "installers": {
+            "config": {
+                "target": "~/.config/bash/profile_custom",
+                "marker": "custom_bash_profile",
+            },
+        },
+    },
+    "bashrc": {
+        "installers": {
+            "config": {
+                "target": "~/.config/bash/bashrc_custom",
+                "marker": "custom_bashrc",
+            },
+        },
+    },
+    "fd": {
+        "command": "fd",
+        "installers": {
+            # Debian ships the binary as fdfind to avoid a name clash.
+            "apt": {"package": "fd-find", "symlink": ("fdfind", "fd")},
+            "pacman": {"package": "fd"},
+        },
+    },
+    "fzf": {
+        "command": "fzf",
+        "installers": {"apt": {}},
+    },
+    "lazygit": {
+        "command": "lazygit",
+        "installers": {"apt": {}},
+    },
+    "nvim": {
+        "command": "nvim",
+        "installers": {
+            "appimage": {
+                "url": "https://github.com/neovim/neovim/releases/latest/"
+                       "download/nvim-linux-x86_64.appimage",
+            },
+        },
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# INSTALL MECHANISMS
+# ---------------------------------------------------------------------------
+#
+# Add an installer type by writing an install function and registering it in
+# MECHANISMS at the end of this section.
+#
+#   install   install(app_name, spec, attributes) -> None
+#   requires  command that must be on PATH for this mechanism to work here
+#   prepare   run once before the first install through this mechanism
+
+Mechanism = namedtuple("Mechanism", "install requires prepare", defaults=(None, None))
+
+
+def apt_update():
+    """Refresh the apt package index."""
+    run(["sudo", "apt", "update"])
+
+
+def apt_install(app_name, spec, attributes):
+    """Install an apt package, optionally symlinking it under another name."""
+    if not run(["sudo", "apt", "install", "-y", spec.get("package", app_name)]):
+        return
+    if "symlink" in spec:
+        create_symlink(BIN_DIR, *spec["symlink"])
+
+
+def pacman_install(app_name, spec, attributes):
+    """Install a pacman package, upgrading the system as Arch requires."""
+    run(["sudo", "pacman", "-Syu", spec.get("package", app_name)])
+
+
+def appimage_install(app_name, spec, attributes):
+    """Download an AppImage into ~/.local/bin and make it executable."""
+    target = BIN_DIR / spec.get("target", app_name)
     try:
-        subprocess.run(["sudo", "apt", "update"], check=True)
-        subprocess.run(["sudo", "apt", "install", "-y", package], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"APT installation failed: {e}")
+        urllib.request.urlretrieve(spec["url"], target)
+    except Exception as e:
+        print(f"Failed to download {app_name}: {e}")
+        return
+
+    target.chmod(target.stat().st_mode | 0o100)
+    print(f"{app_name} installed to {target}")
 
 
-def pacman_installer(package):
-    """Install a package using pacman"""
+def config_install(app_name, spec, attributes):
+    """Copy a source file into a marked block of a config file."""
+    if not attributes:
+        print(f"Error: {app_name} needs a source file, e.g. `{app_name} config ./source`")
+        return
+
+    source = Path(attributes[0])
     try:
-        subprocess.run(["sudo", "pacman", "-Syu", package], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Pacman installation failed: {e}")
+        content = source.read_text()
+    except OSError as e:
+        print(f"Error: could not read source file {source}: {e}")
+        return
+
+    target = Path(spec["target"]).expanduser()
+    update_config_file(target, spec["marker"], content)
+    print(f"{app_name} written to {target}")
 
 
-def get_command_version(command, formatter=None):
-    """Get version of an installed command.
+MECHANISMS = {
+    "apt": Mechanism(install=apt_install, requires="apt", prepare=apt_update),
+    "pacman": Mechanism(install=pacman_install, requires="pacman"),
+    "appimage": Mechanism(install=appimage_install),
+    "config": Mechanism(install=config_install),
+}
 
-    Args:
-        command: The command to check (e.g., 'nvim', 'fd', 'fzf')
-        formatter: Optional function to format the output. If None, returns stripped output.
 
-    Returns:
-        Version string or None if command not found or error occurred
-    """
+# ---------------------------------------------------------------------------
+# CORE HELPERS
+# ---------------------------------------------------------------------------
+
+def run(command):
+    """Run a command, reporting failure. Returns True when it succeeded."""
     try:
-        result = subprocess.run([command, "--version"], capture_output=True, text=True, timeout=5)
-        if result.returncode == 0:
-            if formatter:
-                return formatter(result.stdout)
-            else:
-                return result.stdout.strip()
-        return None
+        subprocess.run(command, check=True)
+        return True
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"Command failed: {' '.join(command)}: {e}")
+        return False
+
+
+def command_version(command):
+    """First line of `<command> --version`, or None if unavailable."""
+    try:
+        result = subprocess.run(
+            [command, "--version"], capture_output=True, text=True, timeout=5
+        )
     except Exception:
         return None
 
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip().split("\n")[0]
+
 
 def update_config_file(file_path, marker_name, content):
-    """Updates a block of text in a file delimited by # start <marker_name> and # end <marker_name>.
-    Creates the file and parent directories if they don't exist.
+    """Update the block delimited by "# start/end <marker_name>" in a file.
 
-    Args:
-        file_path: Path to the config file
-        marker_name: Name of the marker (markers will be "# start marker_name" and "# end marker_name")
-        content: Content to insert between the markers
+    Appends the block when it is not there yet, creating the file and its
+    parent directories.
     """
     target = Path(file_path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -84,13 +236,7 @@ def update_config_file(file_path, marker_name, content):
 
 
 def create_symlink(bin_dir, source_command, link_name):
-    """Create a symlink to a command in the bin directory.
-
-    Args:
-        bin_dir: Path to the bin directory where the symlink will be created
-        source_command: The command to link from (e.g., 'fdfind')
-        link_name: The name of the symlink (e.g., 'fd')
-    """
+    """Link bin_dir/link_name to source_command as found on PATH."""
     source_path = shutil.which(source_command)
     if not source_path:
         print(f"Error: Could not find {source_command} in system PATH.")
@@ -103,347 +249,142 @@ def create_symlink(bin_dir, source_command, link_name):
     try:
         os.symlink(source_path, link_path)
         print(f"Symlinked {source_command} -> {link_path}")
-    except Exception as e:
+    except OSError as e:
         print(f"Failed to create symlink: {e}")
 
 
-class Installer:
-    """Base class for all installers"""
+# ---------------------------------------------------------------------------
+# DRIVER
+# ---------------------------------------------------------------------------
 
-    def __init__(self, installer_type, attributes):
-        self.installer_type = installer_type
-        self.attributes = attributes
-
-    def get_version(self):
-        """Return the current version of the installed application, or None if N/A"""
-        raise NotImplementedError
-
-    def install(self):
-        """Install the application"""
-        raise NotImplementedError
-
-    def supported_installers(self):
-        """Return a list of installer types this class supports, e.g., ['apt', 'pacman']"""
-        raise NotImplementedError
-
-    def app_name(self):
-        """Return the application name. Override in subclasses for custom names."""
-        raise NotImplementedError
-
-    @classmethod
-    def get_installers(cls):
-        """Build and return a registry of all available installers from supported_installers() declarations"""
-        registry = {}
-        installers_to_register = [
-            NvimInstaller,
-            FdInstaller,
-            FzfInstaller,
-            LazyGitInstaller,
-            BashProfileInstaller,
-            BashrcInstaller,
-        ]
-
-        for installer_class in installers_to_register:
-            instance = installer_class(None, None)
-            app_name = instance.app_name
-            for installer_type in instance.supported_installers():
-                registry[(app_name, installer_type)] = installer_class
-
-        return registry
-
-    @classmethod
-    def create_job(cls, installer_tuple, attributes):
-        """Factory method to create an installer instance (Job) from an (app_name, installer_type) tuple.
-
-        Args:
-            installer_tuple: A (app_name, installer_type) tuple
-            attributes: Installation attributes
-
-        Returns:
-            An installer instance or None if the tuple is not found in the registry
-        """
-        registry = cls.get_installers()
-        if installer_tuple in registry:
-            app_name, installer_type = installer_tuple
-            installer_class = registry[installer_tuple]
-            return installer_class(installer_type, attributes)
-        return None
-
-
-class NvimInstaller(Installer):
-    def supported_installers(self):
-        return ["appimage"]
-
-    @property
-    def app_name(self):
-        return "nvim"
-
-    def get_version(self):
-        return get_command_version("nvim", formatter=lambda x: x.split('\n')[0])
-
-    def install(self):
-        url = "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
-        target = Path.home() / ".local" / "bin" / "nvim"
-
-        try:
-            urllib.request.urlretrieve(url, target)
-            target.chmod(target.stat().st_mode | 0o100)
-            print(f"Neovim installed to {target}")
-        except Exception as e:
-            print(f"Failed to download Neovim: {e}")
-
-
-class FdInstaller(Installer):
-    def supported_installers(self):
-        return ["apt", "pacman"]
-
-    @property
-    def app_name(self):
-        return "fd"
-
-    def get_version(self):
-        return get_command_version("fd")
-
-    def install(self):
-        if self.installer_type == "apt":
-            apt_installer("fd-find")
-            create_symlink(Path.home() / ".local" / "bin", "fdfind", "fd")
-        elif self.installer_type == "pacman":
-            pacman_installer("fd")
-
-
-class FzfInstaller(Installer):
-    def supported_installers(self):
-        return ["apt"]
-
-    @property
-    def app_name(self):
-        return "fzf"
-
-    def get_version(self):
-        return get_command_version("fzf")
-
-    def install(self):
-        apt_installer("fzf")
-
-
-class LazyGitInstaller(Installer):
-    def supported_installers(self):
-        return ["apt"]
-
-    @property
-    def app_name(self):
-        return "lazygit"
-
-    def get_version(self):
-        return get_command_version("lazygit")
-
-    def install(self):
-        apt_installer("lazygit")
-
-
-class BashProfileInstaller(Installer):
-    def supported_installers(self):
-        return ["config"]
-
-    @property
-    def app_name(self):
-        return "bash-profile"
-
-    def get_version(self):
-        return None
-
-    def install(self):
-        try:
-            source_path = Path(self.attributes[0])
-            content_to_add = source_path.read_text()
-            profile_path = Path.home() / ".config" / "bash" / "profile_custom"
-
-            update_config_file(
-                file_path=profile_path,
-                marker_name="custom_bash_profile",
-                content=content_to_add
-            )
-        except IndexError:
-            print("Error: No source file provided for bash_profile")
-        except (OSError, IOError) as e:
-            print(f"Error: Could not read source file {self.attributes[0] if self.attributes else 'unknown'}: {e}")
-
-
-class BashrcInstaller(Installer):
-    def supported_installers(self):
-        return ["config"]
-
-    @property
-    def app_name(self):
-        return "bashrc"
-
-    def get_version(self):
-        return None
-
-    def install(self):
-        if not self.attributes:
-            print("Error: No source file provided for bashrc")
-            return
-
-        source_path = Path(self.attributes[0])
-        if not source_path.exists():
-            print(f"Error: Source file {source_path} not found")
-            return
-
-        bashrc = Path.home() / ".config" / "bash" / "bashrc_custom"
-        bashrc.parent.mkdir(parents=True, exist_ok=True)
-        bashrc.touch()
+Job = namedtuple("Job", "app_name mechanism_name spec attributes")
 
 
 def read_installations(file_path):
-    """Read installation tuples from a file.
-
-    File format: One tuple per line (comments starting with # are ignored):
-        <application_name> <installer_type> [attributes...]
-
-    Returns: List of tuples [(app_name, installer_type, [attributes...]), ...]
-    """
-    if not os.path.exists(file_path):
+    """Parse a list file into (app_name, mechanism_name, attributes) tuples."""
+    path = Path(file_path)
+    if not path.exists():
         raise FileNotFoundError(f"File '{file_path}' not found.")
 
-    tuples = []
-    with open(file_path, "r") as f:
-        for line_num, line in enumerate(f, 1):
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
+    installations = []
+    for line_num, line in enumerate(path.read_text().splitlines(), 1):
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
 
-            parts = line.split()
-            if len(parts) < 2:
-                print(f"Malformed input on line {line_num}: aborting")
-                exit(1)
+        parts = line.split()
+        if len(parts) < 2:
+            raise ValueError(f"Malformed input on line {line_num}: {line!r}")
+        installations.append((parts[0], parts[1], parts[2:]))
 
-            app_name, installer_type = parts[0], parts[1]
-            attributes = parts[2:]
-            tuples.append((app_name, installer_type, attributes))
-
-    return tuples
+    return installations
 
 
-class AppInstaller:
-    def __init__(self):
-        self.home = Path.home()
+def resolve(app_name, mechanism_name, attributes):
+    """Build a Job from an (application, installer type) pair.
 
-        # Define the directory requirements
-        self.required_dirs = [
-            self.home / ".local" / "bin",
-            self.home / ".local" / "scripts",
-            self.home / ".config"
-        ]
+    Returns None after explaining why, when the pair cannot be installed.
+    """
+    app = APPS.get(app_name)
+    if app is None:
+        print(f"Unknown application: {app_name}")
+        return None
 
-        self.bin_dir = self.home / ".local" / "bin"
+    if mechanism_name not in app["installers"]:
+        supported = ", ".join(sorted(app["installers"]))
+        print(f"No installer for {app_name} via {mechanism_name}; it supports: {supported}")
+        return None
 
-        # Initialize environment and cleanup
-        self._ensure_env_exists()
-        self.cleanup_broken_symlinks()
+    if mechanism_name not in MECHANISMS:
+        print(f"Unknown installer type: {mechanism_name}")
+        return None
 
-    def _ensure_env_exists(self):
-        """Iterates through required directories and creates them if missing."""
-        for directory in self.required_dirs:
-            if not directory.exists():
-                directory.mkdir(parents=True, exist_ok=True)
-
-    def cleanup_broken_symlinks(self):
-        """Scans the bin directory and removes dangling links."""
-        if self.bin_dir.exists():
-            for item in self.bin_dir.iterdir():
-                if item.is_symlink() and not item.exists():
-                    print(f"Removing broken link: {item.name}")
-                    item.unlink()
-
-    def is_installed(self, cmd):
-        return shutil.which(cmd) is not None
-
-    def ask_to_update(self, app_name, installer=None):
-        version_str = ""
-        if installer:
-            try:
-                version = installer.get_version()
-                if version:
-                    version_str = f" (version: {version})"
-            except Exception:
-                pass
-
-        choice = input(f" {app_name} is already installed{version_str}. Update? (y/N): ").lower()
-        return choice == 'y'
-
-    def list_installers(self):
-        """Display all available installers."""
-        registry = Installer.get_installers()
-        if not registry:
-            print("No installers available.")
-            return
-
-        print("Available installers:")
-        print("-" * 50)
-        print(f"  {'Application':<20} {'Type'}")
-        print("-" * 50)
-
-        for (app_name, installer_type) in sorted(registry.keys()):
-            print(f"  {app_name:<20} {installer_type}")
+    return Job(app_name, mechanism_name, app["installers"][mechanism_name], attributes)
 
 
-    # --- Core Processing ---
+def prepare_environment():
+    """Create the directories installs write to and prune dangling links."""
+    for directory in (BIN_DIR, HOME / ".local" / "scripts", HOME / ".config"):
+        directory.mkdir(parents=True, exist_ok=True)
 
-    def install(self, installer):
-        """Run the installation for the provided installer"""
-        app_name = installer.app_name
-        print("-" * 30)
-        print(f"Installing: {app_name}")
-        if self.is_installed(app_name) and not self.ask_to_update(app_name, installer):
-            return
+    for item in BIN_DIR.iterdir():
+        if item.is_symlink() and not item.exists():
+            print(f"Removing broken link: {item.name}")
+            item.unlink()
 
-        installer.install()
 
-    def create_jobs(self, installation_tuples):
-        """Convert installation tuples into a list of installer objects.
+def confirm_update(app_name, command):
+    """Ask whether to reinstall an application, showing its current version."""
+    version = command_version(command)
+    version_str = f" (version: {version})" if version else ""
+    choice = input(f" {app_name} is already installed{version_str}. Update? (y/N): ")
+    return choice.lower() == "y"
 
-        Args:
-            installation_tuples: List of tuples [(app_name, installer_type, [attributes...]), ...]
 
-        Returns: List of installer objects ready for installation
-        """
-        installers = []
-        for app_name, installer_type, attributes in installation_tuples:
-            installer_key = (app_name, installer_type)
-            installer = Installer.create_job(installer_key, attributes)
-            if installer:
-                installers.append(installer)
-            else:
-                print(f"No installer for {app_name} via {installer_type}")
+def install_job(job):
+    """Install one job, prompting first when the application is already there."""
+    print("-" * 30)
+    print(f"Installing: {job.app_name}")
 
-        return installers
+    command = APPS[job.app_name].get("command")
+    if command and shutil.which(command) and not confirm_update(job.app_name, command):
+        return
 
+    MECHANISMS[job.mechanism_name].install(job.app_name, job.spec, job.attributes)
+
+
+def run_jobs(jobs):
+    """Install every job, preparing each installer type at most once."""
+    prepared = set()
+    for job in jobs:
+        mechanism = MECHANISMS[job.mechanism_name]
+        if mechanism.requires and not shutil.which(mechanism.requires):
+            print(f"Skipping {job.app_name}: {job.mechanism_name} is not available here")
+            continue
+
+        if mechanism.prepare and job.mechanism_name not in prepared:
+            prepared.add(job.mechanism_name)
+            mechanism.prepare()
+
+        install_job(job)
+
+
+def list_apps():
+    """Print every (application, installer type) pair that can be installed."""
+    print("Available installers:")
+    print("-" * 50)
+    print(f"  {'Application':<20} {'Type'}")
+    print("-" * 50)
+
+    for app_name, app in sorted(APPS.items()):
+        for mechanism_name in sorted(app["installers"]):
+            print(f"  {app_name:<20} {mechanism_name}")
+
+
+def print_example():
+    """Print a list file covering every application, ready to be edited."""
+    print("# Configuration example file for appinstall")
+    print("# Generated by `appinstall -e`; alternative installers are commented out.")
+    print("# application   installer    parameters")
+
+    for app_name, app in sorted(APPS.items()):
+        for index, mechanism_name in enumerate(sorted(app["installers"])):
+            prefix = "" if index == 0 else "# "
+            parameters = "  <source file>" if mechanism_name == "config" else ""
+            # Pad past the comment prefix so the columns stay aligned.
+            print(f"{prefix}{app_name:<{15 - len(prefix)}} {mechanism_name:<12}{parameters}".rstrip())
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 def main():
+    """Parse arguments and run the requested mode."""
     parser = argparse.ArgumentParser(
         description="A modular application installer script.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Input File Mode:
-  appinstall.py -f <file>
-  The input file should contain one application per line:
-  <application_name> <installer_type> [attributes...]
-
-Interactive Mode:
-  appinstall.py <application_name> <installer_type> [attributes...]
-  Install a single application directly from command line arguments.
-
-Status Check:
-  appinstall.py -s -f <file>
-  appinstall.py --status <application_name> <installer_type>
-
-Examples:
-  appinstall.py -f apps.txt
-  appinstall.py -s -f apps.txt
-  appinstall.py -s nvim appimage
-        """
+        epilog=__doc__,
     )
 
     parser.add_argument(
@@ -458,44 +399,45 @@ Examples:
     )
 
     parser.add_argument(
-        "-s", "--status",
+        "-e", "--example",
         action="store_true",
-        help="Check the installation status of applications instead of installing"
+        help="Print an example applications list file"
     )
 
     parser.add_argument(
         "app_args",
         nargs="*",
-        help="Application name, installer type, and optional attributes (for interactive mode)"
+        help="Application name, installer type, and optional attributes"
     )
 
     args = parser.parse_args()
 
-    installer = AppInstaller()
-    installations = []
-
     if args.list:
-        installer.list_installers()
+        list_apps()
+        return
+
+    if args.example:
+        print_example()
         return
 
     if args.file:
         try:
             installations = read_installations(args.file)
-        except FileNotFoundError as e:
+        except (FileNotFoundError, ValueError) as e:
             parser.error(str(e))
     elif args.app_args:
         if len(args.app_args) < 2:
             parser.error("Interactive mode requires at least <application_name> and <installer_type>")
-        app_name = args.app_args[0]
-        installer_type = args.app_args[1]
-        attributes = args.app_args[2:] if len(args.app_args) > 2 else []
-        installations = [(app_name, installer_type, attributes)]
+        installations = [(args.app_args[0], args.app_args[1], args.app_args[2:])]
     else:
         parser.error("Mode selection required")
 
-    installers_to_run = installer.create_jobs(installations)
-    for installer_obj in installers_to_run:
-        installer.install(installer_obj)
+    jobs = [job for job in (resolve(*item) for item in installations) if job]
+    if not jobs:
+        return
+
+    prepare_environment()
+    run_jobs(jobs)
 
 
 if __name__ == "__main__":
