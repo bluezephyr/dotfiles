@@ -11,7 +11,7 @@ Single application:
   %(prog)s <application_name> <installer_type> [attributes...]
 
 Other modes:
-  %(prog)s -l   list every application and the installers it supports
+  %(prog)s -l   list every application, its installers and installed version
   %(prog)s -e   print an example list file, e.g. `%(prog)s -e > doc/applications.txt`
 
 Examples:
@@ -42,7 +42,9 @@ BIN_DIR = HOME / ".local" / "bin"
 #
 #   "<app name>": {
 #       "command":    executable the application provides, used to detect an
-#                     existing installation. Omit when it provides none.
+#                     existing installation before reinstalling. Omit when it
+#                     provides none. The version shown by -l comes from the
+#                     installer that provided it, not from here.
 #       "installers": {"<installer type>": {<spec>}, ...}
 #   }
 #
@@ -111,11 +113,18 @@ APPS = {
 # Add an installer type by writing an install function and registering it in
 # MECHANISMS at the end of this section.
 #
-#   install   install(app_name, spec, attributes) -> None
-#   requires  command that must be on PATH for this mechanism to work here
-#   prepare   run once before the first install through this mechanism
+#   install    install(app_name, spec, attributes) -> None
+#   installed  installed(app_name, spec) -> version this mechanism provided,
+#              or None when it did not provide the application
+#   requires   command that must be on PATH for this mechanism to work here
+#   prepare    run once before the first install through this mechanism
 
-Mechanism = namedtuple("Mechanism", "install requires prepare", defaults=(None, None))
+Mechanism = namedtuple("Mechanism", "install installed requires prepare", defaults=(None, None))
+
+
+def package_name(app_name, spec):
+    """Package to install, defaulting to the application name."""
+    return spec.get("package", app_name)
 
 
 def apt_update():
@@ -125,15 +134,41 @@ def apt_update():
 
 def apt_install(app_name, spec, attributes):
     """Install an apt package, optionally symlinking it under another name."""
-    if not run(["sudo", "apt", "install", "-y", spec.get("package", app_name)]):
+    if not run(["sudo", "apt", "install", "-y", package_name(app_name, spec)]):
         return
     if "symlink" in spec:
         create_symlink(BIN_DIR, *spec["symlink"])
 
 
+def apt_installed(app_name, spec):
+    """Version of the app's apt package, or None when apt did not provide it."""
+    if not shutil.which("dpkg-query"):
+        return None
+
+    output = capture([
+        "dpkg-query", "-W", "-f=${db:Status-Status} ${Version}",
+        package_name(app_name, spec),
+    ])
+    if not output:
+        return None
+
+    # Removed packages stay in the dpkg database, so the status decides.
+    status, _, version = output.strip().partition(" ")
+    return version_in(version) if status == "installed" and version else None
+
+
 def pacman_install(app_name, spec, attributes):
     """Install a pacman package, upgrading the system as Arch requires."""
-    run(["sudo", "pacman", "-Syu", spec.get("package", app_name)])
+    run(["sudo", "pacman", "-Syu", package_name(app_name, spec)])
+
+
+def pacman_installed(app_name, spec):
+    """Version of the app's pacman package, or None when pacman did not provide it."""
+    if not shutil.which("pacman"):
+        return None
+
+    output = capture(["pacman", "-Q", package_name(app_name, spec)])
+    return version_in(output.strip()) if output else None
 
 
 def appimage_install(app_name, spec, attributes):
@@ -147,6 +182,16 @@ def appimage_install(app_name, spec, attributes):
 
     target.chmod(target.stat().st_mode | 0o100)
     print(f"{app_name} installed to {target}")
+
+
+def appimage_installed(app_name, spec):
+    """Version of the downloaded AppImage, or None when it is not there."""
+    target = BIN_DIR / spec.get("target", app_name)
+    # A symlink in its place means something else provided the command.
+    if target.is_symlink() or not target.is_file():
+        return None
+
+    return command_version(str(target)) or "installed"
 
 
 def config_install(app_name, spec, attributes):
@@ -167,11 +212,27 @@ def config_install(app_name, spec, attributes):
     print(f"{app_name} written to {target}")
 
 
+def config_installed(app_name, spec):
+    """"configured" when the marked block is in the target file, else None."""
+    target = Path(spec["target"]).expanduser()
+    try:
+        content = target.read_text()
+    except OSError:
+        return None
+
+    return "configured" if f"# start {spec['marker']}" in content else None
+
+
 MECHANISMS = {
-    "apt": Mechanism(install=apt_install, requires="apt", prepare=apt_update),
-    "pacman": Mechanism(install=pacman_install, requires="pacman"),
-    "appimage": Mechanism(install=appimage_install),
-    "config": Mechanism(install=config_install),
+    "apt": Mechanism(
+        install=apt_install, installed=apt_installed,
+        requires="apt", prepare=apt_update,
+    ),
+    "pacman": Mechanism(
+        install=pacman_install, installed=pacman_installed, requires="pacman",
+    ),
+    "appimage": Mechanism(install=appimage_install, installed=appimage_installed),
+    "config": Mechanism(install=config_install, installed=config_installed),
 }
 
 
@@ -189,18 +250,32 @@ def run(command):
         return False
 
 
-def command_version(command):
-    """First line of `<command> --version`, or None if unavailable."""
+# Matches the version in every `--version` line currently in APPS, including
+# the one lazygit buries in a comma-separated list of build facts.
+VERSION_PATTERN = r"\d+\.\d+(?:\.\d+)?"
+
+
+def capture(command):
+    """Standard output of a command, or None when it fails or is unavailable."""
     try:
-        result = subprocess.run(
-            [command, "--version"], capture_output=True, text=True, timeout=5
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=5)
     except Exception:
         return None
 
-    if result.returncode != 0:
-        return None
-    return result.stdout.strip().split("\n")[0]
+    return result.stdout if result.returncode == 0 else None
+
+
+def version_in(text):
+    """First version number in text, falling back to the text itself."""
+    match = re.search(VERSION_PATTERN, text)
+    # Showing the raw text on a miss is a hint that the pattern needs work.
+    return match.group(0) if match else text
+
+
+def command_version(command):
+    """Version number reported by `<command> --version`, or None if unavailable."""
+    output = capture([command, "--version"])
+    return version_in(output.strip().split("\n")[0]) if output else None
 
 
 def update_config_file(file_path, marker_name, content):
@@ -349,16 +424,22 @@ def run_jobs(jobs):
         install_job(job)
 
 
+def installed_label(mechanism_name, app_name, spec):
+    """Version this installer provided, or a dash when it provided nothing."""
+    return MECHANISMS[mechanism_name].installed(app_name, spec) or "-"
+
+
 def list_apps():
-    """Print every (application, installer type) pair that can be installed."""
+    """Print every (application, installer type) pair and what it has installed."""
     print("Available installers:")
-    print("-" * 50)
-    print(f"  {'Application':<20} {'Type'}")
-    print("-" * 50)
+    print("-" * 60)
+    print(f"  {'Application':<20} {'Type':<12} {'Installed'}")
+    print("-" * 60)
 
     for app_name, app in sorted(APPS.items()):
-        for mechanism_name in sorted(app["installers"]):
-            print(f"  {app_name:<20} {mechanism_name}")
+        for mechanism_name, spec in sorted(app["installers"].items()):
+            version = installed_label(mechanism_name, app_name, spec)
+            print(f"  {app_name:<20} {mechanism_name:<12} {version}")
 
 
 def print_example():
@@ -395,7 +476,7 @@ def main():
     parser.add_argument(
         "-l", "--list",
         action="store_true",
-        help="List all available installers"
+        help="List all available installers and installed versions"
     )
 
     parser.add_argument(
