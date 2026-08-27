@@ -173,6 +173,80 @@ local function reset_base()
   end
 end
 
+-- gitsigns marks each popup window with the id of the popup it holds.
+local function popup_win(id)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.w[win].gitsigns_preview == id then
+      return win
+    end
+  end
+end
+
+-- Popups open unfocused, and only once their content has been fetched, so
+-- entering one means waiting for the window to appear.
+local function enter_popup(open, id, decorate)
+  local origin = vim.api.nvim_get_current_win()
+  open()
+  local win
+  vim.wait(1000, function()
+    win = popup_win(id)
+    return win ~= nil
+  end, 20)
+  if not win then
+    return
+  end
+  vim.api.nvim_set_current_win(win)
+  -- Alongside the q that gitsigns binds. Buffer-local, so it wins over any
+  -- global <Esc> mapping while the popup has focus.
+  vim.keymap.set('n', '<Esc>', '<cmd>quit!<cr>',
+    { buffer = vim.api.nvim_win_get_buf(win), silent = true, desc = 'Close popup' })
+  if decorate then
+    decorate(win, origin)
+  end
+end
+
+local function open_hunk_popup()
+  require('gitsigns').preview_hunk()
+end
+
+local function open_blame_popup()
+  require('gitsigns').blame_line({ full = true })
+end
+
+local map_popup_steps
+
+-- ]c and [c inside the hunk popup walk the file window's hunks, the popup
+-- following along. It is closed first: preview_hunk() focuses an open popup
+-- rather than refreshing it.
+local function popup_step(origin, direction)
+  return function()
+    pcall(vim.api.nvim_win_close, 0, true)
+    if not vim.api.nvim_win_is_valid(origin) then
+      return
+    end
+    vim.api.nvim_set_current_win(origin)
+    require('gitsigns').nav_hunk(direction, { target = 'all' }, vim.schedule_wrap(function()
+      enter_popup(open_hunk_popup, 'hunk', map_popup_steps)
+    end))
+  end
+end
+
+map_popup_steps = function(win, origin)
+  local buf = vim.api.nvim_win_get_buf(win)
+  vim.keymap.set('n', ']c', popup_step(origin, 'next'), { buffer = buf, desc = 'Next git hunk' })
+  vim.keymap.set('n', '[c', popup_step(origin, 'prev'), { buffer = buf, desc = 'Previous git hunk' })
+end
+
+local function preview_hunk_focused()
+  enter_popup(open_hunk_popup, 'hunk', map_popup_steps)
+end
+
+-- No stepping here: the popup's "Hunk N of M" counts the blamed commit's own
+-- hunks, which the file's hunks have nothing to do with.
+local function blame_line_focused()
+  enter_popup(open_blame_popup, 'blame')
+end
+
 -- Staging and resetting act against the base, so away from the default they
 -- would touch a past commit rather than the working change.
 local function guarded(action, question)
@@ -221,11 +295,11 @@ return {
         end
       end, 'Previous git hunk')
 
-      map('<leader>gb', function() gs.blame_line({ full = true }) end, 'Git blame line full')
+      map('<leader>gb', blame_line_focused, 'Git blame line full')
       map('<leader>ge', gs.blame, 'Git blame')
       map('<leader>gd', gs.diffthis, 'Git diff this')
       map('<leader>gp', gs.preview_hunk_inline, 'Git preview hunk inline')
-      map('<leader>gh', gs.preview_hunk, 'Git preview hunk')
+      map('<leader>gh', preview_hunk_focused, 'Git preview hunk')
       map('<leader>gr', guarded(gs.reset_hunk, 'Reset hunk'), 'Git reset hunk')
       -- On a staged hunk this unstages it again.
       map('<leader>ga', guarded(gs.stage_hunk, 'Stage hunk'), 'Git stage hunk (toggle)')
