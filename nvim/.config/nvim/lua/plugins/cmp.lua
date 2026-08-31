@@ -99,6 +99,9 @@ return {
       local cmdline_mapping = cmp.mapping.preset.cmdline({
         ["<C-j>"] = { c = cmp.mapping.select_next_item() },
         ["<C-k>"] = { c = cmp.mapping.select_prev_item() },
+        -- The cmdline preset confirms with `select = false`, which does nothing
+        -- until an entry is picked. Take the first one, as insert mode does.
+        ["<C-y>"] = { c = cmp.mapping.confirm({ select = true }) },
         -- The cmdline preset maps C-n/C-p to cmp selection by default.
         -- Use fallback to restore Vim's default: command history navigation.
         ["<C-n>"] = { c = function(fallback) fallback() end },
