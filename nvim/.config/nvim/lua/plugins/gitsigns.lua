@@ -310,8 +310,13 @@ return {
       map('<leader>g]', function() step_base(-1) end, 'Git base one commit newer')
       map('<leader>gC', reset_base, 'Git base back to default')
 
-      map('<leader>tg', gs.toggle_current_line_blame, '[T]oggle [G]it blame line')
-      map('<leader>ts', gs.toggle_signs, '[T]oggle Git [Signs]')
+      -- Both return the new state, which goes to the shared toggle report.
+      map('<leader>tg', function()
+        Toggle_report('git blame line', gs.toggle_current_line_blame())
+      end, '[T]oggle [G]it blame line')
+      map('<leader>ts', function()
+        Toggle_report('git signs', gs.toggle_signs())
+      end, '[T]oggle Git [Signs]')
     end,
   },
 

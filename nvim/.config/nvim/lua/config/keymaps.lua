@@ -107,25 +107,35 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
--- Command to toggle vim options
+-- Every <leader>t mapping reports its new state the same way.
+function Toggle_report(name, enabled)
+  vim.notify(name .. (enabled and " enabled" or " disabled"))
+end
+
+-- Flip a boolean window-local option
 -- See also https://neovim.io/doc/user/lua.html#lua-vim-options
+function Toggle_option(name)
+  local enabled = not vim.opt_local[name]:get()
+  vim.opt_local[name] = enabled
+  Toggle_report(name, enabled)
+end
+
+-- Toggle one flag of 'formatoptions'
 function Toggle_formatoption(option)
-  local action
-  if vim.opt.formatoptions:get()[option] then
-    vim.opt.formatoptions:remove(option)
-    action = " disabled"
-  else
+  local enabled = not vim.opt.formatoptions:get()[option]
+  if enabled then
     vim.opt.formatoptions:append(option)
-    action = " enabled"
+  else
+    vim.opt.formatoptions:remove(option)
   end
-  vim.notify("formatoptions " .. option .. action)
+  Toggle_report("formatoptions " .. option, enabled)
 end
 
 -- Toggle LSP diagnostics for the current buffer
 function Toggle_diagnostics()
-  local enabled = vim.diagnostic.is_enabled({ bufnr = 0 })
-  vim.diagnostic.enable(not enabled, { bufnr = 0 })
-  vim.notify("diagnostics " .. (enabled and "disabled" or "enabled"))
+  local enabled = not vim.diagnostic.is_enabled({ bufnr = 0 })
+  vim.diagnostic.enable(enabled, { bufnr = 0 })
+  Toggle_report("diagnostics", enabled)
 end
 
 -- Clear search with <esc>
@@ -133,11 +143,11 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and 
 
 -- Toggle shortcuts
 vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
-vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
-vim.keymap.set("n", "<leader>ti", "<cmd>setlocal list!<CR>", { desc = '[T]oggle L[i]stchars' })
+vim.keymap.set("n", "<leader>tl", "<cmd>lua Toggle_option('relativenumber')<CR>", { desc = '[T]oggle relative [L]ine numbers' })
+vim.keymap.set("n", "<leader>ti", "<cmd>lua Toggle_option('list')<CR>", { desc = '[T]oggle L[i]stchars' })
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
-vim.keymap.set("n", "<leader>tw", "<cmd>setlocal wrap!<CR>", { desc = '[T]oggle [W]rap mode (window)' })
-vim.keymap.set("n", "<leader>tc", "<cmd>setlocal spell!<CR>", { desc = '[T]oggle Spell [C]heck' })
+vim.keymap.set("n", "<leader>tw", "<cmd>lua Toggle_option('wrap')<CR>", { desc = '[T]oggle [W]rap mode (window)' })
+vim.keymap.set("n", "<leader>tc", "<cmd>lua Toggle_option('spell')<CR>", { desc = '[T]oggle Spell [C]heck' })
 vim.keymap.set("n", "<leader>td", Toggle_diagnostics, { desc = '[T]oggle [D]iagnostics' })
 
 -- Swedish keyboard layout

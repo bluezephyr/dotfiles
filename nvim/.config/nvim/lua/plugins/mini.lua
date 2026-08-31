@@ -7,6 +7,7 @@ local function toggle_trailspace()
   else
     trailspace.highlight()
   end
+  Toggle_report('trailspace', not vim.g.minitrailspace_disable)
 end
 
 return {
