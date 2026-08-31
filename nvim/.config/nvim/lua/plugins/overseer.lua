@@ -551,6 +551,9 @@ return {
         vim.bo[args.buf].buflisted = false
         vim.bo[args.buf].modifiable = false
         vim.bo[args.buf].readonly = true
+        -- mini.trailspace skips a buffer only for its 'buftype', and a saved log
+        -- is an ordinary file, so its highlight takes the per-buffer opt-out.
+        vim.b[args.buf].minitrailspace_disable = true
       end,
     })
 

@@ -1,4 +1,4 @@
--- Toggle mini.trailspace's highlight of trailing whitespace.
+-- Toggle mini.trailspace's highlight of trailing whitespace, in every buffer.
 local function toggle_trailspace()
   local trailspace = require('mini.trailspace')
   vim.g.minitrailspace_disable = not vim.g.minitrailspace_disable
@@ -17,18 +17,28 @@ return {
     event = "VeryLazy",
     config = function()
       require('mini.ai').setup()
-      -- require('mini.bufremove').setup()
       require('mini.surround').setup()
       require('mini.bracketed').setup()
+
       -- Disable the default `\` option-toggle prefix: it made `\` both a complete
       -- mapping (Neotree) and a prefix of 11 others, forcing a 'timeoutlen' wait.
       -- The toggles worth keeping live under <leader>t in config/keymaps.lua.
       require('mini.basics').setup({ mappings = { option_toggle_prefix = '' } })
       require('mini.operators').setup()
       require('mini.icons').setup()
-      require('mini.trailspace').setup()
+
+      -- Skip buffers with a non-empty 'buftype', where trailing space does not
+      -- matter: Overseer's live build output among them.
+      require('mini.trailspace').setup({ only_in_normal_buffers = true })
       vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' })
-      vim.keymap.set('n', '<leader>th', toggle_trailspace, { desc = '[T]oggle Whitespace [H]ighlight' })
+      vim.keymap.set('n', '<leader>tt', toggle_trailspace, { desc = '[T]oggle [T]railspace' })
+      -- Bug: mini.trailspace restores the highlight on InsertLeave but not on
+      -- TermLeave, so a file opened from an fzf-lua picker stays unhighlighted.
+      -- Workaround: restore it on TermLeave.
+      vim.api.nvim_create_autocmd('TermLeave', {
+        group = vim.api.nvim_create_augroup('trailspace_termleave', { clear = true }),
+        callback = function() require('mini.trailspace').highlight() end,
+      })
 
       local statusline = require('mini.statusline')
       statusline.setup({
