@@ -134,6 +134,7 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and 
 -- Toggle shortcuts
 vim.keymap.set("n", "<leader>tm", "<cmd>Markview toggle<cr>", { desc = "[T]oggle [M]arkview" })
 vim.keymap.set("n", "<leader>tl", "<cmd>setlocal relativenumber!<CR>", { desc = '[T]oggle relative [L]ine numbers' })
+vim.keymap.set("n", "<leader>ti", "<cmd>setlocal list!<CR>", { desc = '[T]oggle L[i]stchars' })
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
 vim.keymap.set("n", "<leader>tw", "<cmd>setlocal wrap!<CR>", { desc = '[T]oggle [W]rap mode (window)' })
 vim.keymap.set("n", "<leader>tc", "<cmd>setlocal spell!<CR>", { desc = '[T]oggle Spell [C]heck' })

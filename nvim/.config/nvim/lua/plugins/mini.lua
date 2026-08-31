@@ -1,3 +1,14 @@
+-- Toggle mini.trailspace's highlight of trailing whitespace.
+local function toggle_trailspace()
+  local trailspace = require('mini.trailspace')
+  vim.g.minitrailspace_disable = not vim.g.minitrailspace_disable
+  if vim.g.minitrailspace_disable then
+    trailspace.unhighlight()
+  else
+    trailspace.highlight()
+  end
+end
+
 return {
   -- https://github.com/echasnovski/mini.nvim/tree/main
   {
@@ -15,19 +26,9 @@ return {
       require('mini.basics').setup({ mappings = { option_toggle_prefix = '' } })
       require('mini.operators').setup()
       require('mini.icons').setup()
-      require('mini.trailspace').setup({
-        vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' }),
-        vim.keymap.set('n', '<leader>th', function()
-          local trailspace = require('mini.trailspace')
-          if vim.g.minitrailspace_disable then
-            vim.g.minitrailspace_disable = false
-            trailspace.highlight()
-          else
-            vim.g.minitrailspace_disable = true
-            trailspace.unhighlight()
-          end
-        end, { desc = '[T]oggle Whitespace [H]ighlight' }),
-      })
+      require('mini.trailspace').setup()
+      vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' })
+      vim.keymap.set('n', '<leader>th', toggle_trailspace, { desc = '[T]oggle Whitespace [H]ighlight' })
 
       local statusline = require('mini.statusline')
       statusline.setup({
