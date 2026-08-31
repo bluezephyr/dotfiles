@@ -321,5 +321,25 @@ return {
       end,
       desc = "LSP: Show All Diagnostics",
     },
+    {
+      "z=",
+      function()
+        -- Sits at the cursor like the completion popup. `fullscreen` has to go:
+        -- it pins the window to the editor, ignoring `relative`.
+        require("fzf-lua").spell_suggest({
+          winopts = {
+            fullscreen = false,
+            relative = "cursor",
+            row = 1,
+            col = 0,
+            height = 12,
+            width = 40,
+            backdrop = 100,
+            preview = { hidden = true },
+          },
+        })
+      end,
+      desc = "Spelling suggestions",
+    },
   },
 }
