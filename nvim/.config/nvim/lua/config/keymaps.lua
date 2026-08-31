@@ -147,7 +147,7 @@ vim.keymap.set("n", "<leader>tl", "<cmd>lua Toggle_option('relativenumber')<CR>"
 vim.keymap.set("n", "<leader>ti", "<cmd>lua Toggle_option('list')<CR>", { desc = '[T]oggle L[i]stchars' })
 vim.keymap.set("n", "<leader>ta", "<cmd>lua Toggle_formatoption('a')<CR>", { desc = '[T]oggle [A]uto format (a)' })
 vim.keymap.set("n", "<leader>tw", "<cmd>lua Toggle_option('wrap')<CR>", { desc = '[T]oggle [W]rap mode (window)' })
-vim.keymap.set("n", "<leader>tc", "<cmd>lua Toggle_option('spell')<CR>", { desc = '[T]oggle Spell [C]heck' })
+vim.keymap.set("n", "<leader>ts", "<cmd>lua Toggle_option('spell')<CR>", { desc = '[T]oggle [S]pell check' })
 vim.keymap.set("n", "<leader>td", Toggle_diagnostics, { desc = '[T]oggle [D]iagnostics' })
 
 -- Swedish keyboard layout

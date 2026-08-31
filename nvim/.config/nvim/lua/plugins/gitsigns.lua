@@ -314,9 +314,9 @@ return {
       map('<leader>tg', function()
         Toggle_report('git blame line', gs.toggle_current_line_blame())
       end, '[T]oggle [G]it blame line')
-      map('<leader>ts', function()
+      map('<leader>tG', function()
         Toggle_report('git signs', gs.toggle_signs())
-      end, '[T]oggle Git [Signs]')
+      end, '[T]oggle [G]it signs')
     end,
   },
 
