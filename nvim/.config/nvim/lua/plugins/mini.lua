@@ -25,7 +25,9 @@ return {
       -- mapping (Neotree) and a prefix of 11 others, forcing a 'timeoutlen' wait.
       -- The toggles worth keeping live under <leader>t in config/keymaps.lua.
       require('mini.basics').setup({ mappings = { option_toggle_prefix = '' } })
-      require('mini.operators').setup()
+      -- No `replace`: its `gr` prefix shadows the LSP references picker, and
+      -- takes Neovim's own gr* LSP mappings with it.
+      require('mini.operators').setup({ replace = { prefix = '' } })
       require('mini.icons').setup()
 
       -- Skip buffers with a non-empty 'buftype', where trailing space does not
