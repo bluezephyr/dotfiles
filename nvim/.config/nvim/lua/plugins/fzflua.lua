@@ -303,6 +303,18 @@ return {
       desc = "LSP: Find all locations",
     },
     {
+      "gd",
+      function()
+        require("fzf-lua").lsp_definitions({
+          winopts = {
+            fullscreen = true,
+            preview = { layout = "vertical" },
+          },
+        })
+      end,
+      desc = "LSP: Definitions",
+    },
+    {
       "gr",
       function()
         require("fzf-lua").lsp_references({

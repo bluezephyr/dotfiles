@@ -46,7 +46,6 @@ return {
 
         map('<leader>sF', '<cmd>Format<CR>', 'Format current file')
 
-        map('gd', vim.lsp.buf.definition, 'Goto Definition')
         map('gD', vim.lsp.buf.declaration, 'Goto Declaration')
         map('gt', vim.lsp.buf.type_definition, 'Goto Type definition')
         -- map('gr', require('telescope.builtin').lsp_references, 'Goto References')
