@@ -11,6 +11,7 @@ Single application:
   %(prog)s <application_name> <installer_type> [attributes...]
 
 Other modes:
+  %(prog)s      list the installed applications and their versions
   %(prog)s -l   list every application, its installers and installed version
   %(prog)s -e   print an example list file, e.g. `%(prog)s -e > doc/applications.txt`
 
@@ -429,9 +430,9 @@ def installed_label(mechanism_name, app_name, spec):
     return MECHANISMS[mechanism_name].installed(app_name, spec) or "-"
 
 
-def list_apps():
-    """Print every (application, installer type) pair and what it has installed."""
-    print("Available installers:")
+def list_apps(installed=False):
+    """Print (application, installer type) pairs, all of them or only the installed ones."""
+    print("Installed applications:" if installed else "Available installers:")
     print("-" * 60)
     print(f"  {'Application':<20} {'Type':<12} {'Installed'}")
     print("-" * 60)
@@ -439,6 +440,8 @@ def list_apps():
     for app_name, app in sorted(APPS.items()):
         for mechanism_name, spec in sorted(app["installers"].items()):
             version = installed_label(mechanism_name, app_name, spec)
+            if installed and version == "-":
+                continue
             print(f"  {app_name:<20} {mechanism_name:<12} {version}")
 
 
@@ -511,7 +514,8 @@ def main():
             parser.error("Interactive mode requires at least <application_name> and <installer_type>")
         installations = [(args.app_args[0], args.app_args[1], args.app_args[2:])]
     else:
-        parser.error("Mode selection required")
+        list_apps(installed=True)
+        return
 
     jobs = [job for job in (resolve(*item) for item in installations) if job]
     if not jobs:
