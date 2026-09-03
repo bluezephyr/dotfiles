@@ -22,8 +22,13 @@ return {
       if not selected or not selected[1] then
         return
       end
-      vim.fn.setreg("+", selected[1])
-      vim.notify("Copied: " .. selected[1])
+      -- An entry carries ANSI colours and a devicon ahead of its own separator,
+      -- none of which belong in the register.
+      local utils = require("fzf-lua.utils")
+      local entry = utils.strip_ansi_coloring(selected[1])
+      entry = entry:match(".*" .. utils.nbsp .. "(.+)$") or entry
+      vim.fn.setreg("+", entry)
+      vim.notify("Copied: " .. entry)
     end
 
     return {
