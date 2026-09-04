@@ -121,6 +121,22 @@ local function ensure_commits(bufnr)
   return true
 end
 
+-- Pressing it again closes the revision window; gitsigns' diffthis is a no-op
+-- once the window is already in diff mode.
+local function toggle_diff()
+  local closed = false
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+    if name:match('^gitsigns:') and vim.wo[win].diff then
+      vim.api.nvim_win_close(win, true)
+      closed = true
+    end
+  end
+  if not closed then
+    require('gitsigns').diffthis()
+  end
+end
+
 local function hunk_entries(bufnr, hunks, staged, entries)
   for _, hunk in ipairs(hunks or {}) do
     local kind = hunk.type == 'add' and 'Added'
@@ -370,7 +386,7 @@ return {
 
       map('<leader>gb', blame_line_focused, 'Git blame line full')
       map('<leader>ge', gs.blame, 'Git blame')
-      map('<leader>gd', gs.diffthis, 'Git diff this')
+      map('<leader>gd', toggle_diff, 'Git diff this (toggle)')
       map('<leader>gp', gs.preview_hunk_inline, 'Git preview hunk inline')
       map('<leader>gh', preview_hunk_focused, 'Git preview hunk')
       map('<leader>gr', guarded(gs.reset_hunk, 'Reset hunk'), 'Git reset hunk')
