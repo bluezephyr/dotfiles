@@ -118,6 +118,13 @@ local function yank_path(picker, item)
   Snacks.notify(("Yanked to register `+`:\n```\n%s\n```"):format(path), { title = "Snacks Picker" })
 end
 
+local function pick_reference()
+  Snacks.picker.files({ dirs = reference_dirs, hidden = true, follow = true })
+end
+
+-- Named so the dashboard reaches the same picker as the keymap.
+vim.api.nvim_create_user_command('PickReference', pick_reference, { desc = 'Reference (index and RFCs)' })
+
 -- Matches what the buffers picker lists: every listed buffer but this one.
 local function other_buffers()
   local current = vim.api.nvim_get_current_buf()
@@ -243,10 +250,8 @@ return {
     },
     {
       "<leader>fi",
-      function()
-        Snacks.picker.files({ dirs = reference_dirs, hidden = true, follow = true })
-      end,
-      desc = "Reference (index and RFCs)",
+      pick_reference,
+      desc = "Index (and RFCs)",
     },
     {
       "<leader>ff",
