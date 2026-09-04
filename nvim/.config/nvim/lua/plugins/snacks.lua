@@ -26,13 +26,6 @@ return {
     end
   end,
   opts = {
-    picker = {
-      layout = {
-        cycle = true,
-        preset = "vertical",
-        fullscreen = true,
-      },
-    },
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
@@ -42,7 +35,7 @@ return {
     dashboard = {
       enabled = true,
       preset = {
-        -- Defaults to a picker that supports `fzf-lua`, `telescope.nvim` and `mini.pick`
+        -- nil falls through to the snacks picker.
         ---@type fun(cmd:string, opts:table)|nil
         pick = nil,
         -- Used by the `keys` section to show keymaps.

@@ -36,7 +36,7 @@ return {
       vim.keymap.set('n', '<leader>sb', require('mini.trailspace').trim, { desc = 'Strip Whitespaces' })
       vim.keymap.set('n', '<leader>tt', toggle_trailspace, { desc = '[T]oggle [T]railspace' })
       -- Bug: mini.trailspace restores the highlight on InsertLeave but not on
-      -- TermLeave, so a file opened from an fzf-lua picker stays unhighlighted.
+      -- TermLeave, so a file opened from a terminal buffer stays unhighlighted.
       -- Workaround: restore it on TermLeave.
       vim.api.nvim_create_autocmd('TermLeave', {
         group = vim.api.nvim_create_augroup('trailspace_termleave', { clear = true }),

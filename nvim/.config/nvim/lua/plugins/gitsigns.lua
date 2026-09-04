@@ -121,29 +121,50 @@ local function ensure_commits(bufnr)
   return true
 end
 
+local function format_commit(item)
+  return {
+    { item.sha,                                  'Identifier' },
+    { '  ' },
+    { Snacks.picker.util.align(item.when, 14),   'Comment' },
+    { ' ' },
+    { item.subject },
+  }
+end
+
+local function preview_commit(ctx)
+  return Snacks.picker.preview.cmd(ctx.item.cmd, ctx)
+end
+
+local function confirm_commit(picker, item)
+  picker:close()
+  apply_base(item.bufnr, item.index)
+end
+
 local function pick_base()
   local bufnr = vim.api.nvim_get_current_buf()
   if not ensure_commits(bufnr) then
     return
   end
   local path = vim.api.nvim_buf_get_name(bufnr)
-  local entries, by_sha = {}, {}
+  local dir = vim.fs.dirname(path)
+  local items = {}
   for i, c in ipairs(state[bufnr].commits) do
-    entries[#entries + 1] = ('%s  %-14s %s'):format(c.sha, c.when, c.subject)
-    by_sha[c.sha] = i
+    items[#items + 1] = {
+      text = ('%s %s %s'):format(c.sha, c.when, c.subject),
+      sha = c.sha,
+      when = c.when,
+      subject = c.subject,
+      index = i,
+      bufnr = bufnr,
+      cmd = { 'git', '-C', dir, 'show', '--color=always', c.sha, '--', path },
+    }
   end
-  require('fzf-lua').fzf_exec(entries, {
-    prompt = 'Base> ',
-    preview = ('git -C %s show --color=always {1} -- %s'):format(
-      vim.fn.shellescape(vim.fs.dirname(path)), vim.fn.shellescape(path)),
-    actions = {
-      ['default'] = function(selected)
-        local index = selected[1] and by_sha[selected[1]:match('^(%S+)')]
-        if index then
-          apply_base(bufnr, index)
-        end
-      end,
-    },
+  Snacks.picker.pick({
+    title = 'Base',
+    items = items,
+    format = format_commit,
+    preview = preview_commit,
+    confirm = confirm_commit,
   })
 end
 

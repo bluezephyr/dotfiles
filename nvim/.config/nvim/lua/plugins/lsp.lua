@@ -42,7 +42,6 @@ return {
           vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
-        -- More keymaps are located in the fzflua.lua file
 
         map('<leader>sF', '<cmd>Format<CR>', 'Format current file')
 

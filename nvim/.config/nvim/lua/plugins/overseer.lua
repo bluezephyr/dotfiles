@@ -7,7 +7,7 @@
 -- <leader>fl, so they stay off the buffer list.
 local LOG_ROOT = vim.fn.stdpath("state") .. "/overseer_out"
 local KEEP_LOGS = 50
-local PICKER_PROMPT = "Builds> "
+local PICKER_TITLE = "Builds"
 -- Tinting only 'Normal' would colour the text area alone: the region past the
 -- last line and the number and sign columns are painted by their own groups,
 -- which keep their own background. Each of these gets a derived group with the
@@ -429,8 +429,12 @@ local function toggle_build_output()
   end
 end
 
--- fzf hands back the entry string, so the picker maps labels to items itself
--- rather than relying on fzf-lua parsing a path out of the entry text.
+local function confirm_log(picker, entry)
+  picker:close()
+  open_item(entry.item)
+end
+
+-- The picker hands back the item itself, so repeated labels need no suffix.
 local function pick_log()
   local items = get_build_items()
   if #items == 0 then
@@ -438,47 +442,22 @@ local function pick_log()
     return
   end
 
-  local lookup, entries = {}, {}
+  local entries = {}
   for _, item in ipairs(items) do
-    local entry = item.label
-    -- Labels repeat when one build runs twice in a minute; keep them unique.
-    local n = 1
-    while lookup[entry] do
-      n = n + 1
-      entry = ("%s (%d)"):format(item.label, n)
-    end
-    lookup[entry] = item
-    entries[#entries + 1] = entry
+    entries[#entries + 1] = {
+      text = item.label,
+      file = item.path,
+      buf = item.bufnr,
+      item = item,
+    }
   end
 
-  local builtin = require("fzf-lua.previewer.builtin")
-  local Previewer = builtin.buffer_or_file:extend()
-  function Previewer:new(o, opts)
-    Previewer.super.new(self, o, opts)
-    setmetatable(self, Previewer)
-    return self
-  end
-  function Previewer:entry_to_file(entry_str)
-    local item = lookup[entry_str]
-    if item then
-      return { path = item.path, bufnr = item.bufnr, line = 0, col = 0 }
-    end
-    return Previewer.super.entry_to_file(self, entry_str)
-  end
-
-  require("fzf-lua").fzf_exec(entries, {
-    prompt = PICKER_PROMPT,
-    previewer = Previewer,
-    actions = {
-      ["default"] = function(selected)
-        local item = lookup[selected[1]]
-        if item then
-          open_item(item)
-        end
-      end,
-    },
-    -- fzf-lua's "vertical" stacks the preview underneath.
-    winopts = { preview = { layout = "vertical", vertical = "down:70%" } },
+  Snacks.picker.pick({
+    title = PICKER_TITLE,
+    items = entries,
+    format = "text",
+    preview = "file",
+    confirm = confirm_log,
   })
 end
 
