@@ -121,6 +121,58 @@ local function ensure_commits(bufnr)
   return true
 end
 
+local function hunk_entries(bufnr, hunks, staged, entries)
+  for _, hunk in ipairs(hunks or {}) do
+    local kind = hunk.type == 'add' and 'Added'
+      or hunk.type == 'delete' and 'Removed'
+      or 'Changed'
+    local line = (hunk.added.lines or {})[1] or (hunk.removed.lines or {})[1] or ''
+    entries[#entries + 1] = {
+      bufnr = bufnr,
+      lnum = hunk.added.start,
+      text = ('%-7s %-8s %s'):format(kind, staged and '(staged)' or '', vim.trim(line)),
+    }
+  end
+end
+
+local function by_position(a, b)
+  local an, bn = vim.api.nvim_buf_get_name(a.bufnr), vim.api.nvim_buf_get_name(b.bufnr)
+  if an ~= bn then
+    return an < bn
+  end
+  return a.lnum < b.lnum
+end
+
+-- gitsigns' own setqflist() and get_hunks() both stop at unstaged hunks, so
+-- the cache is read directly: the staged ones sit in a second field.
+local function collect_hunks()
+  local ok, gitsigns_cache = pcall(require, 'gitsigns.cache')
+  local entries = {}
+  if not ok then
+    return entries
+  end
+  for bufnr, bcache in pairs(gitsigns_cache.cache or {}) do
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      hunk_entries(bufnr, bcache.hunks, false, entries)
+      hunk_entries(bufnr, bcache.hunks_staged, true, entries)
+    end
+  end
+  table.sort(entries, by_position)
+  return entries
+end
+
+-- Every attached buffer, so each one's own diff base applies. Reaching every
+-- changed file instead would mean always diffing the index.
+local function pick_hunks()
+  local entries = collect_hunks()
+  if #entries == 0 then
+    vim.notify('No hunks in the open buffers', vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setqflist({}, ' ', { items = entries, title = 'Hunks' })
+  Snacks.picker.qflist()
+end
+
 local function format_commit(item)
   return {
     { item.sha,                                  'Identifier' },
@@ -344,6 +396,10 @@ return {
   config = function(_, opts)
     require('gitsigns').setup(opts)
     define_base_hl()
+
+    -- Global: it collects from every attached buffer, so the buffer in the
+    -- current window need not be one of them.
+    vim.keymap.set('n', '<leader>gq', pick_hunks, { desc = 'Git hunks in open buffers' })
 
     local group = vim.api.nvim_create_augroup('gitsigns_diff_base', { clear = true })
     vim.api.nvim_create_autocmd('ColorScheme', { group = group, callback = define_base_hl })
