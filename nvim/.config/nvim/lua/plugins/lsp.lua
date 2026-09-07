@@ -31,7 +31,9 @@ return {
 
   },
   config = function()
-    vim.lsp.config('gitlab_duo', { enabled = false })
+    -- Shipped by nvim-lspconfig and unwanted here; the enable below covers only
+    -- the listed servers, so this is insurance against anything else enabling it.
+    vim.lsp.enable('gitlab_duo', false)
 
     --  This function gets run when an LSP connects to a particular buffer.
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -100,19 +102,11 @@ return {
       end
     })
 
-    -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-    -- local capabilities = vim.lsp.protocol.make_client_capabilities()
-    -- capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
     -- Setup mason so it can manage external tooling
     require('mason').setup()
-    local lspconfig = require("lspconfig")
 
-    -- See `:help lspconfig-all` for a list of all the pre-configured LSPs
-    -- Some languages (like typescript) have entire language plugins that can be useful:
-    --    https://github.com/pmizio/typescript-tools.nvim
-
-    -- Enable the following language servers
+    -- Servers to configure and enable. See `:help lspconfig-all` for the
+    -- pre-configured ones nvim-lspconfig ships.
     local servers = {
       clangd = {},
       jsonls = {},
@@ -127,42 +121,35 @@ return {
             completion = {
               callSnippet = 'Replace',
             },
-            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+            -- Ignore Lua_LS's noisy `missing-fields` warnings
             diagnostics = { disable = { 'missing-fields' } },
           },
         },
       },
     }
 
-    local ensure_installed = vim.tbl_keys(servers or {})
+    -- nvim-cmp supports additional completion capabilities, so broadcast that
+    -- to every server.
+    vim.lsp.config('*', {
+      capabilities = require('cmp_nvim_lsp').default_capabilities(),
+    })
+
+    for name, config in pairs(servers) do
+      vim.lsp.config(name, config)
+    end
+    vim.lsp.enable(vim.tbl_keys(servers))
+
+    local ensure_installed = vim.tbl_keys(servers)
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-    ---@diagnostic disable-next-line: missing-fields
+    -- Only for :LspInstall and the mason/lspconfig name translation. Enabling
+    -- is done above: automatic_enable would also start every other installed
+    -- package that happens to ship an LSP config, stylua among them.
     require('mason-lspconfig').setup {
-      ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-      automatic_installation = false,
-      handlers = {
-        function(server_name)
-          local server = servers[server_name] or {}
-          -- This handles overriding only values explicitly passed
-          -- by the server configuration above. Useful when disabling
-          -- certain features of an LSP (for example, turning off formatting for ts_ls)
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-          require('lspconfig')[server_name].setup(server)
-        end,
-      },
+      automatic_enable = false,
     }
-    -- Turn on lsp status information
-    -- require('fidget').setup()
-
-    -- Example custom configuration for lua
-    --
-    -- Make runtime files discoverable to the server
-    local runtime_path = vim.split(package.path, ';')
-    table.insert(runtime_path, 'lua/?.lua')
-    table.insert(runtime_path, 'lua/?/init.lua')
   end
 }
