@@ -102,6 +102,18 @@ return {
       end
     })
 
+    -- Close LSP popups with <Esc> too, not just the q Neovim binds. The window
+    -- is marked only after it opens, so bind on entry rather than on creation.
+    vim.api.nvim_create_autocmd('WinEnter', {
+      group = vim.api.nvim_create_augroup('lsp_preview_esc', { clear = true }),
+      callback = function()
+        if vim.w[vim.api.nvim_get_current_win()].lsp_floating_bufnr then
+          vim.keymap.set('n', '<Esc>', '<cmd>quit!<cr>',
+            { buffer = 0, silent = true, desc = 'Close LSP popup' })
+        end
+      end,
+    })
+
     -- Setup mason so it can manage external tooling
     require('mason').setup()
 
