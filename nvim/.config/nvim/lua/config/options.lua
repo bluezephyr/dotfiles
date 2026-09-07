@@ -45,6 +45,7 @@ local options = {
   colorcolumn = "90",
   title = true,
   cursorline = true,                       -- highlight the current line
+  winborder = "rounded",                   -- frame every float that does not bring its own border
 
   timeoutlen = 500,                        -- time to wait for a mapped sequence to complete (in milliseconds)
   timeout = true,
@@ -61,3 +62,38 @@ end
 vim.cmd "set whichwrap+=<,>,[,],h,l"
 vim.cmd [[set iskeyword+=-]]
 vim.cmd [[set formatoptions-=cro]] -- TODO: this doesn't seem to work
+
+-- Floats must stand out from the buffer: a theme's own NormalFloat often sits a
+-- shade from Normal and collides with CursorLine. Derived, so a colorscheme
+-- switch keeps the contrast instead of the previous theme's colors.
+local FLOAT_CONTRAST = 0.30
+
+-- Moves one channel toward black on a dark background, toward white on a light one.
+local function shift_channel(value, lighten)
+  local target = lighten and 255 or 0
+  return math.floor(value + (target - value) * FLOAT_CONTRAST + 0.5)
+end
+
+local function shift_color(color, lighten)
+  local r = shift_channel(math.floor(color / 65536) % 256, lighten)
+  local g = shift_channel(math.floor(color / 256) % 256, lighten)
+  local b = shift_channel(color % 256, lighten)
+  return r * 65536 + g * 256 + b
+end
+
+local function style_floats()
+  local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  if not normal.bg then
+    return
+  end
+  -- Function carries the theme's blue accent, brighter than the Comment grey
+  -- most themes give FloatBorder.
+  local accent = vim.api.nvim_get_hl(0, { name = "Function", link = false }).fg
+  local bg = shift_color(normal.bg, vim.o.background == "light")
+  vim.api.nvim_set_hl(0, "NormalFloat", { fg = normal.fg, bg = bg })
+  vim.api.nvim_set_hl(0, "FloatBorder", { fg = accent, bg = bg })
+  vim.api.nvim_set_hl(0, "FloatTitle", { fg = accent, bg = bg, bold = true })
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", { callback = style_floats })
+style_floats()

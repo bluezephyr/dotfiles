@@ -50,7 +50,6 @@ return {
         floating = {
           max_height = nil,
           max_width = nil,
-          border = "single",
           mappings = {
             close = { "q", "<Esc>" },
           },
