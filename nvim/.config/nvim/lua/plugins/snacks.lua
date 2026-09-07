@@ -101,7 +101,8 @@ return {
       "<leader>r",
       function()
         pcall(function()
-          require("snacks").dashboard.open()
+          -- The picker opens files into the dashboard's window; keep it a normal one.
+          require("snacks").dashboard.open({ win = vim.api.nvim_get_current_win() })
         end)
       end,
       desc = "Open Snacks Dashboard",
