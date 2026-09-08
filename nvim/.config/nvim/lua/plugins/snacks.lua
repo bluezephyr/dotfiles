@@ -43,14 +43,14 @@ return {
         -- When using a function, the `items` argument are the default keymaps.
         ---@type snacks.dashboard.Item[]
         keys = {
-          { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
-          { icon = " ", key = "i", desc = "Reference", action = ":PickReference" },
           { icon = " ", key = "n", desc = "New File", action = ":ene" },
-          { icon = " ", key = "g", desc = "Grep Text", action = ":lua Snacks.dashboard.pick('live_grep')", },
+          { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
           { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')", },
-          { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})", },
+          { icon = " ", key = "g", desc = "Grep Text", action = ":lua Snacks.dashboard.pick('live_grep')", },
+          { icon = " ", key = "i", desc = "Index", action = ":PickReference" },
           { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil, },
           { icon = "󰟾 ", key = "M", desc = "Mason", action = ":Mason" },
+          { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})", },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
         },
       },
@@ -98,7 +98,7 @@ return {
       desc = "Close buffer",
     },
     {
-      "<leader>r",
+      "<leader>h",
       function()
         pcall(function()
           -- The picker opens files into the dashboard's window; keep it a normal one.
