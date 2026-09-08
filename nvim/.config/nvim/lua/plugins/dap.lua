@@ -11,22 +11,18 @@ return {
       local dap = require("dap")
       local mason_nvim_dap = require("mason-nvim-dap")
       local keymap = vim.keymap.set
-      local opts = { noremap = true, silent = true }
 
       -- require("nvim-dap-virtual-text").setup({})
 
       ---- DAP ui ----
       dapui.setup({
-        icons = { expanded = "▾", collapsed = "▸" },
         mappings = {
-          expand = { "<CR>", "<2-LeftMouse>" },
           open = "o",
           remove = "d",
           edit = "e",
           repl = "r",
           toggle = "t",
         },
-        expand_lines = true,
         layouts = {
           {
             elements = {
@@ -47,22 +43,9 @@ return {
             position = "bottom",
           },
         },
-        floating = {
-          max_height = nil,
-          max_width = nil,
-          mappings = {
-            close = { "q", "<Esc>" },
-          },
-        },
-        windows = { indent = 2 },
-        render = {
-          indent = 1,
-          max_type_length = nil,
-        },
       })
 
       ---- DAP ----
-      dap.set_log_level("TRACE")
       dap.listeners.before.launch.dapui = function()
         dapui.open()
       end
@@ -94,14 +77,14 @@ return {
       keymap('n', '<F11>', function() dap.step_into() end, { desc = "DAP: step into" })
       keymap('n', '<F8>', function() dap.step_out() end, { desc = "DAP: step out" })
       keymap('n', '<F9>', function() dap.toggle_breakpoint() end, { desc = "DAP: toggle breakpoint" })
-      keymap('n', '<F4>', function() dap.terminate({ cb = dapui.close() }) end, { desc = "DAP: terminate" })
+      keymap('n', '<F4>', function() dap.terminate({ on_done = dapui.close }) end, { desc = "DAP: terminate" })
       keymap('n', '<F6>', function() dap.run_to_cursor() end, { desc = "DAP: run to cursor" })
       keymap('n', '<Leader>dr', function() dap.run_to_cursor() end, { desc = "DAP: run to cursor" })
       keymap('n', '<Leader>dR', function() dap.restart() end, { desc = "DAP: restart" })
       keymap('n', '<Leader>dj', function() dap.down() end, { desc = "DAP: callstack down" })
       keymap('n', '<Leader>dk', function() dap.up() end, { desc = "DAP: callstack up" })
       keymap('n', '<Leader>do', function() dapui.open() end, { desc = "DAP: open UI" })
-      keymap('n', '<Leader>dc', function() dapui.close() end, { desc = "DAP: open UI" })
+      keymap('n', '<Leader>dc', function() dapui.close() end, { desc = "DAP: close UI" })
 
       -- Keymap: Print variable under cursor in hex using gdb
       keymap('n', '<leader>dx', function()
@@ -115,16 +98,10 @@ return {
       end, { desc = "Print array in hex" })
 
       keymap({ 'n', 'v' }, '<M-e>', function()
-        require('dapui').eval()
+        dapui.eval()
       end, { desc = "Show variable value" })
 
-      -- keymap("n", "<Leader>dw", "<CMD>lua require('dapui').float_element('watches', { enter = true })<CR>", opts)
-      -- keymap("n", "<Leader>ds", "<CMD>lua require('dapui').float_element('scopes', { enter = true })<CR>", opts)
-      -- keymap("n", "<Leader>dr", "<CMD>lua require('dapui').float_element('repl', { enter = true })<CR>", opts)
-
       ---- DAP language adapters ----
-      require("mason").setup()
-
       -- Make sure to use the nvim_dap adapter name (see
       -- https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/source.lua)
       local adapters = {
@@ -133,16 +110,11 @@ return {
         'codelldb',
       }
 
+      -- Empty, but present: without a handlers table no adapter is set up at
+      -- all, and an empty one sends every adapter through default_setup.
       mason_nvim_dap.setup({
         ensure_installed = adapters,
-        automatic_installation = false,
-        handlers = {
-          function(config)
-            -- all sources with no handler get passed here
-            -- Keep original functionality
-            mason_nvim_dap.default_setup(config)
-          end,
-        },
+        handlers = {},
       })
 
       -- Add the native GDB adapter - requires gdb 14 or greater
