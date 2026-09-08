@@ -3,7 +3,5 @@
 return {
   'folke/which-key.nvim',
   event = 'VeryLazy',
-  opts = {
-    show_help = true,
-  },
+  opts = {},
 }
