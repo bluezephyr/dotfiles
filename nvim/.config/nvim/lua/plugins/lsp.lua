@@ -1,6 +1,27 @@
 -- LSP settings
 -- LSP Configuration & Plugins
 -- See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/
+
+-- Popups ---------------------------------------------------------------------
+-- Closing is shared, in lua/popup. This is the part that is LSP's own.
+local popup = require('popup')
+
+-- open_floating_preview records its window on the buffer it was opened from.
+local function popup_win()
+  local win = vim.b.lsp_floating_preview
+  if win and vim.api.nvim_win_is_valid(win) then
+    return win
+  end
+end
+
+-- The request is answered asynchronously, so the window appears after the call.
+local function show_popup(open)
+  local win, origin = popup.open(open, popup_win)
+  if win then
+    popup.bind_close_keys(win, origin)
+  end
+end
+
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
@@ -54,12 +75,12 @@ return {
         map('gh', ":LspClangdSwitchSourceHeader<CR>", 'Switch header/source')
 
         -- See `:help K` for why this keymap
-        map('K', vim.lsp.buf.hover, 'Hover Documentation')
+        map('K', function() show_popup(vim.lsp.buf.hover) end, 'Hover Documentation')
 
         map('<leader>sr', vim.lsp.buf.rename, 'Rename')
         map('<leader>sa', vim.lsp.buf.code_action, 'Code Action')
-        map('<leader>sk', vim.lsp.buf.signature_help, 'Signature Documentation')
-        map('<leader>sd', vim.diagnostic.open_float, 'Show Diagnostics')
+        map('<leader>sk', function() show_popup(vim.lsp.buf.signature_help) end, 'Signature Documentation')
+        map('<leader>sd', function() show_popup(vim.diagnostic.open_float) end, 'Show Diagnostics')
 
         -- Create a command `:Format` local to the LSP buffer
         vim.api.nvim_buf_create_user_command(0, 'Format', function(_)
@@ -100,18 +121,6 @@ return {
           })
         end
       end
-    })
-
-    -- Close LSP popups with <Esc> too, not just the q Neovim binds. The window
-    -- is marked only after it opens, so bind on entry rather than on creation.
-    vim.api.nvim_create_autocmd('WinEnter', {
-      group = vim.api.nvim_create_augroup('lsp_preview_esc', { clear = true }),
-      callback = function()
-        if vim.w[vim.api.nvim_get_current_win()].lsp_floating_bufnr then
-          vim.keymap.set('n', '<Esc>', '<cmd>quit!<cr>',
-            { buffer = 0, silent = true, desc = 'Close LSP popup' })
-        end
-      end,
     })
 
     -- Setup mason so it can manage external tooling

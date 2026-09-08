@@ -262,6 +262,10 @@ local function reset_base()
   end
 end
 
+-- Popups ---------------------------------------------------------------------
+-- Closing is shared, in lua/popup. This is the part that is gitsigns' own.
+local popup = require('popup')
+
 -- gitsigns marks each popup window with the id of the popup it holds.
 local function popup_win(id)
   for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -271,36 +275,30 @@ local function popup_win(id)
   end
 end
 
--- Popups arrive only once their content has been fetched, so decorating one
--- means waiting for the window to appear. Unfocused unless asked: gitsigns
--- closes an unfocused popup on the next cursor move, the way hover does.
+-- Unfocused unless asked: gitsigns closes an unfocused popup on the next
+-- cursor move, the way hover does.
 local function show_popup(open, id, decorate, focus)
-  local origin = vim.api.nvim_get_current_win()
-  open()
-  local win
-  vim.wait(1000, function()
-    win = popup_win(id)
-    return win ~= nil
-  end, 20)
+  local win, origin = popup.open(open, function()
+    return popup_win(id)
+  end)
   if not win then
     return
   end
   if focus then
     vim.api.nvim_set_current_win(win)
   end
-  -- Alongside the q that gitsigns binds. Buffer-local, so it wins over any
-  -- global <Esc> mapping while the popup has focus.
-  vim.keymap.set('n', '<Esc>', '<cmd>quit!<cr>',
-    { buffer = vim.api.nvim_win_get_buf(win), silent = true, desc = 'Close popup' })
+  popup.bind_close_keys(win, origin)
   if decorate then
     decorate(win, origin)
   end
 end
 
+-- Opens gitsigns' own hunk preview popup.
 local function open_hunk_popup()
   require('gitsigns').preview_hunk()
 end
 
+-- Opens gitsigns' own full blame popup.
 local function open_blame_popup()
   require('gitsigns').blame_line({ full = true })
 end
