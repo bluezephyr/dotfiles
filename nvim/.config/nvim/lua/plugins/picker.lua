@@ -34,6 +34,7 @@ local function option_items()
   return items
 end
 
+-- Renders one option row, colouring booleans by value.
 local function format_option(item)
   local value_hl = "Comment"
   if item.value == true then
@@ -57,6 +58,7 @@ local function parse_option(item, input)
   return input
 end
 
+-- Prompts for a new value and applies it in the given scope.
 local function set_option(item, scope)
   local prompt = ("%s (%s) = "):format(item.name, scope)
   vim.ui.input({ prompt = prompt, default = tostring(item.value) }, function(input)
@@ -77,16 +79,19 @@ local function set_option(item, scope)
   end)
 end
 
+-- Applies the picked option to the current buffer or window.
 local function confirm_option(picker, item)
   picker:close()
   set_option(item, "local")
 end
 
+-- Applies the picked option globally.
 local function confirm_option_global(picker, item)
   picker:close()
   set_option(item, "global")
 end
 
+-- Picks a Neovim option to change.
 local function pick_options()
   Snacks.picker.pick({
     title = "Options",
@@ -118,6 +123,7 @@ local function yank_path(picker, item)
   Snacks.notify(("Yanked to register `+`:\n```\n%s\n```"):format(path), { title = "Snacks Picker" })
 end
 
+-- Picks a file from the reference trees.
 local function pick_reference()
   Snacks.picker.files({ dirs = reference_dirs, hidden = true, follow = true })
 end
@@ -145,6 +151,7 @@ local function pick_buffers()
   Snacks.picker.buffers({ current = false, auto_confirm = true })
 end
 
+-- Picks from every kind of LSP location at once.
 local function pick_lsp_locations()
   Snacks.picker.pick({ title = "Locations", multi = lsp_locations })
 end

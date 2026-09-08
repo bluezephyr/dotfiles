@@ -73,6 +73,7 @@ local function shift_channel(value, lighten)
   return math.floor(value + (target - value) * FLOAT_CONTRAST + 0.5)
 end
 
+-- Moves all three channels of a colour toward black or white.
 local function shift_color(color, lighten)
   local r = shift_channel(math.floor(color / 65536) % 256, lighten)
   local g = shift_channel(math.floor(color / 256) % 256, lighten)
@@ -80,6 +81,7 @@ local function shift_color(color, lighten)
   return r * 65536 + g * 256 + b
 end
 
+-- Repaints the float highlights so they contrast with the theme.
 local function style_floats()
   local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
   if not normal.bg then

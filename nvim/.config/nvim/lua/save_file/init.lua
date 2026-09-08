@@ -1,5 +1,6 @@
 local M = {}
 
+-- Writes the buffer, asking for a name when it has none.
 function M.save_file()
   local name = vim.api.nvim_buf_get_name(0)
   if name == "" then

@@ -13,6 +13,7 @@ local base_hl = ''
 -- buffer -> { commits = {...}, index = n }. Index 0 is the default base.
 local state = {}
 
+-- Derives the sign and winbar highlights used while the base is not HEAD.
 local function define_base_hl()
   local accent = vim.api.nvim_get_hl(0, { name = ACCENT, link = false }).fg
   local parts = {}
@@ -57,6 +58,7 @@ local function file_commits(path)
   return commits
 end
 
+-- The commit this buffer is diffed against, or nil for the default base.
 local function current_commit(bufnr)
   local st = state[bufnr]
   if st and st.index > 0 then
@@ -64,6 +66,7 @@ local function current_commit(bufnr)
   end
 end
 
+-- Tints a window and names its base in the winbar, or clears both.
 local function decorate_win(win)
   local commit = current_commit(vim.api.nvim_win_get_buf(win))
   if commit then
@@ -83,6 +86,7 @@ local function decorate_win(win)
   end
 end
 
+-- Re-decorates every non-floating window in the tab.
 local function sweep_bases()
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if vim.api.nvim_win_get_config(win).relative == '' then
@@ -137,6 +141,7 @@ local function toggle_diff()
   end
 end
 
+-- Appends one quickfix entry per hunk to entries.
 local function hunk_entries(bufnr, hunks, staged, entries)
   for _, hunk in ipairs(hunks or {}) do
     local kind = hunk.type == 'add' and 'Added'
@@ -151,6 +156,7 @@ local function hunk_entries(bufnr, hunks, staged, entries)
   end
 end
 
+-- Orders quickfix entries by file name, then line.
 local function by_position(a, b)
   local an, bn = vim.api.nvim_buf_get_name(a.bufnr), vim.api.nvim_buf_get_name(b.bufnr)
   if an ~= bn then
@@ -189,6 +195,7 @@ local function pick_hunks()
   Snacks.picker.qflist()
 end
 
+-- Renders one commit row in the base picker.
 local function format_commit(item)
   return {
     { item.sha,                                  'Identifier' },
@@ -199,15 +206,18 @@ local function format_commit(item)
   }
 end
 
+-- Previews a commit by running its own diff command.
 local function preview_commit(ctx)
   return Snacks.picker.preview.cmd(ctx.item.cmd, ctx)
 end
 
+-- Applies the picked commit as this buffer's diff base.
 local function confirm_commit(picker, item)
   picker:close()
   apply_base(item.bufnr, item.index)
 end
 
+-- Picks the commit to diff this buffer against.
 local function pick_base()
   local bufnr = vim.api.nvim_get_current_buf()
   if not ensure_commits(bufnr) then
@@ -255,6 +265,7 @@ local function step_base(delta)
   vim.notify(commit and ('Base: from ' .. commit.sha) or 'Base: default')
 end
 
+-- Returns this buffer to the default diff base.
 local function reset_base()
   local bufnr = vim.api.nvim_get_current_buf()
   if current_commit(bufnr) then
@@ -368,6 +379,7 @@ return {
     },
     on_attach = function(bufnr)
       local gs = require('gitsigns')
+      -- Buffer-local keymap for the attached buffer.
       local function map(l, r, desc)
         vim.keymap.set('n', l, r, { buffer = bufnr, desc = desc })
       end

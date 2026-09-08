@@ -16,6 +16,7 @@ local TINT_GROUPS = { "Normal", "EndOfBuffer", "SignColumn", "LineNr", "CursorLi
 local build_win_hl = ""
 local MSG_NO_BUILDS = "No builds"
 
+-- Derives the highlights that tint the build window.
 local function define_tint()
   local tint = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false }).bg
   -- CursorLine matches NormalFloat in some themes and would vanish in the tint.
@@ -47,6 +48,7 @@ local saved_lines = {}
 -- <leader>bs re-anchors it deliberately.
 local build_root = nil
 
+-- Records the project root that logs are grouped under.
 local function set_build_root()
   local dir = vim.uv.cwd()
   build_root = vim.fs.root(dir, ".git") or dir
@@ -59,6 +61,7 @@ local function get_project_log_dir()
   return ("%s/%s-%s"):format(LOG_ROOT, name, vim.fn.sha256(build_root):sub(1, 8))
 end
 
+-- The log filenames in a directory, oldest first.
 local function get_log_files(dir)
   dir = dir or get_project_log_dir()
   if vim.fn.isdirectory(dir) == 0 then
@@ -70,6 +73,7 @@ local function get_log_files(dir)
   return files
 end
 
+-- Deletes all but the newest KEEP_LOGS logs, never the protected one.
 local function prune_logs(dir, protect)
   local files = get_log_files(dir)
   for i = 1, #files - KEEP_LOGS do
@@ -97,6 +101,7 @@ local function build_label(task)
   return (leaf:gsub("[^%w%-_.]", "_"))
 end
 
+-- The log path for a task, assigned once and reused.
 local function log_path_for(task)
   local path = log_path_by_task[task.id]
   if not path then
@@ -109,6 +114,7 @@ local function log_path_for(task)
   return path
 end
 
+-- The overseer task whose output lives in this buffer.
 local function get_task_for_buf(bufnr)
   for _, task in ipairs(require("overseer").list_tasks()) do
     if task:get_bufnr() == bufnr then
@@ -218,6 +224,7 @@ end
 -- Fills the build window until the first build of the session arrives.
 local placeholder_buf = nil
 
+-- The empty buffer shown until the first build of the session.
 local function get_placeholder_buf()
   if not (placeholder_buf and vim.api.nvim_buf_is_valid(placeholder_buf)) then
     placeholder_buf = vim.api.nvim_create_buf(false, true)
@@ -257,6 +264,7 @@ local build_win = nil
 local build_buf = nil
 local setting_build_buf = false
 
+-- Turns the build window's tint on or off.
 local function set_tint(win, on)
   if not win or not vim.api.nvim_win_is_valid(win) then
     return
@@ -300,6 +308,7 @@ local function release_stale_build_win()
   end
 end
 
+-- Opens an item in the build window, tracking the buffer it lands on.
 local function show_in_build_win(item)
   vim.api.nvim_set_current_win(build_win)
   setting_build_buf = true
@@ -429,6 +438,7 @@ local function toggle_build_output()
   end
 end
 
+-- Opens the picked log.
 local function confirm_log(picker, entry)
   picker:close()
   open_item(entry.item)
