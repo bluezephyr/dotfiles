@@ -1,5 +1,6 @@
 require("vim._core.ui2").enable({})
 require("config.lazy")
+require("colorscheme").restore()
 require("config.options")
 require("config.keymaps")
 require("config.filetypes")

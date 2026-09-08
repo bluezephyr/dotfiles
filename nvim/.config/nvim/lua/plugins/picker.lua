@@ -261,6 +261,13 @@ return {
       desc = "Index (and RFCs)",
     },
     {
+      "<leader>ft",
+      function()
+        Snacks.picker.colorschemes()
+      end,
+      desc = "Themes",
+    },
+    {
       "<leader>ff",
       function()
         Snacks.picker.files()
