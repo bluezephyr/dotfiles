@@ -9,15 +9,9 @@ return {
     "nvim-tree/nvim-web-devicons"
   },
 
-  -- Workaround for issue https://github.com/OXY2DEV/markview.nvim/issues/365
-  config = function()
-    require("markview").setup({
-      preview = {
-        icon_provider = 'mini'
-      },
-      experimental = {
-        check_rtp_message = false,
-      },
-    })
-  end,
+  opts = {
+    preview = {
+      icon_provider = 'mini',
+    },
+  },
 }
