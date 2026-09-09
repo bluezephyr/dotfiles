@@ -1,3 +1,5 @@
+local style = require('style')
+
 local options = {
   breakindent = true,                      -- indent text after linebreaksop
   clipboard = "unnamedplus",               -- allows neovim to access the system clipboard
@@ -9,6 +11,7 @@ local options = {
   guifont = "monospace:h17",               -- the font used in graphical neovim applications
   hlsearch = true,                         -- highlight all matches on previous search pattern
   ignorecase = true,                       -- ignore case in search patterns
+  laststatus = 0,                          -- the statusline is drawn in the tabline
   list = true,
   mouse = "a",                             -- allow the mouse to be used in neovim
   number = true,                           -- set numbered lines
@@ -67,30 +70,16 @@ vim.cmd [[set iskeyword+=-]]
 -- switch keeps the contrast instead of the previous theme's colors.
 local FLOAT_CONTRAST = 0.30
 
--- Moves one channel toward black on a dark background, toward white on a light one.
-local function shift_channel(value, lighten)
-  local target = lighten and 255 or 0
-  return math.floor(value + (target - value) * FLOAT_CONTRAST + 0.5)
-end
-
--- Moves all three channels of a colour toward black or white.
-local function shift_color(color, lighten)
-  local r = shift_channel(math.floor(color / 65536) % 256, lighten)
-  local g = shift_channel(math.floor(color / 256) % 256, lighten)
-  local b = shift_channel(color % 256, lighten)
-  return r * 65536 + g * 256 + b
-end
-
 -- Repaints the float highlights so they contrast with the theme.
 local function style_floats()
-  local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  local normal = style.hl("Normal")
   if not normal.bg then
     return
   end
   -- Function carries the theme's blue accent, brighter than the Comment grey
   -- most themes give FloatBorder.
-  local accent = vim.api.nvim_get_hl(0, { name = "Function", link = false }).fg
-  local bg = shift_color(normal.bg, vim.o.background == "light")
+  local accent = style.hl("Function").fg
+  local bg = style.blend(normal.bg, vim.o.background == "light" and 0xffffff or 0x000000, FLOAT_CONTRAST)
   vim.api.nvim_set_hl(0, "NormalFloat", { fg = normal.fg, bg = bg })
   vim.api.nvim_set_hl(0, "FloatBorder", { fg = accent, bg = bg })
   vim.api.nvim_set_hl(0, "FloatTitle", { fg = accent, bg = bg, bold = true })
