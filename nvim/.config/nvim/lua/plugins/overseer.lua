@@ -3,8 +3,9 @@
 -- See `:help overseer`
 
 -- Builds live in Overseer's in-memory buffers, which stream while a build runs,
--- and are copied to a per-task log on completion. Reached with <leader>l and
--- <leader>fl, so they stay off the buffer list.
+-- and are copied to a per-task log on completion. The streaming buffers stay
+-- off the buffer list, reached with <leader>l; a saved log is an ordinary
+-- listed buffer, read-only because it is a record.
 local LOG_ROOT = vim.fn.stdpath("state") .. "/overseer_out"
 local KEEP_LOGS = 50
 local PICKER_TITLE = "Builds"
@@ -530,14 +531,11 @@ return {
       end,
     })
 
-    -- Saved logs are ordinary file buffers, so unlist those too. BufWinEnter is
-    -- needed as well: `:edit` on a loaded buffer re-sets 'buflisted' without
-    -- re-reading the file.
-    vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost", "BufWinEnter" }, {
-      group = vim.api.nvim_create_augroup("overseer_output_unlist", { clear = true }),
+    -- A saved log is a record, so it opens read-only.
+    vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+      group = vim.api.nvim_create_augroup("overseer_output_readonly", { clear = true }),
       pattern = LOG_ROOT .. "/*",
       callback = function(args)
-        vim.bo[args.buf].buflisted = false
         vim.bo[args.buf].modifiable = false
         vim.bo[args.buf].readonly = true
         -- mini.trailspace skips a buffer only for its 'buftype', and a saved log
