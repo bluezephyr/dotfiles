@@ -100,10 +100,13 @@ return {
     {
       "<leader>h",
       function()
-        pcall(function()
-          -- The picker opens files into the dashboard's window; keep it a normal one.
-          require("snacks").dashboard.open({ win = vim.api.nvim_get_current_win() })
-        end)
+        -- Opening a dashboard over a dashboard wipes the augroup both share, which
+        -- leaves 'laststatus' and 'showtabline' at the 0 the startup dashboard set.
+        if vim.bo.filetype == "snacks_dashboard" then
+          return
+        end
+        -- The picker opens files into the dashboard's window; keep it a normal one.
+        require("snacks").dashboard.open({ win = vim.api.nvim_get_current_win() })
       end,
       desc = "Open Snacks Dashboard",
     },
