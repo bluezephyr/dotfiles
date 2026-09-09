@@ -131,24 +131,28 @@ end
 -- Named so the dashboard reaches the same picker as the keymap.
 vim.api.nvim_create_user_command('PickReference', pick_reference, { desc = 'Reference (index and RFCs)' })
 
--- Matches what the buffers picker lists: every listed buffer but this one.
+-- Matches what the buffers picker lists: the listed buffers but this one,
+-- scratch aside.
 local function other_buffers()
   local current = vim.api.nvim_get_current_buf()
   local count = 0
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if buf ~= current and vim.bo[buf].buflisted then
+    if buf ~= current and vim.bo[buf].buflisted and vim.bo[buf].buftype ~= "nofile" then
       count = count + 1
     end
   end
   return count
 end
 
--- Nothing to switch to needs no message, and a single candidate needs no list.
+-- Dropping the current buffer leaves the alternate first, since the list is
+-- sorted by last use, so <leader><leader><CR> is the jump back to it.
+-- Nothing to switch to needs no message: an empty list is only the picker's
+-- "No results" warning, which says nothing.
 local function pick_buffers()
   if other_buffers() == 0 then
     return
   end
-  Snacks.picker.buffers({ current = false, auto_confirm = true })
+  Snacks.picker.buffers({ current = false })
 end
 
 -- Picks from every kind of LSP location at once.
