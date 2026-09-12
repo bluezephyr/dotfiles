@@ -73,8 +73,8 @@ smart_gaps inverse_outer
 bindsym $mod+g exec ~/.config/i3/scripts/toggle-horizontal-gaps.sh
 
 # Automatically arrange the windows on the workspace
-bindsym $mod+m exec ~/.config/i3/scripts/master-stack.sh
-bindsym $mod+equal exec ~/.config/i3/scripts/equalize-windows.sh
+bindsym $mod+m exec ~/.config/i3/scripts/master-stack.py
+bindsym $mod+equal exec ~/.config/i3/scripts/equalize-windows.py
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -420,7 +420,7 @@ for_window [window_role="About"] floating enable
 # master-stack: route new windows to stack  #
 #############################################
 
-for_window [class="^.*"] mark --add __i3_newwin, exec --no-startup-id ~/.config/i3/scripts/stack-new-window.sh
+for_window [class="^.*"] mark --add __i3_newwin, exec --no-startup-id ~/.config/i3/scripts/stack-new-window.py
 
 # set border of floating window
 for_window [class="urxvt"] border pixel 1
