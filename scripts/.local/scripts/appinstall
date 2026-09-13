@@ -153,11 +153,8 @@ def apt_install(app_name, spec, attributes):
         create_symlink(BIN_DIR, *spec["symlink"])
 
 
-def apt_installed(app_name, spec):
+def apt_version_installed(app_name, spec):
     """Version of the app's apt package, or None when apt did not provide it."""
-    if not shutil.which("dpkg-query"):
-        return None
-
     output = capture([
         "dpkg-query", "-W", "-f=${db:Status-Status} ${Version}",
         package_name(app_name, spec),
@@ -175,11 +172,8 @@ def pacman_install(app_name, spec, attributes):
     run(["sudo", "pacman", "-Syu", package_name(app_name, spec)])
 
 
-def pacman_installed(app_name, spec):
+def pacman_version_installed(app_name, spec):
     """Version of the app's pacman package, or None when pacman did not provide it."""
-    if not shutil.which("pacman"):
-        return None
-
     output = capture(["pacman", "-Q", package_name(app_name, spec)])
     return version_in(output.strip()) if output else None
 
@@ -197,7 +191,7 @@ def appimage_install(app_name, spec, attributes):
     print(f"{app_name} installed to {target}")
 
 
-def appimage_installed(app_name, spec):
+def appimage_version_installed(app_name, spec):
     """Version of the downloaded AppImage, or None when it is not there."""
     target = BIN_DIR / spec.get("target", app_name)
     # A symlink in its place means something else provided the command.
@@ -221,7 +215,7 @@ def script_install(app_name, spec, attributes):
         print(f"Install script failed for {app_name}: {e}")
 
 
-def script_installed(app_name, spec):
+def script_version_installed(app_name, spec):
     """Version reported by the app's command, or None when it is not on PATH."""
     command = spec.get("command", app_name)
     return command_version(command) if shutil.which(command) else None
@@ -258,14 +252,14 @@ def config_installed(app_name, spec):
 
 MECHANISMS = {
     "apt": Mechanism(
-        install=apt_install, installed=apt_installed,
+        install=apt_install, installed=apt_version_installed,
         requires="apt", prepare=apt_update,
     ),
     "pacman": Mechanism(
-        install=pacman_install, installed=pacman_installed, requires="pacman",
+        install=pacman_install, installed=pacman_version_installed, requires="pacman",
     ),
-    "appimage": Mechanism(install=appimage_install, installed=appimage_installed),
-    "script": Mechanism(install=script_install, installed=script_installed),
+    "appimage": Mechanism(install=appimage_install, installed=appimage_version_installed),
+    "script": Mechanism(install=script_install, installed=script_version_installed),
     "config": Mechanism(install=config_install, installed=config_installed),
 }
 
@@ -442,12 +436,17 @@ def install_job(job):
     MECHANISMS[job.mechanism_name].install(job.app_name, job.spec, job.attributes)
 
 
+def mechanism_available(mechanism):
+    """Whether the tool this mechanism requires is on PATH, when it needs one."""
+    return not mechanism.requires or shutil.which(mechanism.requires)
+
+
 def run_jobs(jobs):
     """Install every job, preparing each installer type at most once."""
     prepared = set()
     for job in jobs:
         mechanism = MECHANISMS[job.mechanism_name]
-        if mechanism.requires and not shutil.which(mechanism.requires):
+        if not mechanism_available(mechanism):
             print(f"Skipping {job.app_name}: {job.mechanism_name} is not available here")
             continue
 
@@ -460,7 +459,10 @@ def run_jobs(jobs):
 
 def installed_label(mechanism_name, app_name, spec):
     """Version this installer provided, or a dash when it provided nothing."""
-    return MECHANISMS[mechanism_name].installed(app_name, spec) or "-"
+    mechanism = MECHANISMS[mechanism_name]
+    if not mechanism_available(mechanism):
+        return "-"
+    return mechanism.installed(app_name, spec) or "-"
 
 
 def list_apps(installed=False):
