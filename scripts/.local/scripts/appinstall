@@ -57,6 +57,9 @@ BIN_DIR = HOME / ".local" / "bin"
 #                 "symlink"   (source_command, link_name) made in ~/.local/bin
 #   appimage      "url"       download location
 #                 "target"    name in ~/.local/bin, defaults to the app name
+#   script        "url"       location of a shell install script, piped to `sh`
+#                 "command"   executable to check for the installed version,
+#                             defaults to the app name
 #   config        "target"    file to update, ~ is expanded
 #                 "marker"    name of the "# start/end <marker>" block to
 #                             replace. The content comes from the file given
@@ -101,6 +104,15 @@ APPS = {
             "appimage": {
                 "url": "https://github.com/neovim/neovim/releases/latest/"
                        "download/nvim-linux-x86_64.appimage",
+            },
+        },
+    },
+    "zoxide": {
+        "command": "zoxide",
+        "installers": {
+            "script": {
+                "url": "https://raw.githubusercontent.com/ajeetdsouza/zoxide/"
+                       "main/install.sh",
             },
         },
     },
@@ -195,6 +207,26 @@ def appimage_installed(app_name, spec):
     return command_version(str(target)) or "installed"
 
 
+def script_install(app_name, spec, attributes):
+    """Download a shell install script and run it, piped into `sh`."""
+    try:
+        script = urllib.request.urlopen(spec["url"]).read()
+    except Exception as e:
+        print(f"Failed to download installer for {app_name}: {e}")
+        return
+
+    try:
+        subprocess.run(["sh"], input=script, check=True)
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"Install script failed for {app_name}: {e}")
+
+
+def script_installed(app_name, spec):
+    """Version reported by the app's command, or None when it is not on PATH."""
+    command = spec.get("command", app_name)
+    return command_version(command) if shutil.which(command) else None
+
+
 def config_install(app_name, spec, attributes):
     """Copy a source file into a marked block of a config file."""
     if not attributes:
@@ -233,6 +265,7 @@ MECHANISMS = {
         install=pacman_install, installed=pacman_installed, requires="pacman",
     ),
     "appimage": Mechanism(install=appimage_install, installed=appimage_installed),
+    "script": Mechanism(install=script_install, installed=script_installed),
     "config": Mechanism(install=config_install, installed=config_installed),
 }
 
