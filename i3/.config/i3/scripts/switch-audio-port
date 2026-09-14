@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#
+# Cycle the default audio sink (e.g. built-in speakers <-> headphones) and
+# move all currently playing streams over to it.
+
+mapfile -t sinks < <(pactl list short sinks | cut -f2)
+
+if [ "${#sinks[@]}" -lt 2 ]; then
+    dunstify -t 1500 -r 2594 -u normal "Audio output" "Only one output device available"
+    exit 0
+fi
+
+current=$(pactl get-default-sink)
+
+next=""
+for i in "${!sinks[@]}"; do
+    if [ "${sinks[$i]}" = "$current" ]; then
+        next="${sinks[$(( (i + 1) % ${#sinks[@]} ))]}"
+        break
+    fi
+done
+[ -z "$next" ] && next="${sinks[0]}"
+
+pactl set-default-sink "$next"
+
+while read -r input; do
+    pactl move-sink-input "$input" "$next"
+done < <(pactl list short sink-inputs | cut -f1)
+
+description=$(pactl list sinks | awk -v sink="$next" '
+    { line = $0; sub(/^[ \t]+/, "", line) }
+    line ~ /^Name: / { name = line; sub(/^Name: /, "", name) }
+    line ~ /^Description: / {
+        desc = line; sub(/^Description: /, "", desc)
+        if (name == sink) { print desc; exit }
+    }
+')
+
+dunstify -t 1500 -r 2594 -u normal "Audio output" "${description:-$next}"
