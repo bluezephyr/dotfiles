@@ -94,6 +94,14 @@ APPS = {
         "command": "fzf",
         "installers": {"apt": {}},
     },
+    "kitty": {
+        "command": "kitty",
+        "installers": {
+            "script": {
+                "url": "https://sw.kovidgoyal.net/kitty/installer.sh",
+            },
+        },
+    },
     "lazygit": {
         "command": "lazygit",
         "installers": {"apt": {}},
