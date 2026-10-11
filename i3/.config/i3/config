@@ -74,7 +74,7 @@ bindsym $mod+g exec ~/.config/i3/scripts/toggle-horizontal-gaps.sh
 
 # Automatically arrange the windows on the workspace
 bindsym $mod+m exec ~/.config/i3/scripts/master-stack.py
-bindsym $mod+equal exec ~/.config/i3/scripts/equalize-windows.py
+bindsym $mod+Shift+m exec ~/.config/i3/scripts/equalize-windows.py
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
