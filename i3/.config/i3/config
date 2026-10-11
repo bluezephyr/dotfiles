@@ -234,6 +234,9 @@ bindsym XF86AudioPrev exec playerctl previous
 # Redirect sound to headphones
 bindsym $mod+p exec ~/.config/i3/scripts/switch-audio-port
 
+# Toggle keyboard layout (us altgr-intl nodeadkeys <-> se)
+bindsym $mod+i exec --no-startup-id ~/.config/i3/scripts/toggle-keyboard-layout
+
 ## App shortcuts
 bindsym $mod+w exec /usr/bin/google-chrome-stable
 bindsym $mod+e exec /usr/bin/thunar

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# Toggle between US international (altgr-intl, no dead keys) and Swedish layout.
+
+current=$(setxkbmap -query | awk '/^layout:/ { print $2 }')
+
+if [ "$current" = "se" ]; then
+    setxkbmap -layout us -variant altgr-intl -option nodeadkeys
+    name="US (altgr-intl, no dead keys)"
+else
+    setxkbmap -layout se
+    name="Swedish"
+fi
+
+dunstify -t 1500 -r 2595 -u normal "Keyboard layout" "$name"
