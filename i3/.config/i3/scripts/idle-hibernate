@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#
+# Called by xidlehook (see the i3 config). Hibernate when idle, but only when
+# running on battery without an external monitor connected.
+#
+# Usage: idle-hibernate warn|cancel|hibernate
+
+NOTIFY_ID=9900
+
+on_battery_undocked() {
+    [ "$(cat /sys/class/power_supply/AC/online)" = 0 ] || return 1
+    for status in /sys/class/drm/card*-*/status; do
+        case "$status" in
+            *-eDP-*) continue ;;
+        esac
+        [ "$(cat "$status")" = connected ] && return 1
+    done
+    return 0
+}
+
+case "$1" in
+    warn)
+        on_battery_undocked && dunstify -r $NOTIFY_ID -u critical "Idle" "Hibernating in 1 minute"
+        ;;
+    cancel)
+        dunstify -C $NOTIFY_ID
+        ;;
+    hibernate)
+        dunstify -C $NOTIFY_ID
+        on_battery_undocked && systemctl hibernate
+        ;;
+    *)
+        echo "Usage: $0 warn|cancel|hibernate" >&2
+        exit 1
+        ;;
+esac

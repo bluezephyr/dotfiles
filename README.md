@@ -112,14 +112,31 @@ yay -S hyprpaper
 
 By default, EndeavourOS uses LightDM for the log-in, and uses the lightdm-gtk-greeter.
 
-## Lid Close and Suspend
+## Power Management
 
-Closing the lid is handled by systemd-logind. With an external monitor
-connected (docked), the lid is ignored. Without an external monitor, the
-laptop suspends and then hibernates after 15 minutes (suspend-then-hibernate).
+The laptop is used in three modes:
+
+| Mode | Lid closed | Idle 15 min (lid open) |
+|---|---|---|
+| Battery, no external monitor | Suspend, hibernate after 15 min | Warning at 14 min, hibernate at 15 min |
+| AC, no external monitor | Suspend, hibernate after 15 min | Nothing |
+| External monitor (HDMI/USB-C) | Nothing | Nothing |
+
+In all modes, the screen blanks after 8 min and the display turns off after
+10 min (`xset` in the i3 config). Idle hibernate is skipped while audio is
+playing or a window is fullscreen.
+
+The configuration lives in four places:
+
+* `/etc/systemd/logind.conf.d/lid.conf`: lid close
+* `/etc/systemd/sleep.conf.d/hibernate.conf`: delay before hibernate
+* `i3/.config/i3/config` and `i3/.config/i3/scripts/idle-hibernate`: idle
+* TLP: battery/AC power tuning (default config)
+
+### Hardware notes
 
 Suspend on this laptop (Clevo NV4XMB, Insyde BIOS 1.07.06LWL1) drains a lot of
-battery:
+battery, so hibernation is used to save power:
 
 * `s2idle` (the default) never reaches the low power state because of a BIOS
   bug. `\_SB.PEPD._DSM` fails on missing symbols `\_SB.PC00.PGOF/PGON` (see
@@ -146,10 +163,23 @@ resume_offset=<offset>` to `/etc/kernel/cmdline` and run `sudo
 reinstall-kernels`. The offset is the first physical block from
 `sudo filefrag -v /swapfile`.
 
-### Configuration
+### Lid close and hibernate delay
 
 Use drop-in files rather than editing `sleep.conf`/`logind.conf` to avoid
 `.pacnew` files on updates.
+
+`/etc/systemd/logind.conf.d/lid.conf`:
+
+```
+[Login]
+HandleLidSwitch=suspend-then-hibernate
+HandleLidSwitchExternalPower=suspend-then-hibernate
+HandleLidSwitchDocked=ignore
+```
+
+logind treats the laptop as docked when any external display connector is
+connected, which covers both HDMI and USB-C (DisplayPort alt mode). Apply
+changes with `sudo systemctl kill -s HUP systemd-logind`.
 
 `/etc/systemd/sleep.conf.d/hibernate.conf`:
 
@@ -158,21 +188,40 @@ Use drop-in files rather than editing `sleep.conf`/`logind.conf` to avoid
 HibernateDelaySec=15min
 ```
 
-`/etc/systemd/logind.conf.d/lid.conf`:
+Sleep settings are read at each suspend, so no reload is needed.
+
+### Idle hibernate
+
+Idle detection on X11 is done by `xidlehook`, started from the i3 config.
+Install using:
 
 ```
-[Login]
-HandleLidSwitch=suspend-then-hibernate
+yay -S xidlehook
 ```
 
-`HandleLidSwitchExternalPower` falls back to `HandleLidSwitch` and
-`HandleLidSwitchDocked` defaults to `ignore`. Apply logind changes with `sudo
-systemctl kill -s HUP systemd-logind`. Sleep settings are read at each suspend.
-Verify with:
+It calls `~/.config/i3/scripts/idle-hibernate`, which only acts when running on
+battery (`/sys/class/power_supply/AC/online` is 0) and no external monitor is
+connected (any `/sys/class/drm/card*-*/status` other than eDP). The conditions
+are checked each time, so plugging in the charger or a monitor takes effect
+without restarting anything. Any input during the warning cancels it.
+
+### TLP
+
+TLP tunes CPU, PCIe, USB and Wi-Fi power saving with separate battery and AC
+settings. Enable it and mask `systemd-rfkill` (TLP handles radio state):
+
+```
+sudo systemctl enable --now tlp
+sudo systemctl mask systemd-rfkill.service systemd-rfkill.socket
+```
+
+### Verify
 
 ```
 busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
-    org.freedesktop.login1.Manager HandleLidSwitch
+    org.freedesktop.login1.Manager HandleLidSwitch HandleLidSwitchExternalPower \
+    HandleLidSwitchDocked Docked
+sudo tlp-stat -s
 journalctl -b | grep -iE "suspend|hibernat"
 ```
 

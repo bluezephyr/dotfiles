@@ -357,9 +357,12 @@ exec --no-startup-id xset s 480 dpms 600 600 600
 # disable power saving (for example if using xscreensaver)
 #exec --no-startup-id xset -dpms
 
-# use xautolock to use autosuspend rules for mobile devices
-# https://wiki.archlinux.org/title/Session_lock#xautolock
-#exec --no-startup-id xautolock -time 60 -locker "systemctl suspend"
+# Hibernate after 15 min idle on battery without external monitor. Timers are
+# cumulative (840 s + 60 s). See ~/.config/i3/scripts/idle-hibernate and the
+# "Power Management" section in the dotfiles README.
+exec --no-startup-id xidlehook --not-when-fullscreen --not-when-audio \
+    --timer 840 '~/.config/i3/scripts/idle-hibernate warn' '~/.config/i3/scripts/idle-hibernate cancel' \
+    --timer 60 '~/.config/i3/scripts/idle-hibernate hibernate' ''
 
 
 # xscreensaver
