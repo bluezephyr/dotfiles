@@ -6,7 +6,7 @@
 # See README.md for usage instructions
 bar_color="#7f7fff"
 volume_step=1
-brightness_step=2.5
+brightness_step=2
 max_volume=100
 
 # Uses regex to get volume from pactl
@@ -19,9 +19,9 @@ function get_mute {
     pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)'
 }
 
-# Uses regex to get brightness from xbacklight
+# Gets brightness percentage from brightnessctl
 function get_brightness {
-    xbacklight | grep -Po '[0-9]{1,3}' | head -n 1
+    brightnessctl -m | cut -d, -f4 | tr -d %
 }
 
 # Returns a mute icon, a volume-low icon, or a volume-high icon, depending on the volume
@@ -44,7 +44,7 @@ function get_brightness_icon {
 
 # Displays a volume notification using dunstify
 function show_volume_notif {
-    volume=$(get_mute)
+    volume=$(get_volume)
     get_volume_icon
     dunstify -i audio-volume-muted-blocking -t 1000 -r 2593 -u normal "$volume_icon $volume%" -h int:value:$volume -h string:hlcolor:$bar_color
 }
@@ -84,13 +84,13 @@ case $1 in
 
     brightness_up)
     # Increases brightness and displays the notification
-    xbacklight -inc $brightness_step -time 0 
+    brightnessctl -q set ${brightness_step}%+
     show_brightness_notif
     ;;
 
     brightness_down)
     # Decreases brightness and displays the notification
-    xbacklight -dec $brightness_step -time 0
+    brightnessctl -q set ${brightness_step}%-
     show_brightness_notif
     ;;
 esac
