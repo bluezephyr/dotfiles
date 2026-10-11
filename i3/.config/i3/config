@@ -384,8 +384,9 @@ exec --no-startup-id /usr/bin/dunst
 
 # Autostart apps as you like
 
-# Keyboard layout
-exec_always "setxkbmap -layout us -variant altgr-intl -option nodeadkeys"
+# Keyboard layout (and kitty font size): Swedish without external monitor, US
+# with. Also run by the autorandr predetect hook. Toggle manually with $mod+i.
+exec --no-startup-id ~/.config/i3/scripts/display-mode --force
 
 ###############
 # system tray #

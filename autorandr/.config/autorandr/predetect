@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Runs on every autorandr --change, also when no profile matches. Update
+# keyboard layout and kitty font size if an external monitor was connected or
+# disconnected.
+~/.config/i3/scripts/display-mode

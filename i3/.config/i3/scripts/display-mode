@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Apply settings depending on whether an external monitor is connected:
+#   laptop:   Swedish keyboard, larger kitty font (see ~/.config/kitty/display-font.sh)
+#   external: US international (altgr-intl, no dead keys), normal kitty font
+#
+# Called at i3 startup (with --force) and by the autorandr predetect hook. Does
+# nothing unless the mode has changed, so a manual toggle with super+i is kept.
+#
+# Usage: display-mode [--force]
+
+STATE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/display-mode"
+
+if ~/.local/scripts/has-external-monitor; then
+    mode=external
+else
+    mode=laptop
+fi
+
+if [ "$1" != "--force" ] && [ "$(cat "$STATE" 2>/dev/null)" = "$mode" ]; then
+    exit 0
+fi
+
+if [ "$mode" = laptop ]; then
+    setxkbmap -layout se
+    name="Swedish"
+else
+    setxkbmap -layout us -variant altgr-intl -option nodeadkeys
+    name="US (altgr-intl, no dead keys)"
+fi
+
+dunstify -t 1500 -r 2595 -u normal "Keyboard layout" "$name"
+
+# Make running kitty instances reload their config to update the font size
+pkill -USR1 -x kitty
+
+echo "$mode" > "$STATE"

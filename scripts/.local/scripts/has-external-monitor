@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# Exit 0 if an external monitor (HDMI, DP or USB-C) is connected, otherwise 1.
+# The internal laptop panel (eDP) is ignored.
+
+for status in /sys/class/drm/card*-*/status; do
+    case "$status" in
+        *-eDP-*) continue ;;
+    esac
+    [ "$(cat "$status")" = connected ] && exit 0
+done
+exit 1

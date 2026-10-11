@@ -66,6 +66,29 @@ sudo chmod a+x /etc/acpi/autorandr.sh
 sudo systemctl enable --now acpid
 ```
 
+### Laptop vs external monitor
+
+Some settings depend on whether an external monitor is connected:
+
+| | Keyboard layout | Kitty font size |
+|---|---|---|
+| No external monitor | Swedish | 13 |
+| External monitor | US international (altgr-intl, no dead keys) | 11 |
+
+`~/.local/scripts/has-external-monitor` checks `/sys/class/drm/*/status` for
+any connected output except the internal panel (eDP). It is used by:
+
+* `~/.config/i3/scripts/display-mode`: sets the keyboard layout and makes
+  running kitty instances reload their config (SIGUSR1). It runs at i3 startup
+  and from the autorandr `predetect` hook, which runs on every monitor change,
+  also for monitors without a saved profile. It only acts when the mode has
+  changed, so a manual toggle with `$mod+i` is kept until the next change. Run
+  `display-mode --force` to apply the settings again.
+* `~/.config/kitty/display-font.sh`: included in `kitty.conf` with
+  `geninclude` and prints the larger `font_size` in laptop mode. A config
+  reload resets any manual zoom (ctrl+shift+plus).
+* `~/.config/i3/scripts/idle-hibernate` (see Power Management).
+
 ### Polybar
 
 Polybar is a status bar for i3. Install using
