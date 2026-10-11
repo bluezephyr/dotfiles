@@ -50,19 +50,19 @@ using `autorandr -s <config-name>`.
 
 Autorandr is executed automatically when monitors are plugged in/unplugged but
 in order to have it run also when the laptop lid is opened/closed, this must be
-monitored separatedly. One way to do it is using ACPI. Install `acpid` using:
+monitored separately. One way to do it is using ACPI. Install `acpid` using:
 
 ```
 yay -S acpid
 ```
 
-Copy the `~/dotfiles/scripts/autorandr.sh` script to `/etc/acpi/` and modify
+Copy the `~/dotfiles/scripts/.local/scripts/autorandr.sh` script to `/etc/acpi/` and modify
 the `handler.sh` script in `/etc/acpi` by adding a call to
 `/etc/acpi/autorandr.sh` when the lid is opened/closed. Make sure that the
 scripts are executable and that the acpid service is enabled:
 
 ```
-sudo chmod a+c /etc/acpi/autorandr.sh
+sudo chmod a+x /etc/acpi/autorandr.sh
 sudo systemctl enable --now acpid
 ```
 
@@ -111,6 +111,70 @@ yay -S hyprpaper
 ## Login
 
 By default, EndeavourOS uses LightDM for the log-in, and uses the lightdm-gtk-greeter.
+
+## Lid Close and Suspend
+
+Closing the lid is handled by systemd-logind. With an external monitor
+connected (docked), the lid is ignored. Without an external monitor, the
+laptop suspends and then hibernates after 15 minutes (suspend-then-hibernate).
+
+Suspend on this laptop (Clevo NV4XMB, Insyde BIOS 1.07.06LWL1) drains a lot of
+battery:
+
+* `s2idle` (the default) never reaches the low power state because of a BIOS
+  bug. `\_SB.PEPD._DSM` fails on missing symbols `\_SB.PC00.PGOF/PGON` (see
+  `journalctl -k -b 0 | grep -B3 PEPD`). Check with
+  `cat /sys/devices/system/cpu/cpuidle/low_power_idle_system_residency_us`,
+  which stays at 0 after a suspend.
+* `deep` (S3) hangs on suspend and requires a hard reset. Do not use it.
+
+### Swap file for hibernation
+
+Hibernation requires a swap file at least the size of the RAM:
+
+```
+sudo mkswap --size 32G --file /swapfile
+echo '/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
+sudo swapon /swapfile
+```
+
+No `resume=` kernel parameter is needed. On UEFI, systemd stores the swap file
+location in the `HibernateLocation` EFI variable and the initramfs (dracut
+`resume` module) picks it up. Test with `systemctl hibernate`. If the laptop
+boots fresh instead of resuming, add `resume=UUID=<root-uuid>
+resume_offset=<offset>` to `/etc/kernel/cmdline` and run `sudo
+reinstall-kernels`. The offset is the first physical block from
+`sudo filefrag -v /swapfile`.
+
+### Configuration
+
+Use drop-in files rather than editing `sleep.conf`/`logind.conf` to avoid
+`.pacnew` files on updates.
+
+`/etc/systemd/sleep.conf.d/hibernate.conf`:
+
+```
+[Sleep]
+HibernateDelaySec=15min
+```
+
+`/etc/systemd/logind.conf.d/lid.conf`:
+
+```
+[Login]
+HandleLidSwitch=suspend-then-hibernate
+```
+
+`HandleLidSwitchExternalPower` falls back to `HandleLidSwitch` and
+`HandleLidSwitchDocked` defaults to `ignore`. Apply logind changes with `sudo
+systemctl kill -s HUP systemd-logind`. Sleep settings are read at each suspend.
+Verify with:
+
+```
+busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
+    org.freedesktop.login1.Manager HandleLidSwitch
+journalctl -b | grep -iE "suspend|hibernat"
+```
 
 ## Default Applications
 
@@ -193,7 +257,7 @@ information.
 
 ### Lazygit
 
-(Lazygit)[https://github.com/jesseduffield/lazygit] is a terminal gui git tool.
+[Lazygit](https://github.com/jesseduffield/lazygit) is a terminal gui git tool.
 
 Use the following steps to install on Ubuntu:
 
@@ -235,7 +299,7 @@ snap connect nmap:network-control
 ## Stow
 
 Stow is used to manage the dotfiles. See https://www.gnu.org/software/stow/ for
-detatils. Install using
+details. Install using
 
 Ubuntu: `sudo apt install stow`
 
@@ -254,16 +318,17 @@ The following command is used to stow a configuration.
 
 `stow <application-name> -t <target-dir>`
 
-The command will create a symlink in the target-dir named according to the
-application-name. The symlink will point to the contents of the
-application-name directory.
+The command will create symlinks in the target-dir that mirror the contents of
+the application-name directory. For example, `i3/.config/i3` is linked as
+`<target-dir>/.config/i3`.
 
 For example, to stow the i3 configuration, the command
 
 `stow -t ~ i3`
 
 To stow individual files that are not stored in .config (such as .gitconfig),
-use the flag `--dotfiles`.
+use the flag `--dotfiles`. It renames files prefixed with `dot-` (such as
+`gitconfig/dot-gitconfig`) to start with a dot (`~/.gitconfig`).
 
 `stow --dotfiles -t ~ gitconfig`
 
@@ -340,7 +405,7 @@ ssh-add ~/.ssh/<private key>
 Navigate to https://github.com/settings/keys and click the 'New SSH key'
 button. Enter a name for the key such as "BlueZephyr <host>". Use
 
-`cat ~.ssh/id_github_<host>.pub`
+`cat ~/.ssh/id_github_<host>.pub`
 
 and copy the output into the Key part. Press "Add SSH key" to save.
 
