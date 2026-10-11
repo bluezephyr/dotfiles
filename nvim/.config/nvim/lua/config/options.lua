@@ -65,6 +65,18 @@ end
 vim.cmd "set whichwrap+=<,>,[,],h,l"
 vim.cmd [[set iskeyword+=-]]
 
+-- Filetype plugins add r/o (continue comments on <CR> and o/O); strip them once the
+-- ftplugin has run, since Neovim registers its loader after this autocmd.
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(args.buf) then
+        vim.bo[args.buf].formatoptions = vim.bo[args.buf].formatoptions:gsub("[ro]", "")
+      end
+    end)
+  end,
+})
+
 -- Floats must stand out from the buffer: a theme's own NormalFloat often sits a
 -- shade from Normal and collides with CursorLine. Derived, so a colorscheme
 -- switch keeps the contrast instead of the previous theme's colors.
