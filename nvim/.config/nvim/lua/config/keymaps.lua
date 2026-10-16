@@ -154,7 +154,7 @@ vim.cmd.packadd('nvim.undotree')
 vim.keymap.set("n", "<leader>tu", "<cmd>Undotree<cr>", { desc = '[T]oggle [U]ndotree' })
 
 -- Swedish keyboard layout
--- The physical keys at the US `;` `'` `\` positions produce öäå on a Swedish
+-- The physical keys at the US `;` `'` `\` `/` positions produce öäå- on a Swedish
 -- layout. Map them back to their US meaning in Normal/Visual/Operator-pending
 -- mode. Insert mode and the command line are untouched, so öäå still type
 -- normally, and so do `f`/`t`/`r` arguments (those bypass mappings).
@@ -167,6 +167,7 @@ local swedish_normal_keys = {
   { 'Ö', ':' },
   { 'Ä', '"' },
   { 'Å', '|' },
+  { '-', '/' },
 }
 
 for _, keys in ipairs(swedish_normal_keys) do
