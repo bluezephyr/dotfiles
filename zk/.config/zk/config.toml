@@ -52,6 +52,8 @@ filename = "{{format-date now}}"
 
 # MARKDOWN SETTINGS
 [format.markdown]
+# Format used to generate links between notes: "wiki", "markdown" or a template.
+link-format = "wiki"
 # Enable support for #hashtags
 hashtags = true
 # Enable support for :colon:separated:tags:
