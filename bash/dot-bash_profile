@@ -26,5 +26,6 @@ fi
 
 export EDITOR=/home/jens/.local/bin/nvim
 export OPENER=/home/jens/.local/bin/nvim
+export ZK_NOTEBOOK_DIR="$HOME/notebook"
 
 . "$HOME/.cargo/env"

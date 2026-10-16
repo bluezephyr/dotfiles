@@ -33,5 +33,6 @@ fi
 
 export EDITOR=nvim
 export OPENER=nvim
+export ZK_NOTEBOOK_DIR="$HOME/notebook"
 
 . "$HOME/.cargo/env"
