@@ -53,7 +53,7 @@ filename = "{{format-date now}}"
 # MARKDOWN SETTINGS
 [format.markdown]
 # Format used to generate links between notes: "wiki", "markdown" or a template.
-link-format = "wiki"
+link-format = "[[{{path}}|{{title}}]]"
 # Enable support for #hashtags
 hashtags = true
 # Enable support for :colon:separated:tags:
@@ -100,7 +100,7 @@ lucky = "zk list --quiet --format full --sort random --limit 1"
 
 [lsp.diagnostics]
 # Report titles of wiki-links as hints.
-wiki-title = "hint"
+wiki-title = "none"
 # Warn for dead links between notes.
 dead-link = "error"
 # Warn when notes link here without backlinks.
