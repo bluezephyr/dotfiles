@@ -132,7 +132,14 @@ return {
       clangd = {},
       jsonls = {},
       pyright = {},
-      marksman = {},
+      marksman = {
+        -- zk serves the notes; inside a notebook both would offer every [[ link.
+        root_dir = function(bufnr, on_dir)
+          if not vim.fs.root(bufnr, '.zk') then
+            on_dir(vim.fs.root(bufnr, { '.marksman.toml', '.git' }))
+          end
+        end,
+      },
       taplo = {},
       rust_analyzer = {},
       bashls = {},
