@@ -3,8 +3,10 @@
 # application   installer    parameters
 bash-profile    config        <source file>
 bashrc          config        <source file>
+bat             tar
 fd              apt
 # fd            pacman
 fzf             apt
 lazygit         apt
 nvim            appimage
+zk              tar

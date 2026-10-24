@@ -348,6 +348,24 @@ https://github.com/XAMPPRocky/tokei for more information.
 
 `cargo install tokei`
 
+### Bat
+
+[Bat](https://github.com/sharkdp/bat) is a cat clone with syntax highlighting.
+On Ubuntu, install the latest release into `~/.local/bin` with:
+
+`appinstall bat tar`
+
+Arch: `sudo pacman -Syu bat`
+
+### Zk
+
+[Zk](https://github.com/zk-org/zk) is a note-taking CLI, also used as LSP in
+Neovim. On Ubuntu, install the latest release into `~/.local/bin` with:
+
+`appinstall zk tar`
+
+Arch: `sudo pacman -Syu zk`
+
 
 ### Spotify
 

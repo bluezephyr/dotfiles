@@ -26,6 +26,7 @@ import os
 import re
 import shutil
 import subprocess
+import tarfile
 import urllib.request
 from collections import namedtuple
 from pathlib import Path
@@ -57,6 +58,10 @@ BIN_DIR = HOME / ".local" / "bin"
 #                 "symlink"   (source_command, link_name) made in ~/.local/bin
 #   appimage      "url"       download location
 #                 "target"    name in ~/.local/bin, defaults to the app name
+#   tar           "repository" GitHub owner/repo, its latest release is used
+#                 "asset"     .tar.gz file in the release, {tag} is replaced
+#                 "member"    executable in the archive, {tag} is replaced
+#                 "target"    name in ~/.local/bin, defaults to the app name
 #   script        "url"       location of a shell install script, piped to `sh`
 #                 "command"   executable to check for the installed version,
 #                             defaults to the app name
@@ -79,6 +84,16 @@ APPS = {
             "config": {
                 "target": "~/.config/bash/bashrc_custom",
                 "marker": "custom_bashrc",
+            },
+        },
+    },
+    "bat": {
+        "command": "bat",
+        "installers": {
+            "tar": {
+                "repository": "sharkdp/bat",
+                "asset": "bat-{tag}-x86_64-unknown-linux-gnu.tar.gz",
+                "member": "bat-{tag}-x86_64-unknown-linux-gnu/bat",
             },
         },
     },
@@ -112,6 +127,16 @@ APPS = {
             "appimage": {
                 "url": "https://github.com/neovim/neovim/releases/latest/"
                        "download/nvim-linux-x86_64.appimage",
+            },
+        },
+    },
+    "zk": {
+        "command": "zk",
+        "installers": {
+            "tar": {
+                "repository": "zk-org/zk",
+                "asset": "zk-{tag}-linux-amd64.tar.gz",
+                "member": "zk",
             },
         },
     },
@@ -199,14 +224,41 @@ def appimage_install(app_name, spec, attributes):
     print(f"{app_name} installed to {target}")
 
 
-def appimage_version_installed(app_name, spec):
-    """Version of the downloaded AppImage, or None when it is not there."""
+def downloaded_version_installed(app_name, spec):
+    """Version of a downloaded executable, or None when it is not there."""
     target = BIN_DIR / spec.get("target", app_name)
     # A symlink in its place means something else provided the command.
     if target.is_symlink() or not target.is_file():
         return None
 
     return command_version(str(target)) or "installed"
+
+
+def tar_install(app_name, spec, attributes):
+    """Extract one executable from a GitHub latest-release .tar.gz into ~/.local/bin."""
+    target = BIN_DIR / spec.get("target", app_name)
+    releases = f"https://github.com/{spec['repository']}/releases"
+    try:
+        # The latest release page redirects to .../releases/tag/<tag>.
+        with urllib.request.urlopen(f"{releases}/latest") as response:
+            tag = response.url.rsplit("/", 1)[-1]
+        url = f"{releases}/download/{tag}/{spec['asset'].format(tag=tag)}"
+        with urllib.request.urlopen(url) as response:
+            with tarfile.open(fileobj=response, mode="r|gz") as archive:
+                name = spec["member"].format(tag=tag)
+                member = next((m for m in archive if m.name == name), None)
+                if member is None:
+                    raise ValueError(f"{name} not found in {url}")
+                # Replaced rather than overwritten, so a running copy is not disturbed.
+                staging = target.with_name(f".{target.name}.new")
+                staging.write_bytes(archive.extractfile(member).read())
+    except Exception as e:
+        print(f"Failed to install {app_name}: {e}")
+        return
+
+    staging.chmod(0o755)
+    staging.replace(target)
+    print(f"{app_name} installed to {target}")
 
 
 def script_install(app_name, spec, attributes):
@@ -266,7 +318,8 @@ MECHANISMS = {
     "pacman": Mechanism(
         install=pacman_install, installed=pacman_version_installed, requires="pacman",
     ),
-    "appimage": Mechanism(install=appimage_install, installed=appimage_version_installed),
+    "appimage": Mechanism(install=appimage_install, installed=downloaded_version_installed),
+    "tar": Mechanism(install=tar_install, installed=downloaded_version_installed),
     "script": Mechanism(install=script_install, installed=script_version_installed),
     "config": Mechanism(install=config_install, installed=config_installed),
 }
