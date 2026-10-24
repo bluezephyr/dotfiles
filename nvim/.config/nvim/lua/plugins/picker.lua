@@ -284,6 +284,13 @@ return {
     {
       "<leader>f.",
       function()
+        Snacks.picker.files({ pattern = vim.fn.expand("<cword>") })
+      end,
+      desc = "Files matching current word",
+    },
+    {
+      "<leader>f/",
+      function()
         Snacks.picker.files({ cwd = vim.fn.expand("%:p:h") })
       end,
       desc = "Files in current folder",
