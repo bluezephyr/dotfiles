@@ -32,19 +32,12 @@ end
 
 return {
   "zk-org/zk-nvim",
-  ft = "markdown",
   cmd = { "ZkNew", "ZkNotes", "ZkTags", "ZkBacklinks", "ZkLinks", "ZkIndex" },
   opts = {
     picker = "snacks_picker",
-    lsp = {
-      config = {
-        name = "zk",
-        cmd = { "zk", "lsp" },
-        filetypes = { "markdown" },
-      },
-      -- Only attaches to markdown files inside a notebook.
-      auto_attach = { enabled = true },
-    },
+    -- Attaching is left to vim.lsp.enable('zk') in plugins/lsp.lua, so it does
+    -- not depend on this plugin having been loaded. The plugin reuses that client.
+    lsp = { auto_attach = { enabled = false } },
   },
   config = function(_, opts)
     require("zk").setup(opts)

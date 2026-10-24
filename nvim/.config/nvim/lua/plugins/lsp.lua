@@ -166,6 +166,9 @@ return {
       vim.lsp.config(name, config)
     end
     vim.lsp.enable(vim.tbl_keys(servers))
+    -- Ships with nvim-lspconfig and attaches only inside a notebook (.zk). Kept
+    -- out of servers since the zk binary comes from appinstall, not Mason.
+    vim.lsp.enable('zk')
 
     local ensure_installed = vim.tbl_keys(servers)
     vim.list_extend(ensure_installed, {
