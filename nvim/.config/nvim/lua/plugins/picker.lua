@@ -203,6 +203,9 @@ return {
           auto_close = true,
           jump = { close = true },
           diagnostics = false,
+          -- Plain Vim search over the visible lines rather than the filter that
+          -- searches the whole tree and opens directories; `i` still reaches it.
+          win = { list = { keys = { ["/"] = false } } },
         },
       },
 
