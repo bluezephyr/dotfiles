@@ -1,9 +1,6 @@
 -- Reference trees that <leader>fi searches as one list.
 local reference_dirs = { "~/index", "~/.local/rfc" }
 
--- rg stops at 500 columns by default; the last flag wins.
-local grep_args = { "--max-columns=4096" }
-
 -- Locations that <leader>sf collects into a single list.
 local lsp_locations = {
   "lsp_definitions",
@@ -110,7 +107,7 @@ local function grep_curbuf()
     vim.notify("No file in this buffer", vim.log.levels.WARN)
     return
   end
-  Snacks.picker.grep({ dirs = { name }, hidden = true, args = grep_args })
+  Snacks.picker.grep({ dirs = { name } })
 end
 
 -- Items carry a cwd-relative path; the register should hold the whole one.
@@ -172,6 +169,10 @@ return {
 
       -- Snacks shows R when regex is off; show it when regex is on instead.
       toggles = { regex = { icon = "R", value = true } },
+
+      -- Every grep, the dashboard's included, also searches dot files. rg stops
+      -- at 500 columns by default; the last flag wins.
+      sources = { grep = { hidden = true, args = { "--max-columns=4096" } } },
 
       actions = {
         yank_path = yank_path,
@@ -301,7 +302,7 @@ return {
     {
       "<leader>fg",
       function()
-        Snacks.picker.grep({ hidden = true, args = grep_args })
+        Snacks.picker.grep()
       end,
       desc = "Live Grep",
     },
