@@ -49,12 +49,13 @@ local function search_notes_by_word_under_cursor()
   end
 end
 
+-- Notes with the tag under the cursor, or all tags when it is not on one.
 local function search_notes_by_tag_under_cursor()
   local tag = vim.fn.expand("<cWORD>"):match("#([%w_/-]+)")
   if tag then
     edit_or_create({ tags = { tag } })
   else
-    vim.notify("No tag under cursor", vim.log.levels.INFO)
+    require("zk.commands").get("ZkTags")()
   end
 end
 
@@ -138,8 +139,7 @@ return {
     { "<leader>zf", edit_or_create, desc = "zk: Edit or create note" },
     { "<leader>zo","<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: List Find notes" },
     { "<leader>zw", search_notes_by_word_under_cursor, desc = "zk: Find notes matching word under cursor" },
-    { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Find notes with tag under cursor" },
-    { "<leader>zT", "<Cmd>ZkTags<CR>", desc = "zk: Tags" },
+    { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Notes with tag under cursor, or all tags" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
     { "<leader>zb", "<Cmd>ZkBacklinks<CR>", desc = "zk: Backlinks" },
     { "<leader>zl", "<Cmd>ZkLinks<CR>", desc = "zk: Links" },
