@@ -170,6 +170,9 @@ return {
     picker = {
       layout = { cycle = true, preset = "vertical", fullscreen = true },
 
+      -- Snacks shows R when regex is off; show it when regex is on instead.
+      toggles = { regex = { icon = "R", value = true } },
+
       actions = {
         yank_path = yank_path,
         yank_entry = { action = "yank", reg = "+" },
