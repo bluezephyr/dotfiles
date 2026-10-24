@@ -16,6 +16,8 @@ local function snacks_opts(pattern, on_create, desc)
 
   return {
     pattern = pattern and vim.fn.tolower(pattern),
+    -- Opens even without matches, so a note can still be created with <C-e>.
+    show_empty = true,
     actions = { zk_create = create },
     win = { input = { keys = { ["<c-e>"] = { "zk_create", mode = { "n", "i" }, desc = desc } } } },
   }
