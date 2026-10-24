@@ -117,7 +117,7 @@ return {
       require('mini.bracketed').setup()
 
       -- Disable the default `\` option-toggle prefix: it made `\` both a complete
-      -- mapping (Neotree) and a prefix of 11 others, forcing a 'timeoutlen' wait.
+      -- mapping (the file explorer) and a prefix of 11 others, forcing a 'timeoutlen' wait.
       -- The toggles worth keeping live under <leader>t in config/keymaps.lua.
       require('mini.basics').setup({ mappings = { option_toggle_prefix = '' } })
       -- No `replace`: its `gr` prefix shadows the LSP references picker, and

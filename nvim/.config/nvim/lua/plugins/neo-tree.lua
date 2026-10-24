@@ -3,6 +3,8 @@
 -- deep-merged, so the default mappings survive alongside the ones named here.
 return {
   "nvim-neo-tree/neo-tree.nvim",
+  -- Trying the Snacks explorer (plugins/picker.lua) instead.
+  enabled = false,
   branch = "v3.x",
   dependencies = {
     "nvim-lua/plenary.nvim",

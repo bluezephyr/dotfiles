@@ -121,6 +121,17 @@ local function grep_word(whole)
   })
 end
 
+-- The explorer only reveals files inside its cwd, so a file from elsewhere
+-- (e.g. a zk note) opens it at that file's project instead.
+local function explorer()
+  local file = vim.api.nvim_buf_get_name(0)
+  if vim.fn.filereadable(file) == 1 and not vim.startswith(file, vim.fn.getcwd() .. "/") then
+    Snacks.explorer({ cwd = vim.fs.root(0, { ".zk", ".git" }) or vim.fs.dirname(file) })
+  else
+    Snacks.explorer()
+  end
+end
+
 -- Items carry a cwd-relative path; the register should hold the whole one.
 local function yank_path(picker, item)
   local path = Snacks.picker.util.path(item)
@@ -181,9 +192,19 @@ return {
       -- Snacks shows R when regex is off; show it when regex is on instead.
       toggles = { regex = { icon = "R", value = true } },
 
-      -- Every grep, the dashboard's included, also searches dot files. rg stops
-      -- at 500 columns by default; the last flag wins.
-      sources = { grep = { hidden = true, args = { "--max-columns=4096" } } },
+      sources = {
+        -- Every grep, the dashboard's included, also searches dot files. rg
+        -- stops at 500 columns by default; the last flag wins.
+        grep = { hidden = true, args = { "--max-columns=4096" } },
+        -- Fullscreen like the other pickers instead of Snacks' sidebar; opening
+        -- a file closes it, the way neo-tree in the current window did.
+        explorer = {
+          layout = { preset = "vertical", preview = false },
+          auto_close = true,
+          jump = { close = true },
+          diagnostics = false,
+        },
+      },
 
       actions = {
         yank_path = yank_path,
@@ -209,6 +230,11 @@ return {
     },
   },
   keys = {
+    {
+      "\\",
+      explorer,
+      desc = "File explorer",
+    },
     {
       "<leader>fk",
       function()

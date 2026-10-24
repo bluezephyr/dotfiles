@@ -68,7 +68,8 @@ return {
         },
       },
     },
-    -- explorer = { enabled = true },
+    -- Opens directories (`nvim <dir>`) in the explorer instead of netrw.
+    explorer = { enabled = true },
     -- indent = { enabled = true },
     -- input = { enabled = true },
     -- picker = { enabled = true },
