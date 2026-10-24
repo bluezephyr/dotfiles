@@ -2,7 +2,9 @@
 -- https://github.com/zk-org/zk-nvim
 
 -- Snacks options shared by the zk pickers: the query starts as pattern and can
--- be edited, and <C-e> hands whatever is typed to on_create.
+-- be edited, and <C-e> hands whatever is typed to on_create. The pattern is
+-- lowercased so it matches regardless of case and <C-e> suggests a lowercase
+-- title, so near-duplicates like nisse and Nisse are not created.
 local function snacks_opts(pattern, on_create, desc)
   local function create(picker)
     local title = picker.input:get()
@@ -13,7 +15,7 @@ local function snacks_opts(pattern, on_create, desc)
   end
 
   return {
-    pattern = pattern,
+    pattern = pattern and vim.fn.tolower(pattern),
     actions = { zk_create = create },
     win = { input = { keys = { ["<c-e>"] = { "zk_create", mode = { "n", "i" }, desc = desc } } } },
   }
@@ -54,33 +56,63 @@ local function search_notes_by_tag_under_cursor()
   end
 end
 
--- Links the selection to a note picked with the selection as query; <C-e>
--- creates a note from the query and links to that instead.
-local function insert_link_for_selection()
+-- Links text at location to a note picked with text as query; <C-e> creates a
+-- note from the query and links to that instead. Without text, the query starts
+-- empty and the link gets the note's title.
+local function insert_link(text, location)
   local util = require("zk.util")
   local api = require("zk.api")
-  local selected_text = util.get_selected_text()
-  local location = util.get_lsp_location_from_selection()
-  local notebook_path = util.resolve_notebook_path(0)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local notebook_path = util.resolve_notebook_path(bufnr)
+  local root = vim.fs.root(bufnr, ".zk")
+  -- Not api.link: that uses the first zk client the plugin found, which may
+  -- serve another notebook and then does not have this buffer open.
+  local client = vim.lsp.get_clients({ bufnr = bufnr, name = "zk" })[1]
+  if not client then
+    vim.notify("zk is not attached to this buffer", vim.log.levels.WARN)
+    return
+  end
 
   local function link_to_note(path)
-    api.link(path, location, notebook_path, { title = selected_text }, function(err)
+    client:request("workspace/executeCommand", {
+      command = "zk.link",
+      arguments = { notebook_path, { path = path, location = location, title = text } },
+    }, function(err)
       assert(not err, tostring(err))
-    end)
+    end, bufnr)
   end
 
   require("zk").pick_notes({ notebook_path = notebook_path, sort = { "modified" } }, {
     title = "Zk Insert Link",
     multi_select = false,
-    snacks_picker = snacks_opts(selected_text, function(title)
+    snacks_picker = snacks_opts(text, function(title)
       api.new(notebook_path, { title = title, edit = false }, function(err, note)
         assert(not err, tostring(err))
-        link_to_note(note.path)
+        -- new returns an absolute path, but link only finds notebook-relative ones.
+        link_to_note(vim.fs.relpath(root, note.path))
       end)
     end, "create note and insert link"),
   }, function(note)
     link_to_note(note.path)
   end)
+end
+
+local function insert_link_for_selection()
+  local util = require("zk.util")
+  insert_link(util.get_selected_text(), util.get_lsp_location_from_selection())
+end
+
+-- Links the word under the cursor, or inserts a link after the cursor when it
+-- is not on a word.
+local function insert_link_at_cursor()
+  local col = vim.api.nvim_win_get_cursor(0)[2]
+  local char = vim.fn.matchstr(vim.api.nvim_get_current_line(), "\\%" .. (col + 1) .. "c.")
+  if vim.fn.match(char, "\\k") == 0 then
+    vim.cmd("normal! viw\27")
+    insert_link_for_selection()
+  else
+    insert_link(nil, require("zk.util").get_lsp_location_from_caret())
+  end
 end
 
 return {
@@ -89,7 +121,8 @@ return {
   opts = {
     picker = "snacks_picker",
     -- Attaching is left to vim.lsp.enable('zk') in plugins/lsp.lua, so it does
-    -- not depend on this plugin having been loaded. The plugin reuses that client.
+    -- not depend on this plugin having been loaded. The plugin reuses that
+    -- client if one is attached when it is first used, else starts its own.
     lsp = { auto_attach = { enabled = false } },
   },
   config = function(_, opts)
@@ -109,8 +142,8 @@ return {
     { "<leader>zb", "<Cmd>ZkBacklinks<CR>", desc = "zk: Backlinks" },
     { "<leader>zl", "<Cmd>ZkLinks<CR>", desc = "zk: Links" },
     { "<leader>zi", "<Cmd>ZkIndex<CR>", desc = "zk: Index notebook" },
-    { "<leader>zL", "viw:ZkInsertLinkAtSelectionEdit {}<CR>", desc = "zk: Insert link for word under cursor" },
-    { "<leader>zL", ":'<,'>ZkInsertLinkAtSelectionEdit {}<CR>", mode = "v", desc = "zk: Insert link for selection" },
+    { "<leader>zn", insert_link_at_cursor, desc = "zk: Insert link for word under cursor" },
+    { "<leader>zn", ":'<,'>ZkInsertLinkAtSelectionEdit {}<CR>", mode = "v", desc = "zk: Insert link for selection" },
     { "<leader>zg", ":'<,'>ZkMatch<CR>", mode = "v", desc = "zk: Notes matching selection" },
   },
 }
