@@ -95,6 +95,16 @@ local function diagnostics_section()
   return '' .. table.concat(parts, '') .. '%#MiniStatuslineDevinfo#'
 end
 
+-- Names of the LSP clients attached to the buffer, or a notice when there are none.
+local function lsp_section()
+  local names = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
+  if #names == 0 then
+    return ' no LSP'
+  end
+  table.sort(names)
+  return ' ' .. table.concat(names, ',')
+end
+
 return {
   -- https://github.com/echasnovski/mini.nvim/tree/main
   {
@@ -141,7 +151,7 @@ return {
               { hl = 'MiniStatuslineFilename', strings = { filename_section() } },
               -- Align the rest of the items to the right
               '%=',
-              { hl = 'MiniStatuslineDevinfo',  strings = { git, diagnostics_section() } },
+              { hl = 'MiniStatuslineDevinfo',  strings = { lsp_section(), git, diagnostics_section() } },
               { hl = 'MiniStatuslineFileinfo', strings = { fileinfo_section() } },
               { hl = 'MiniStatuslineLocation', strings = { location } },
             })
@@ -158,7 +168,8 @@ return {
       -- mini redraws the statusline on these; a tabline needs its own nudge.
       vim.api.nvim_create_autocmd({ 'DiagnosticChanged', 'LspAttach', 'LspDetach' }, {
         group = vim.api.nvim_create_augroup('statusline_tabline', { clear = true }),
-        callback = function() vim.cmd('redrawtabline') end,
+        -- On LspDetach the client is still listed, so redraw once it is gone.
+        callback = function() vim.schedule(function() vim.cmd('redrawtabline') end) end,
       })
     end
   },
