@@ -33,13 +33,13 @@ local function edit_or_create(options, pattern)
   })
 end
 
--- Live search over the notebook's note contents.
+-- Live grep over the notebook's notes.
 local function search_notes()
-  vim.ui.input({ prompt = "Search: " }, function(query)
-    if query and query ~= "" then
-      edit_or_create({ sort = { "modified" }, match = { query } })
-    end
-  end)
+  Snacks.picker.grep({
+    title = "Zk Grep",
+    cwd = vim.fs.root(0, ".zk") or vim.env.ZK_NOTEBOOK_DIR,
+    glob = "*.md",
+  })
 end
 
 local function search_notes_by_word_under_cursor()
