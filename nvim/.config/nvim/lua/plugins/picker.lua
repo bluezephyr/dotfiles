@@ -110,6 +110,17 @@ local function grep_curbuf()
   Snacks.picker.grep({ dirs = { name } })
 end
 
+-- Live grep starting from the word under the cursor or the visual selection,
+-- escaped so it matches literally; whole wraps it in \b to match whole words.
+local function grep_word(whole)
+  Snacks.picker.grep({
+    search = function(picker)
+      local text = picker:word():match("[^\n]*"):gsub("[%.%+%*%?%(%)|%[%]{}%^%$\\]", "\\%0")
+      return whole and "\\b" .. text .. "\\b" or text
+    end,
+  })
+end
+
 -- Items carry a cwd-relative path; the register should hold the whole one.
 local function yank_path(picker, item)
   local path = Snacks.picker.util.path(item)
@@ -309,9 +320,18 @@ return {
     {
       "<leader>fw",
       function()
-        Snacks.picker.grep_word()
+        grep_word(false)
       end,
-      desc = "Grep Word",
+      mode = { "n", "x" },
+      desc = "Grep word or selection",
+    },
+    {
+      "<leader>fW",
+      function()
+        grep_word(true)
+      end,
+      mode = { "n", "x" },
+      desc = "Grep whole word or selection",
     },
     {
       "<leader>fz",
