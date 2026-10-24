@@ -136,6 +136,33 @@ local function pick_lsp_locations()
   Snacks.picker.pick({ title = "Locations", multi = lsp_locations })
 end
 
+-- Lists the paths changed by a commit against its first parent (including
+-- root commits), rather than checking out the commit as git_log normally does.
+local function commit_files_quickfix(picker, item)
+  picker:close()
+  if not item then
+    return
+  end
+  local result = vim.system({
+    "git", "-C", item.cwd, "diff-tree", "--root", "-m", "--first-parent",
+    "--no-commit-id", "--name-only", "-M", "-r", "-z", item.commit,
+  }):wait()
+  if result.code ~= 0 then
+    vim.notify("Could not list commit files: " .. vim.trim(result.stderr or ""), vim.log.levels.ERROR)
+    return
+  end
+  local items = {}
+  for _, path in ipairs(vim.split(result.stdout or "", "\0", { plain = true, trimempty = true })) do
+    items[#items + 1] = { filename = vim.fs.joinpath(item.cwd, path), lnum = 1, text = path }
+  end
+  if #items == 0 then
+    vim.notify("No files changed in " .. item.commit, vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setqflist({}, " ", { title = "Commit " .. item.commit, items = items })
+  vim.cmd.copen()
+end
+
 return {
   -- https://github.com/folke/snacks.nvim
   "folke/snacks.nvim",
@@ -328,6 +355,13 @@ return {
         Snacks.picker.git_log()
       end,
       desc = "Git log",
+    },
+    {
+      "<leader>gf",
+      function()
+        Snacks.picker.git_log({ confirm = commit_files_quickfix })
+      end,
+      desc = "Git commit files in quickfix",
     },
 
     -- LSP keymaps
