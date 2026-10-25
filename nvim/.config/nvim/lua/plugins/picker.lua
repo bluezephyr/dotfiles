@@ -237,10 +237,23 @@ return {
             ["<a-y>"] = { "yank_path", mode = { "n", "i" } },
             -- `?` lists the keys too, but only in normal mode; the input starts in insert.
             ["<a-?>"] = { "toggle_help_input", mode = { "n", "i" }, desc = "help" },
+            -- <C-j>/<C-k> move between the windows, input above list above
+            -- preview, as they do between splits, wrapping around at the ends.
+            -- Unmapped, they would reach the split navigation and leave the
+            -- picker. <C-n>/<C-p> still move the selection.
+            ["<c-j>"] = { "focus_list", mode = { "n", "i" } },
+            ["<c-k>"] = { "focus_preview", mode = { "n", "i" } },
           },
         },
-        -- The same key where the list has focus, as in the explorer.
-        list = { keys = { ["<a-?>"] = { "toggle_help_list", desc = "help" } } },
+        list = {
+          keys = {
+            -- The same key where the list has focus, as in the explorer.
+            ["<a-?>"] = { "toggle_help_list", desc = "help" },
+            ["<c-j>"] = "focus_preview",
+            ["<c-k>"] = "focus_input",
+          },
+        },
+        preview = { keys = { ["<c-j>"] = "focus_input", ["<c-k>"] = "focus_list" } },
       },
     },
   },
