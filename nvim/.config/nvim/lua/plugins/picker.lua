@@ -153,7 +153,7 @@ end
 
 -- Picks a file from the reference trees.
 local function pick_reference()
-  Snacks.picker.files({ dirs = reference_dirs, hidden = true, follow = true })
+  Snacks.picker.files({ dirs = reference_dirs, follow = true })
 end
 
 -- Named so the dashboard reaches the same picker as the keymap.
@@ -202,8 +202,9 @@ return {
       toggles = { regex = { icon = "R", value = true } },
 
       sources = {
-        -- Every grep, the dashboard's included, also searches dot files. rg
-        -- stops at 500 columns by default; the last flag wins.
+        -- Every file list and grep, the dashboard's included, also covers dot
+        -- files. rg stops at 500 columns by default; the last flag wins.
+        files = { hidden = true },
         grep = { hidden = true, args = { "--max-columns=4096" } },
         -- Fullscreen like the other pickers instead of Snacks' sidebar; opening
         -- a file closes it, the way neo-tree in the current window did.
