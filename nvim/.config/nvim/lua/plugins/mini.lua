@@ -183,7 +183,11 @@ return {
           active = function()
             local mode, mode_hl = statusline.section_mode({})
             local git      = statusline.section_git({})
-            local location = statusline.section_location({})
+            -- mini's location, padded so the bar does not shift while moving:
+            -- the line to the width of the line count, the column and line
+            -- length to three.
+            local location = ('%%%dl|%%L│%%3v|%%-3{virtcol("$") - 1}')
+              :format(#tostring(vim.api.nvim_buf_line_count(0)))
             if git ~= '' then
               git = '%#MiniStatuslineGit#' .. git .. '%#MiniStatuslineDevinfo#'
             end
