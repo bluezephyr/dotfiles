@@ -44,8 +44,9 @@ local function style_statusline()
 end
 
 -- The buffer's name, then the full directory holding it, shortened to ~ where
--- it sits under the home directory.
-local function filename_section()
+-- it sits under the home directory, and to one letter per level when short.
+-- Should the line still not fit, Vim cuts the directory from the left (%<).
+local function filename_section(short)
   if vim.bo.buftype == 'terminal' then
     return '%#MiniStatuslineName#%t'
   end
@@ -54,14 +55,27 @@ local function filename_section()
   local name, dir = '%f', ''
   if path ~= '' then
     name = vim.fn.fnamemodify(path, ':t')
-    dir = DIR_ICON .. ' ' .. vim.fn.fnamemodify(path, ':~:h') .. '/'
+    dir = vim.fn.fnamemodify(path, ':~:h')
+    dir = DIR_ICON .. ' ' .. (short and vim.fn.pathshorten(dir) or dir) .. '/'
   end
 
   return table.concat({
     '%#MiniStatuslineName#', name,
     '%#MiniStatuslineModified#%m%r',
-    '%#MiniStatuslineDir#    ', dir,
+    '%#MiniStatuslineDir#    %<', dir,
   })
+end
+
+-- The first line from build(level) that fits the screen, raising the level
+-- (dropping or shortening more) until it does.
+local function fit(build, max_level)
+  for level = 0, max_level do
+    local line = build(level)
+    local width = vim.api.nvim_eval_statusline((line:gsub('%%=', '')), { maxwidth = 10000 }).width
+    if width <= vim.o.columns or level == max_level then
+      return line
+    end
+  end
 end
 
 -- mini takes the filetype icon from mini.icons, whose glyphs differ from the
@@ -145,16 +159,21 @@ return {
             local mode     = statusline.section_mode({})
             local git      = statusline.section_git({})
             local location = statusline.section_location({})
+            local lsp, diagnostics, fileinfo = lsp_section(), diagnostics_section(), fileinfo_section()
 
-            return statusline.combine_groups({
-              { hl = 'MiniStatuslineMode',     strings = { mode } },
-              { hl = 'MiniStatuslineFilename', strings = { filename_section() } },
-              -- Align the rest of the items to the right
-              '%=',
-              { hl = 'MiniStatuslineDevinfo',  strings = { lsp_section(), git, diagnostics_section() } },
-              { hl = 'MiniStatuslineFileinfo', strings = { fileinfo_section() } },
-              { hl = 'MiniStatuslineLocation', strings = { location } },
-            })
+            -- When short of space: drop the git branch, then the file info,
+            -- then shorten the directory. Mode and file name always stay.
+            return fit(function(level)
+              return statusline.combine_groups({
+                { hl = 'MiniStatuslineMode',     strings = { mode } },
+                { hl = 'MiniStatuslineFilename', strings = { filename_section(level >= 3) } },
+                -- Align the rest of the items to the right
+                '%=',
+                { hl = 'MiniStatuslineDevinfo',  strings = { lsp, level < 1 and git or '', diagnostics } },
+                { hl = 'MiniStatuslineFileinfo', strings = { level < 2 and fileinfo or '' } },
+                { hl = 'MiniStatuslineLocation', strings = { location } },
+              })
+            end, 3)
           end,
         },
       })
