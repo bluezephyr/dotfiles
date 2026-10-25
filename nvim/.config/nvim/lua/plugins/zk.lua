@@ -33,11 +33,16 @@ local function edit_or_create(options, pattern)
   })
 end
 
+-- The notebook holding the current buffer, else the default one.
+local function notebook_dir()
+  return vim.fs.root(0, ".zk") or vim.env.ZK_NOTEBOOK_DIR
+end
+
 -- Live grep over the notebook's notes, starting from search when given.
 local function search_notes(search)
   Snacks.picker.grep({
     title = "Zk Grep",
-    cwd = vim.fs.root(0, ".zk") or vim.env.ZK_NOTEBOOK_DIR,
+    cwd = notebook_dir(),
     glob = "*.md",
     search = search,
   })
@@ -52,6 +57,18 @@ local function search_notes_by_word()
 end
 
 -- Notes with the tag under the cursor, or all tags when it is not on one.
+-- The notebook's files, filtered by the word under the cursor or the visual
+-- selection; zk's own .zk folder is left out. Lowercased, since note file
+-- names are, and a capital would make the match case-sensitive.
+local function find_notebook_files()
+  Snacks.picker.files({
+    title = "Zk Files",
+    cwd = notebook_dir(),
+    exclude = { ".zk" },
+    pattern = function(picker) return vim.fn.tolower(picker:word()) end,
+  })
+end
+
 local function search_notes_by_tag_under_cursor()
   local tag = vim.fn.expand("<cWORD>"):match("#([%w_/-]+)")
   if tag then
@@ -143,6 +160,7 @@ return {
     { "<leader>zw", search_notes_by_word, mode = { "n", "x" }, desc = "zk: Grep notes for word or selection" },
     { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Notes with tag under cursor, or all tags" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
+    { "<leader>z.", find_notebook_files, mode = { "n", "x" }, desc = "zk: Files matching word or selection" },
     { "<leader>zb", "<Cmd>ZkBacklinks<CR>", desc = "zk: Backlinks" },
     { "<leader>zl", "<Cmd>ZkLinks<CR>", desc = "zk: Links" },
     { "<leader>zi", "<Cmd>ZkIndex<CR>", desc = "zk: Index notebook" },
