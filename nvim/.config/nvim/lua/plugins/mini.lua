@@ -15,6 +15,13 @@ end
 -- Marks the directory holding the file.
 local DIR_ICON = ''
 
+-- Half circles that round off the mode-coloured sections where they meet
+-- another section; at the screen edges they stay square.
+local CAP_LEFT, CAP_RIGHT = '', ''
+
+-- The groups mini colours the mode with; each gets matching caps.
+local MODE_GROUPS = { 'Normal', 'Insert', 'Visual', 'Replace', 'Command', 'Other' }
+
 -- How far the directory is dimmed toward the background it sits on.
 local DIM_AMOUNT = 0.45
 
@@ -47,6 +54,15 @@ local function style_statusline()
   -- Themes tend to give the file info the dev info's background; the file
   -- name's instead makes the sections alternate, so each stands apart.
   vim.api.nvim_set_hl(0, 'MiniStatuslineFileinfo', { fg = style.hl('MiniStatuslineFileinfo').fg, bg = bg })
+
+  -- A cap is drawn in the mode colour on the section it borders: the file
+  -- name/info, or the dev info when the file info has been dropped for space.
+  for _, name in ipairs(MODE_GROUPS) do
+    local group = 'MiniStatuslineMode' .. name
+    local mode_bg = style.hl(group).bg
+    vim.api.nvim_set_hl(0, group .. 'Inner', { fg = mode_bg, bg = bg })
+    vim.api.nvim_set_hl(0, group .. 'Dev', { fg = mode_bg, bg = devinfo })
+  end
 end
 
 -- The buffer's name, then the full directory holding it, shortened to ~ where
@@ -174,14 +190,17 @@ return {
             -- When short of space: drop the git branch, then the file info,
             -- then shorten the directory. Mode and file name always stay.
             return fit(function(level)
+              local location_border = level < 2 and fileinfo ~= '' and 'Inner' or 'Dev'
               return statusline.combine_groups({
                 -- Both ends in the mode's colour, as mini's own layout has them.
                 { hl = mode_hl,                  strings = { mode } },
+                '%#' .. mode_hl .. 'Inner#' .. CAP_RIGHT,
                 { hl = 'MiniStatuslineFilename', strings = { filename_section(level >= 3) } },
                 -- Align the rest of the items to the right
                 '%=',
                 { hl = 'MiniStatuslineDevinfo',  strings = { lsp, level < 1 and git or '', diagnostics } },
                 { hl = 'MiniStatuslineFileinfo', strings = { level < 2 and fileinfo or '' } },
+                '%#' .. mode_hl .. location_border .. '#' .. CAP_LEFT,
                 { hl = mode_hl,                  strings = { location } },
               })
             end, 3)
