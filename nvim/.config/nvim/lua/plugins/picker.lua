@@ -121,10 +121,14 @@ local function grep_word(whole)
   })
 end
 
+-- Whether the last explorer showed hidden and ignored files (H and I), so the
+-- next one opens the same way.
+local explorer_toggles = {}
+
 -- The explorer only reveals files inside its cwd, so a file from elsewhere
 -- (e.g. a zk note) opens it at that file's project instead.
 local function explorer(opts)
-  opts = opts or {}
+  opts = vim.tbl_extend("force", explorer_toggles, opts or {})
   local file = vim.api.nvim_buf_get_name(0)
   if vim.fn.filereadable(file) == 1 and not vim.startswith(file, vim.fn.getcwd() .. "/") then
     opts.cwd = vim.fs.root(0, { ".zk", ".git" }) or vim.fs.dirname(file)
@@ -213,6 +217,10 @@ return {
           auto_close = true,
           jump = { close = true },
           diagnostics = false,
+          hidden = true,
+          on_close = function(picker)
+            explorer_toggles = { hidden = picker.opts.hidden, ignored = picker.opts.ignored }
+          end,
           -- Plain Vim search over the visible lines rather than the filter that
           -- searches the whole tree and opens directories; `i` still reaches it.
           win = { list = { keys = { ["/"] = false } } },
