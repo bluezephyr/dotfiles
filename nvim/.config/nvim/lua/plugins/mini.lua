@@ -220,8 +220,9 @@ return {
       style_statusline()
       vim.api.nvim_create_autocmd('ColorScheme', { callback = style_statusline })
 
-      -- mini redraws the statusline on these; a tabline needs its own nudge.
-      vim.api.nvim_create_autocmd({ 'DiagnosticChanged', 'LspAttach', 'LspDetach' }, {
+      -- A statusline is redrawn on these, a tabline is not: without the nudge
+      -- the mode, location and diagnostics would go stale.
+      vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'ModeChanged', 'DiagnosticChanged', 'LspAttach', 'LspDetach' }, {
         group = vim.api.nvim_create_augroup('statusline_tabline', { clear = true }),
         -- On LspDetach the client is still listed, so redraw once it is gone.
         callback = function() vim.schedule(function() vim.cmd('redrawtabline') end) end,
