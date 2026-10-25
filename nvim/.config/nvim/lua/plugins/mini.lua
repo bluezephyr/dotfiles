@@ -37,7 +37,7 @@ local DIAGNOSTIC_LEVELS = {
 -- colorscheme switch keeps the emphasis.
 local function style_statusline()
   local fg, bg = style.hl('Normal').fg, style.hl('MiniStatuslineFilename').bg
-  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = style.hl('Number').fg or fg, bg = bg, bold = true })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = style.hl('Identifier').fg or fg, bg = bg, bold = true })
   -- Blended rather than borrowed from Comment, whose colour some themes set
   -- to exactly this background.
   local dim = fg and bg and style.blend(fg, bg, DIM_AMOUNT) or style.hl('Comment').fg
