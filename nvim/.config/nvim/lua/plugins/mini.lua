@@ -48,7 +48,7 @@ local function style_statusline()
   for _, level in ipairs(DIAGNOSTIC_LEVELS) do
     vim.api.nvim_set_hl(0, level.hl, { fg = style.hl(level.source).fg, bg = devinfo })
   end
-  vim.api.nvim_set_hl(0, 'MiniStatuslineLsp', { fg = style.hl('Function').fg, bg = devinfo })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineLsp', { fg = style.hl('Function').fg, bg = bg })
   vim.api.nvim_set_hl(0, 'MiniStatuslineGit', { fg = style.hl('String').fg, bg = devinfo })
 
   -- Themes tend to give the file info the dev info's background; the file
@@ -102,8 +102,10 @@ end
 
 -- mini takes the filetype icon from mini.icons, whose glyphs differ from the
 -- devicons set the bufferline showed. Swap it, keeping the rest of mini's.
+-- Only the icon and filetype: mini leaves out encoding and size when it
+-- counts as truncated, which an endless width makes it always.
 local function fileinfo_section()
-  local info = require('mini.statusline').section_fileinfo({})
+  local info = require('mini.statusline').section_fileinfo({ trunc_width = math.huge })
   local ok, devicons = pcall(require, 'nvim-web-devicons')
   if not ok or info:sub(1, #vim.bo.filetype) == vim.bo.filetype then
     return info
@@ -131,15 +133,15 @@ local function diagnostics_section()
   return '' .. table.concat(parts, '') .. '%#MiniStatuslineDevinfo#'
 end
 
--- Names of the LSP clients attached to the buffer, or a notice when there are none.
+-- Names of the LSP clients attached to the buffer behind an icon, to follow
+-- the filetype, or nothing when there are none.
 local function lsp_section()
   local names = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-  local text = ' no LSP'
-  if #names > 0 then
-    table.sort(names)
-    text = ' ' .. table.concat(names, ',')
+  if #names == 0 then
+    return ''
   end
-  return '%#MiniStatuslineLsp#' .. text .. '%#MiniStatuslineDevinfo#'
+  table.sort(names)
+  return '%#MiniStatuslineLsp#󱐋 ' .. table.concat(names, ',') .. '%#MiniStatuslineFileinfo#'
 end
 
 return {
@@ -185,12 +187,16 @@ return {
             if git ~= '' then
               git = '%#MiniStatuslineGit#' .. git .. '%#MiniStatuslineDevinfo#'
             end
-            local lsp, diagnostics, fileinfo = lsp_section(), diagnostics_section(), fileinfo_section()
+            local diagnostics, lsp = diagnostics_section(), lsp_section()
+            -- e.g. `markdown 󱐋 marksman`
+            local fileinfo = table.concat(vim.tbl_filter(function(x) return x ~= '' end, { fileinfo_section(), lsp }), ' ')
 
-            -- When short of space: drop the git branch, then the file info,
-            -- then shorten the directory. Mode and file name always stay.
+            -- When short of space: drop the git branch, then the filetype and
+            -- LSP, then shorten the directory. Mode and file name always stay.
             return fit(function(level)
-              local location_border = level < 2 and fileinfo ~= '' and 'Inner' or 'Dev'
+              local info = level < 2 and fileinfo or ''
+              local dev_shown = (level < 1 and git ~= '') or diagnostics ~= ''
+              local location_border = (info == '' and dev_shown) and 'Dev' or 'Inner'
               return statusline.combine_groups({
                 -- Both ends in the mode's colour, as mini's own layout has them.
                 { hl = mode_hl,                  strings = { mode } },
@@ -198,8 +204,8 @@ return {
                 { hl = 'MiniStatuslineFilename', strings = { filename_section(level >= 3) } },
                 -- Align the rest of the items to the right
                 '%=',
-                { hl = 'MiniStatuslineDevinfo',  strings = { lsp, level < 1 and git or '', diagnostics } },
-                { hl = 'MiniStatuslineFileinfo', strings = { level < 2 and fileinfo or '' } },
+                { hl = 'MiniStatuslineDevinfo',  strings = { level < 1 and git or '', diagnostics } },
+                { hl = 'MiniStatuslineFileinfo', strings = { info } },
                 '%#' .. mode_hl .. location_border .. '#' .. CAP_LEFT,
                 { hl = mode_hl,                  strings = { location } },
               })
