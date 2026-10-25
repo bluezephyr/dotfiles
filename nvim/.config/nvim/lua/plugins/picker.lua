@@ -238,6 +238,8 @@ return {
             ["<a-?>"] = { "toggle_help_input", mode = { "n", "i" }, desc = "help" },
           },
         },
+        -- The same key where the list has focus, as in the explorer.
+        list = { keys = { ["<a-?>"] = { "toggle_help_list", desc = "help" } } },
       },
     },
   },
