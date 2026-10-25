@@ -344,9 +344,11 @@ return {
     {
       "<leader>f.",
       function()
-        Snacks.picker.files({ pattern = vim.fn.expand("<cword>") })
+        -- The word under the cursor, or the selection in visual mode.
+        Snacks.picker.files({ pattern = function(picker) return picker:word() end })
       end,
-      desc = "Files matching current word",
+      mode = { "n", "x" },
+      desc = "Files matching word or selection",
     },
     {
       "<leader>f/",
