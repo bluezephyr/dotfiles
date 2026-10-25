@@ -30,7 +30,7 @@ local DIAGNOSTIC_LEVELS = {
 -- colorscheme switch keeps the emphasis.
 local function style_statusline()
   local fg, bg = style.hl('Normal').fg, style.hl('MiniStatuslineFilename').bg
-  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = fg, bg = bg, bold = true })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = style.hl('Number').fg or fg, bg = bg, bold = true })
   -- Blended rather than borrowed from Comment, whose colour some themes set
   -- to exactly this background.
   local dim = fg and bg and style.blend(fg, bg, DIM_AMOUNT) or style.hl('Comment').fg
@@ -41,6 +41,12 @@ local function style_statusline()
   for _, level in ipairs(DIAGNOSTIC_LEVELS) do
     vim.api.nvim_set_hl(0, level.hl, { fg = style.hl(level.source).fg, bg = devinfo })
   end
+  vim.api.nvim_set_hl(0, 'MiniStatuslineLsp', { fg = style.hl('Function').fg, bg = devinfo })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineGit', { fg = style.hl('String').fg, bg = devinfo })
+
+  -- Themes tend to give the file info the dev info's background; the file
+  -- name's instead makes the sections alternate, so each stands apart.
+  vim.api.nvim_set_hl(0, 'MiniStatuslineFileinfo', { fg = style.hl('MiniStatuslineFileinfo').fg, bg = bg })
 end
 
 -- The buffer's name, then the full directory holding it, shortened to ~ where
@@ -112,11 +118,12 @@ end
 -- Names of the LSP clients attached to the buffer, or a notice when there are none.
 local function lsp_section()
   local names = vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients({ bufnr = 0 }))
-  if #names == 0 then
-    return ' no LSP'
+  local text = ' no LSP'
+  if #names > 0 then
+    table.sort(names)
+    text = ' ' .. table.concat(names, ',')
   end
-  table.sort(names)
-  return ' ' .. table.concat(names, ',')
+  return '%#MiniStatuslineLsp#' .. text .. '%#MiniStatuslineDevinfo#'
 end
 
 return {
@@ -156,22 +163,26 @@ return {
       statusline.setup({
         content = {
           active = function()
-            local mode     = statusline.section_mode({})
+            local mode, mode_hl = statusline.section_mode({})
             local git      = statusline.section_git({})
             local location = statusline.section_location({})
+            if git ~= '' then
+              git = '%#MiniStatuslineGit#' .. git .. '%#MiniStatuslineDevinfo#'
+            end
             local lsp, diagnostics, fileinfo = lsp_section(), diagnostics_section(), fileinfo_section()
 
             -- When short of space: drop the git branch, then the file info,
             -- then shorten the directory. Mode and file name always stay.
             return fit(function(level)
               return statusline.combine_groups({
-                { hl = 'MiniStatuslineMode',     strings = { mode } },
+                -- Both ends in the mode's colour, as mini's own layout has them.
+                { hl = mode_hl,                  strings = { mode } },
                 { hl = 'MiniStatuslineFilename', strings = { filename_section(level >= 3) } },
                 -- Align the rest of the items to the right
                 '%=',
                 { hl = 'MiniStatuslineDevinfo',  strings = { lsp, level < 1 and git or '', diagnostics } },
                 { hl = 'MiniStatuslineFileinfo', strings = { level < 2 and fileinfo or '' } },
-                { hl = 'MiniStatuslineLocation', strings = { location } },
+                { hl = mode_hl,                  strings = { location } },
               })
             end, 3)
           end,
