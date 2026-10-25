@@ -366,15 +366,15 @@ return {
       desc = "Live Grep",
     },
     {
-      "<leader>fw",
+      "<leader>fg",
       function()
         grep_word(false)
       end,
-      mode = { "n", "x" },
-      desc = "Grep word or selection",
+      mode = "x",
+      desc = "Grep selection",
     },
     {
-      "<leader>fW",
+      "<leader>fw",
       function()
         grep_word(true)
       end,
