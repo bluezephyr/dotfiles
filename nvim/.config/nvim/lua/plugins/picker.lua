@@ -123,13 +123,22 @@ end
 
 -- The explorer only reveals files inside its cwd, so a file from elsewhere
 -- (e.g. a zk note) opens it at that file's project instead.
-local function explorer()
+local function explorer(opts)
+  opts = opts or {}
   local file = vim.api.nvim_buf_get_name(0)
   if vim.fn.filereadable(file) == 1 and not vim.startswith(file, vim.fn.getcwd() .. "/") then
-    Snacks.explorer({ cwd = vim.fs.root(0, { ".zk", ".git" }) or vim.fs.dirname(file) })
-  else
-    Snacks.explorer()
+    opts.cwd = vim.fs.root(0, { ".zk", ".git" }) or vim.fs.dirname(file)
   end
+  Snacks.explorer(opts)
+end
+
+-- Snacks' own sidebar, which stays open beside the files it opens.
+local function explorer_split()
+  explorer({
+    layout = { preset = "sidebar", fullscreen = false, preview = false },
+    auto_close = false,
+    jump = { close = false },
+  })
 end
 
 -- Items carry a cwd-relative path; the register should hold the whole one.
@@ -237,6 +246,11 @@ return {
       "\\",
       explorer,
       desc = "File explorer",
+    },
+    {
+      "|",
+      explorer_split,
+      desc = "File explorer in a split",
     },
     {
       "<leader>fk",
