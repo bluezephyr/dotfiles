@@ -33,20 +33,22 @@ local function edit_or_create(options, pattern)
   })
 end
 
--- Live grep over the notebook's notes.
-local function search_notes()
+-- Live grep over the notebook's notes, starting from search when given.
+local function search_notes(search)
   Snacks.picker.grep({
     title = "Zk Grep",
     cwd = vim.fs.root(0, ".zk") or vim.env.ZK_NOTEBOOK_DIR,
     glob = "*.md",
+    search = search,
   })
 end
 
-local function search_notes_by_word_under_cursor()
-  local word = vim.fn.expand("<cword>")
-  if word ~= "" then
-    edit_or_create(nil, word)
-  end
+-- The grep, starting from the word under the cursor or the visual selection,
+-- escaped so it matches literally.
+local function search_notes_by_word()
+  search_notes(function(picker)
+    return (picker:word():match("[^\n]*"):gsub("[%.%+%*%?%(%)|%[%]{}%^%$\\]", "\\%0"))
+  end)
 end
 
 -- Notes with the tag under the cursor, or all tags when it is not on one.
@@ -138,7 +140,7 @@ return {
   keys = {
     { "<leader>zf", edit_or_create, desc = "zk: Edit or create note" },
     { "<leader>zo","<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: List Find notes" },
-    { "<leader>zw", search_notes_by_word_under_cursor, desc = "zk: Find notes matching word under cursor" },
+    { "<leader>zw", search_notes_by_word, mode = { "n", "x" }, desc = "zk: Grep notes for word or selection" },
     { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Notes with tag under cursor, or all tags" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
     { "<leader>zb", "<Cmd>ZkBacklinks<CR>", desc = "zk: Backlinks" },
