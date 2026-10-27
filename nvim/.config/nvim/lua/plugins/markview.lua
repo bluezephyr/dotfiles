@@ -12,7 +12,8 @@ return {
   opts = {
     preview = {
       icon_provider = 'mini',
-      modes = { 'n', 'no', 'c', 'i' },
+      -- Not 'c': rendering during a search hides IncSearch's current match.
+      modes = { 'n', 'no', 'i' },
       hybrid_modes = { 'n', 'i' },
     },
     markdown = {

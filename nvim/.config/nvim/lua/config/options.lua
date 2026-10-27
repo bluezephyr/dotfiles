@@ -81,9 +81,13 @@ vim.api.nvim_create_autocmd("FileType", {
 -- shade from Normal and collides with CursorLine. Derived, so a colorscheme
 -- switch keeps the contrast instead of the previous theme's colors.
 local FLOAT_CONTRAST = 0.30
+-- How far the other search hits are tinted toward the theme's orange: enough
+-- to spot them all, softer than the solid blue current match.
+local SEARCH_TINT = 0.5
 
--- Repaints the float highlights so they contrast with the theme.
-local function style_floats()
+-- Repaints the float highlights so they contrast with the theme, and the
+-- search ones so the current match stands out from the other hits.
+local function style_highlights()
   local normal = style.hl("Normal")
   if not normal.bg then
     return
@@ -95,7 +99,13 @@ local function style_floats()
   vim.api.nvim_set_hl(0, "NormalFloat", { fg = normal.fg, bg = bg })
   vim.api.nvim_set_hl(0, "FloatBorder", { fg = accent, bg = bg })
   vim.api.nvim_set_hl(0, "FloatTitle", { fg = accent, bg = bg, bold = true })
+  -- Number carries the orange: warm, so it stands out from the cool background.
+  local orange = style.hl("Number").fg
+  local tint = orange and style.blend(normal.bg, orange, SEARCH_TINT)
+  vim.api.nvim_set_hl(0, "Search", { bg = tint })
+  vim.api.nvim_set_hl(0, "IncSearch", { fg = normal.bg, bg = accent, bold = true })
+  vim.api.nvim_set_hl(0, "CurSearch", { link = "IncSearch" })
 end
 
-vim.api.nvim_create_autocmd("ColorScheme", { callback = style_floats })
-style_floats()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = style_highlights })
+style_highlights()
