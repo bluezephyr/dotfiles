@@ -56,7 +56,6 @@ local function search_notes_by_word()
   end)
 end
 
--- Notes with the tag under the cursor, or all tags when it is not on one.
 -- The notebook's files, filtered by the word under the cursor or the visual
 -- selection; zk's own .zk folder is left out. Lowercased, since note file
 -- names are, and a capital would make the match case-sensitive.
@@ -69,6 +68,7 @@ local function find_notebook_files()
   })
 end
 
+-- Notes with the tag under the cursor, or a picker for several tags otherwise.
 local function search_notes_by_tag_under_cursor()
   local tag = vim.fn.expand("<cWORD>"):match("#([%w_/-]+)")
   if tag then
@@ -142,6 +142,8 @@ return {
   cmd = { "ZkNew", "ZkNotes", "ZkTags", "ZkBacklinks", "ZkLinks", "ZkIndex", "ZkEditOrCreate", "ZkInsertLinkAtSelectionEdit" },
   opts = {
     picker = "snacks_picker",
+    -- zk does not parse the default "AND"; a comma is its AND.
+    tags = { multi_select_strategy = "," },
     -- Attaching is left to vim.lsp.enable('zk') in plugins/lsp.lua, so it does
     -- not depend on this plugin having been loaded. The plugin reuses that
     -- client if one is attached when it is first used, else starts its own.
@@ -158,7 +160,7 @@ return {
     { "<leader>zf", edit_or_create, desc = "zk: Edit or create note" },
     { "<leader>zo","<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: List Find notes" },
     { "<leader>zw", search_notes_by_word, mode = { "n", "x" }, desc = "zk: Grep notes for word or selection" },
-    { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Notes with tag under cursor, or all tags" },
+    { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Tag under cursor or pick tags (AND)" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
     { "<leader>z.", find_notebook_files, mode = { "n", "x" }, desc = "zk: Files matching word or selection" },
     { "<leader>zb", "<Cmd>ZkBacklinks<CR>", desc = "zk: Backlinks" },
