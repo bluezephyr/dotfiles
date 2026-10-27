@@ -62,9 +62,12 @@ BIN_DIR = HOME / ".local" / "bin"
 #                 "asset"     .tar.gz file in the release, {tag} is replaced
 #                 "member"    executable in the archive, {tag} is replaced
 #                 "target"    name in ~/.local/bin, defaults to the app name
-#   script        "url"       location of a shell install script, piped to `sh`
+#   script        "url"       location of a shell install script
+#                 "shell"     interpreter, defaults to `sh`
 #                 "command"   executable to check for the installed version,
 #                             defaults to the app name
+#                 "version_command" command to get the version when no executable
+#                             is available on PATH; failing means not installed
 #   config        "target"    file to update, ~ is expanded
 #                 "marker"    name of the "# start/end <marker>" block to
 #                             replace. The content comes from the file given
@@ -127,6 +130,18 @@ APPS = {
             "appimage": {
                 "url": "https://github.com/neovim/neovim/releases/latest/"
                        "download/nvim-linux-x86_64.appimage",
+            },
+        },
+    },
+    "nvm": {
+        "installers": {
+            "script": {
+                "url": "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh",
+                "shell": "bash",
+                "version_command": [
+                    "bash", "-c",
+                    'source "$HOME/.nvm/nvm.sh" && nvm --version',
+                ],
             },
         },
     },
@@ -262,7 +277,7 @@ def tar_install(app_name, spec, attributes):
 
 
 def script_install(app_name, spec, attributes):
-    """Download a shell install script and run it, piped into `sh`."""
+    """Download a shell install script and run it with its configured shell."""
     try:
         script = urllib.request.urlopen(spec["url"]).read()
     except Exception as e:
@@ -270,13 +285,18 @@ def script_install(app_name, spec, attributes):
         return
 
     try:
-        subprocess.run(["sh"], input=script, check=True)
+        subprocess.run([spec.get("shell", "sh")], input=script, check=True)
     except (subprocess.CalledProcessError, OSError) as e:
         print(f"Install script failed for {app_name}: {e}")
 
 
 def script_version_installed(app_name, spec):
-    """Version reported by the app's command, or None when it is not on PATH."""
+    """Version reported by the app, or None when it is not installed."""
+    version_command = spec.get("version_command")
+    if version_command:
+        output = capture(version_command)
+        return version_in(output.strip()) if output else None
+
     command = spec.get("command", app_name)
     return command_version(command) if shutil.which(command) else None
 

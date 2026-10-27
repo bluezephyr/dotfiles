@@ -9,4 +9,5 @@ fd              apt
 fzf             apt
 lazygit         apt
 nvim            appimage
+nvm             script
 zk              tar
