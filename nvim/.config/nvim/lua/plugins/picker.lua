@@ -438,7 +438,8 @@ return {
     {
       "<leader><leader>",
       function()
-        Snacks.picker.buffers()
+        -- Sorted by last use, so the alternate buffer comes first.
+        Snacks.picker.buffers({ current = false })
       end,
       desc = "Buffers",
     },
