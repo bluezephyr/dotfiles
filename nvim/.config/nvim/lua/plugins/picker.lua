@@ -145,6 +145,166 @@ local function explorer_split()
   })
 end
 
+-- The window whose title shows the search status.
+local function explorer_status_win(picker)
+  return picker.layout.root:has_border() and picker.layout.root or picker.input.win
+end
+
+-- Highlights pattern in the list, or clears the highlight when it is nil.
+-- Window matches survive the list buffer being redrawn while scrolling.
+local function explorer_set_match(picker, pattern)
+  local win = picker.list.win.win
+  if picker.explorer_search_match then
+    vim.fn.matchdelete(picker.explorer_search_match.id, win)
+  end
+  picker.explorer_search_match = pattern
+    and { id = vim.fn.matchadd("Search", pattern, 10, -1, { window = win }), pattern = pattern }
+end
+
+-- Search the result items, not the buffer, which only holds on-screen rows.
+local function explorer_search_jump(picker, direction, pattern, cursor, preview)
+  if pattern == "" then
+    return
+  end
+  local list = picker.list
+  local status_win = explorer_status_win(picker)
+  local ignorecase = vim.o.ignorecase and not (vim.o.smartcase and pattern:find("%u"))
+  local search_pattern = (ignorecase and "\\c" or "\\C") .. pattern
+  local ok, regex = pcall(vim.regex, search_pattern)
+  if not ok then
+    if not preview then
+      vim.notify(tostring(regex), vim.log.levels.WARN)
+    end
+    return
+  end
+  picker.explorer_title = picker.explorer_title or vim.deepcopy(status_win.opts.title)
+  explorer_set_match(picker, search_pattern)
+  local count = list:count()
+  local hits, total = {}, 0
+  for index = 1, count do
+    local item = list:get(index)
+    local name = item.file and vim.fs.basename(item.file) or item.text
+    if regex:match_str(name) then
+      total = total + 1
+      hits[index] = total
+    end
+  end
+  local step = list.reverse and -direction or direction
+  for offset = 1, count do
+    local index = cursor + offset * step
+    if not vim.o.wrapscan and (index < 1 or index > count) then
+      break
+    end
+    index = (index - 1) % count + 1
+    if hits[index] then
+      local current = list.reverse and total - hits[index] + 1 or hits[index]
+      list:view(index)
+      local status = ("[%d/%d] /%s"):format(current, total, pattern)
+      status_win:set_title(status)
+      if not preview then
+        vim.api.nvim_echo({ { status, "Search" } }, false, {})
+      end
+      return
+    end
+  end
+  status_win:set_title(("[0/%d] /%s"):format(total, pattern))
+  if not preview then
+    vim.notify("Pattern not found: " .. pattern, vim.log.levels.INFO)
+  end
+end
+
+-- Like :nohlsearch, while a search is highlighted; otherwise close as usual.
+local function explorer_nohl(picker)
+  if not picker.explorer_search_match then
+    return picker:action("cancel")
+  end
+  explorer_set_match(picker, nil)
+  explorer_status_win(picker):set_title(picker.explorer_title)
+end
+
+local function explorer_expand(picker, item)
+  if item and item.dir and not item.open then
+    picker:action("confirm")
+  end
+end
+
+local function explorer_search(picker, direction, prompt)
+  local list = picker.list
+  local cursor, top = list.cursor, list.top
+  local original = picker:current()
+  local pattern = vim.fn.getreg("/")
+  if not prompt then
+    return explorer_search_jump(picker, direction, pattern, cursor)
+  end
+  local status_win = explorer_status_win(picker)
+  local title = vim.deepcopy(status_win.opts.title)
+  local previous_match = picker.explorer_search_match and picker.explorer_search_match.pattern
+  local function restore()
+    explorer_set_match(picker, previous_match)
+    local index = cursor
+    for i, item in ipairs(picker:items()) do
+      if original and item.file == original.file then
+        index = i
+        break
+      end
+    end
+    list:view(index, top)
+    status_win:set_title(title)
+  end
+  local navigated = false
+  local changed = vim.api.nvim_create_autocmd("CmdlineChanged", {
+    pattern = "@",
+    callback = function()
+      navigated = false
+      restore()
+      explorer_search_jump(picker, direction, vim.fn.getcmdline(), list.cursor, true)
+      vim.cmd.redraw()
+    end,
+  })
+  local function action(name)
+    return function() picker:action(name) end
+  end
+  local function hit(step)
+    return function() explorer_search_jump(picker, direction * step, vim.fn.getcmdline(), list.cursor, true) end
+  end
+  -- Arrows move through the tree; <C-g>/<C-t> go to the next and previous
+  -- hit, as with 'incsearch' in a buffer.
+  local keys = {
+    ["<Up>"] = action("list_up"),
+    ["<Down>"] = action("list_down"),
+    ["<Left>"] = action("explorer_close"),
+    ["<Right>"] = action("explorer_expand"),
+    ["<C-g>"] = hit(1),
+    ["<C-t>"] = hit(-1),
+  }
+  for key, fn in pairs(keys) do
+    vim.keymap.set("c", key, function()
+      navigated = true
+      fn()
+      vim.cmd.redraw()
+    end, { buffer = list.win.buf })
+  end
+  vim.fn.inputsave()
+  local ok, input = pcall(vim.fn.input, { prompt = "/", cancelreturn = "\27" })
+  vim.fn.inputrestore()
+  for key in pairs(keys) do
+    vim.keymap.del("c", key, { buffer = list.win.buf })
+  end
+  vim.api.nvim_del_autocmd(changed)
+  if not ok or input == "\27" then
+    return restore()
+  end
+  pattern = input ~= "" and input or pattern
+  if pattern ~= "" then
+    vim.fn.setreg("/", pattern)
+    vim.fn.histadd("search", pattern)
+  end
+  if not navigated then
+    restore()
+    explorer_search_jump(picker, direction, pattern, list.cursor)
+  end
+end
+
 -- Items carry a cwd-relative path; the register should hold the whole one.
 local function yank_path(picker, item)
   local path = Snacks.picker.util.path(item)
@@ -221,9 +381,22 @@ return {
           on_close = function(picker)
             explorer_toggles = { hidden = picker.opts.hidden, ignored = picker.opts.ignored }
           end,
-          -- Plain Vim search over the visible lines rather than the filter that
-          -- searches the whole tree and opens directories; `i` still reaches it.
-          win = { list = { keys = { ["/"] = false } } },
+          actions = {
+            explorer_expand = explorer_expand,
+            explorer_nohl = explorer_nohl,
+            explorer_search = function(picker) explorer_search(picker, 1, true) end,
+            explorer_search_next = function(picker) explorer_search(picker, 1) end,
+            explorer_search_prev = function(picker) explorer_search(picker, -1) end,
+          },
+          -- Search without changing the filter; `i` still reaches the filter.
+          win = { list = { keys = {
+            ["<Esc>"] = "explorer_nohl",
+            ["<Left>"] = "explorer_close",
+            ["<Right>"] = "explorer_expand",
+            ["/"] = "explorer_search",
+            ["n"] = "explorer_search_next",
+            ["N"] = "explorer_search_prev",
+          } } },
         },
       },
 
