@@ -272,6 +272,24 @@ local function explorer_expand(picker, item)
   })
 end
 
+-- Moves to the next entry whose name matches the filter. The filter matches
+-- the path, so the list also holds parents and contents of matching folders.
+local function explorer_hit(picker, step)
+  local list = picker.list
+  if not picker.input.filter.meta.searching then
+    return picker:action(step > 0 and "list_down" or "list_up")
+  end
+  step = list.reverse and -step or step
+  local count = list:count()
+  for offset = 1, count do
+    local index = (list.cursor + offset * step - 1) % count + 1
+    local name = vim.fs.basename(list:get(index).file)
+    if picker.matcher:match({ text = name, idx = 1, score = 0 }) > 0 then
+      return list:view(index)
+    end
+  end
+end
+
 local function explorer_search(picker, direction, prompt)
   local list = picker.list
   local cursor, top = list.cursor, list.top
@@ -429,6 +447,8 @@ return {
           end,
           actions = {
             explorer_expand = explorer_expand,
+            explorer_hit_next = function(picker) explorer_hit(picker, 1) end,
+            explorer_hit_prev = function(picker) explorer_hit(picker, -1) end,
             explorer_nohl = explorer_nohl,
             explorer_search = function(picker) explorer_search(picker, 1, true) end,
             explorer_search_next = function(picker) explorer_search(picker, 1) end,
@@ -436,9 +456,16 @@ return {
           },
           win = {
             -- Esc leaves the filter for the list, to move around with hjkl.
-            input = { keys = { ["<esc>"] = { "focus_list", mode = { "n", "i" } } } },
+            -- <c-n>/<c-p> go between the filter's hits.
+            input = { keys = {
+              ["<esc>"] = { "focus_list", mode = { "n", "i" } },
+              ["<c-n>"] = { "explorer_hit_next", mode = { "n", "i" } },
+              ["<c-p>"] = { "explorer_hit_prev", mode = { "n", "i" } },
+            } },
             -- Search without changing the filter; `i` still reaches the filter.
             list = { keys = {
+              ["<c-n>"] = "explorer_hit_next",
+              ["<c-p>"] = "explorer_hit_prev",
               ["<Esc>"] = "explorer_nohl",
               ["<Left>"] = "explorer_close",
               ["<Right>"] = "explorer_expand",
