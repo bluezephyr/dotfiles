@@ -5,6 +5,10 @@ return {
   {
     'lukas-reineke/indent-blankline.nvim',
     main = "ibl",
-    opts = {},
+    opts = {
+      -- The current scope's guide is enough: no underline on the lines that
+      -- open and close it (a for loop's `for ... do` and `end`).
+      scope = { show_start = false, show_end = false },
+    },
   },
 }
