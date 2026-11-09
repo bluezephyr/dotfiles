@@ -1,5 +1,0 @@
-# Neovim
-
-## Future plugins
-
-
