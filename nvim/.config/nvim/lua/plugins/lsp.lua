@@ -22,6 +22,62 @@ local function show_popup(open)
   end
 end
 
+-- Notebook links -------------------------------------------------------------
+-- Wiki links [[...]] and markdown links [...](...), as a Vim regex for search()
+-- and as Lua patterns for finding the link under the cursor.
+local link_regex = [=[\[\[[^]]\+\]\]\|\[[^]]*\]([^)]\+)]=]
+local link_patterns = { "%[%[.-%]%]", "%[[^%]]-%]%([^%)]+%)" }
+
+local function cursor_on_link()
+  local line = vim.api.nvim_get_current_line()
+  local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+  for _, pattern in ipairs(link_patterns) do
+    local init = 1
+    while true do
+      local s, e = line:find(pattern, init)
+      if not s or s > col then break end
+      if col <= e then return true end
+      init = e + 1
+    end
+  end
+  return false
+end
+
+-- Moves to the start of the count'th next or previous link, and follows it
+-- when follow is set.
+local function jump_to_link(backward, follow)
+  return function()
+    for _ = 1, vim.v.count1 do
+      if vim.fn.search(link_regex, backward and "b" or "") == 0 then
+        vim.notify("No more links", vim.log.levels.INFO)
+        return
+      end
+    end
+    if follow then
+      Snacks.picker.lsp_definitions()
+    end
+  end
+end
+
+-- Link keys for a buffer the zk server serves: <CR> follows the link under the
+-- cursor and falls back to a plain <CR> elsewhere.
+local function map_link_keys(buf)
+  local function map(lhs, rhs, desc)
+    vim.keymap.set("n", lhs, rhs, { buffer = buf, desc = "zk: " .. desc })
+  end
+  map("<CR>", function()
+    if cursor_on_link() then
+      Snacks.picker.lsp_definitions()
+    else
+      vim.cmd.normal({ vim.v.count1 .. "\r", bang = true })
+    end
+  end, "Follow link")
+  map("]n", jump_to_link(false), "Next link")
+  map("[n", jump_to_link(true), "Previous link")
+  map("].", jump_to_link(false, true), "Follow next link")
+  map("[.", jump_to_link(true, true), "Follow previous link")
+end
+
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
@@ -97,6 +153,10 @@ return {
         --
         -- When you move your cursor, the highlights will be cleared (the second autocommand).
         local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+        if client and client.name == 'zk' then
+          map_link_keys(event.buf)
+        end
 
         if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
           local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
