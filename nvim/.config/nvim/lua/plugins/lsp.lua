@@ -47,6 +47,10 @@ end
 -- when follow is set.
 local function jump_to_link(backward, follow)
   return function()
+    -- From inside a link, a backward search would land on that link's own start.
+    if backward and cursor_on_link() then
+      vim.fn.search(link_regex, "bc")
+    end
     for _ = 1, vim.v.count1 do
       if vim.fn.search(link_regex, backward and "b" or "") == 0 then
         vim.notify("No more links", vim.log.levels.INFO)
@@ -60,22 +64,21 @@ local function jump_to_link(backward, follow)
 end
 
 -- Link keys for a buffer the zk server serves: <CR> follows the link under the
--- cursor and falls back to a plain <CR> elsewhere.
+-- cursor, else the next one. <BS> (back, as <C-o>) is in config/keymaps.lua.
 local function map_link_keys(buf)
   local function map(lhs, rhs, desc)
     vim.keymap.set("n", lhs, rhs, { buffer = buf, desc = "zk: " .. desc })
   end
+  local follow_next = jump_to_link(false, true)
   map("<CR>", function()
     if cursor_on_link() then
       Snacks.picker.lsp_definitions()
     else
-      vim.cmd.normal({ vim.v.count1 .. "\r", bang = true })
+      follow_next()
     end
-  end, "Follow link")
+  end, "Follow link under cursor or next link")
   map("]n", jump_to_link(false), "Next link")
   map("[n", jump_to_link(true), "Previous link")
-  map("].", jump_to_link(false, true), "Follow next link")
-  map("[.", jump_to_link(true, true), "Follow previous link")
 end
 
 return {

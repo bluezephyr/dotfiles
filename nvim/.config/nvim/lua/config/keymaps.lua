@@ -16,6 +16,9 @@ wk.add({
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
+-- Backspace goes back in the jump list, e.g. to the note a followed link came from.
+vim.keymap.set('n', '<BS>', '<C-o>', { desc = 'Jump back' })
+
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
