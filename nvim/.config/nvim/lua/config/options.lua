@@ -105,6 +105,18 @@ local function style_highlights()
   vim.api.nvim_set_hl(0, "Search", { bg = tint })
   vim.api.nvim_set_hl(0, "IncSearch", { fg = normal.bg, bg = accent, bold = true })
   vim.api.nvim_set_hl(0, "CurSearch", { link = "IncSearch" })
+  -- Many themes colour emphasis like plain text, leaving only the font style,
+  -- which is hard to spot: italic takes the orange, bold the yellow.
+  for _, lang in ipairs({ "", ".markdown_inline" }) do
+    vim.api.nvim_set_hl(0, "@markup.italic" .. lang, { fg = orange, italic = true })
+    vim.api.nvim_set_hl(0, "@markup.strong" .. lang, { fg = style.hl("Type").fg, bold = true })
+    -- Labels and URLs in the link's blue, as markview draws them, rather than
+    -- the cyan some themes give them.
+    vim.api.nvim_set_hl(0, "@markup.link.label" .. lang, { link = "@markup.link" .. lang })
+    vim.api.nvim_set_hl(0, "@markup.link.url" .. lang, { link = "@markup.link" .. lang })
+  end
+  -- Links as markview draws them: in the link blue, italic.
+  vim.api.nvim_set_hl(0, "NoteLink", { fg = style.hl("@markup.link").fg, italic = true })
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", { callback = style_highlights })
