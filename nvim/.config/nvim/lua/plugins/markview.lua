@@ -21,6 +21,38 @@ local function plain_links()
   return out
 end
 
+-- Hybrid mode shows the cursor line raw, so syntax hidden by the preview can be
+-- seen while moving and yanking. These motions switch it on (, and ` toggle
+-- it) and Escape switches it off, so the full preview is the resting state.
+local HYBRID_KEYS = { "w", "W", "b", "B", "e", "E", "ge", "gE", "f", "F", "t", "T", ";", "y" }
+
+local function hybrid_keymaps(buf)
+  local function map(modes, lhs, rhs, desc, expr)
+    vim.keymap.set(modes, lhs, rhs, { buffer = buf, desc = desc, expr = expr })
+  end
+  -- Runs a Markview command, then the key itself. The command consumes the
+  -- count and register, so they are restored.
+  local function with(command, key)
+    return function()
+      local count = vim.v.count > 0 and tostring(vim.v.count) or ""
+      local register = vim.v.register ~= '"' and '"' .. vim.v.register or ""
+      return "<cmd>Markview " .. command .. "<cr>" .. register .. count .. key
+    end
+  end
+
+  for _, key in ipairs(HYBRID_KEYS) do
+    map("n", key, with("hybridEnable", key), "Show line raw and " .. key, true)
+  end
+  map("n", ",", with("hybridToggle", ","), "Toggle raw line and ,", true)
+  map("n", "`", "<cmd>Markview hybridToggle<cr>", "Toggle raw line")
+  map({ "n", "i" }, "<esc>", "<esc><cmd>Markview hybridDisable<cr><cmd>noh<cr>",
+    "Escape, clear search and render line")
+  map({ "x", "s", "o" }, "<esc>", "<esc><cmd>Markview hybridDisable<cr>",
+    "Escape and render line")
+  -- <C-c> to cancel: an <Esc> sent by a mapping runs the command line instead.
+  map("c", "<esc>", "<C-c><cmd>Markview hybridDisable<cr>", "Cancel command and render line")
+end
+
 return {
   "OXY2DEV/markview.nvim",
   lazy = false, -- Recommended
@@ -33,11 +65,15 @@ return {
   opts = {
     preview = {
       icon_provider = 'mini',
-      -- Rendered in normal mode, raw in insert mode (not listed, so markview
-      -- clears the preview). Not 'c': rendering during a search hides
-      -- IncSearch's current match.
+      -- Normal mode starts rendered; hybrid can reveal the current line.
+      -- Visual, insert and search stay raw (not listed). Rendering during a
+      -- search hides IncSearch's current match. 'no' is hybrid too, or y
+      -- would redraw the revealed line while waiting for its motion.
       modes = { 'n', 'no' },
-      hybrid_modes = {},
+      hybrid_modes = { 'n', 'no' },
+      enable_hybrid_mode = false,
+      linewise_hybrid_mode = true,
+      edit_range = { 0, 0 },
     },
     markdown = {
       headings = {
@@ -70,6 +106,19 @@ return {
   },
 
   config = function(_, opts)
+    -- Markview's default mode-change callback reveals the cursor line in every
+    -- hybrid mode, ignoring whether the buffer has hybrid switched on.
+    local default = require("markview.spec").default.preview.callbacks
+    opts.preview.callbacks = {
+      on_mode_change = function(buffer, wins, mode)
+        default.on_mode_change(buffer, wins, mode)
+        local state = require("markview.state").get_buffer_state(buffer, false)
+        local previewing = require("markview.actions").in_preview_mode(mode)
+        if state and not state.hybrid_mode and previewing then
+          default.on_hybrid_disable(buffer, wins)
+        end
+      end,
+    }
     opts.markdown_inline = plain_links()
     -- Only the box is coloured: markview tints the whole item by default,
     -- which turns a list of long items into a wall of red. Ticked items fade
@@ -93,6 +142,7 @@ return {
       callback = function(args)
         vim.keymap.set({ "n", "x" }, "<C-x>", "<cmd>Checkbox toggle<cr>",
           { buffer = args.buf, desc = "zk: Toggle checkbox" })
+        hybrid_keymaps(args.buf)
       end,
     })
   end,
