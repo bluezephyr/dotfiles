@@ -12,6 +12,11 @@ wk.add({
   { "<leader>d", group = "[D]ebug" },
 })
 
+-- Describe built-in keys that which-key doesn't label
+wk.add({
+  { "g<", desc = "Previous command output" },
+})
+
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
