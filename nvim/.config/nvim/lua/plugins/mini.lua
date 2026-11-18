@@ -33,35 +33,47 @@ local DIAGNOSTIC_LEVELS = {
   { name = 'HINT', sign = 'H', hl = 'MiniStatuslineDiagHint', source = 'DiagnosticHint' },
 }
 
--- Paints the accents onto the backgrounds mini gives their sections, so a
--- colorscheme switch keeps the emphasis.
+-- How far the bar is tinted from the editor background toward the theme's
+-- blue, and the file name lifted from the text colour toward white (black
+-- on light themes). In onedark these give #334659 and #eaecef.
+local BAR_TINT = 0.2
+local INACTIVE_TINT = 0.08
+local NAME_LIFT = 0.75
+
+-- Gives every section one background, tinted from the theme, so the bar
+-- reads as a whole and keeps its look across colorscheme switches.
 local function style_statusline()
-  local fg, bg = style.hl('Normal').fg, style.hl('MiniStatuslineFilename').bg
-  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = style.hl('Identifier').fg or fg, bg = bg, bold = true })
+  local normal = style.hl('Normal')
+  local base = normal.bg or style.hl('StatusLine').bg or 0
+  local fg = normal.fg or style.hl('StatusLine').fg or 0xffffff
+  local blue = style.hl('Function').fg or fg
+  local bg = style.blend(base, blue, BAR_TINT)
+  local light = vim.o.background == 'light'
+
+  for _, group in ipairs({ 'MiniStatuslineFilename', 'MiniStatuslineDevinfo', 'MiniStatuslineFileinfo' }) do
+    vim.api.nvim_set_hl(0, group, { fg = style.hl(group).fg or fg, bg = bg })
+  end
+  local name = style.blend(fg, light and 0x000000 or 0xffffff, NAME_LIFT)
+  vim.api.nvim_set_hl(0, 'MiniStatuslineName', { fg = name, bg = bg, bold = true })
   -- Blended rather than borrowed from Comment, whose colour some themes set
   -- to exactly this background.
-  local dim = fg and bg and style.blend(fg, bg, DIM_AMOUNT) or style.hl('Comment').fg
-  vim.api.nvim_set_hl(0, 'MiniStatuslineDir', { fg = dim, bg = bg })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineDir', { fg = style.blend(fg, bg, DIM_AMOUNT), bg = bg })
   vim.api.nvim_set_hl(0, 'MiniStatuslineModified', { fg = style.hl('DiagnosticWarn').fg, bg = bg, bold = true })
 
-  local devinfo = style.hl('MiniStatuslineDevinfo').bg
   for _, level in ipairs(DIAGNOSTIC_LEVELS) do
-    vim.api.nvim_set_hl(0, level.hl, { fg = style.hl(level.source).fg, bg = devinfo })
+    vim.api.nvim_set_hl(0, level.hl, { fg = style.hl(level.source).fg, bg = bg })
   end
-  vim.api.nvim_set_hl(0, 'MiniStatuslineLsp', { fg = style.hl('Function').fg, bg = bg })
-  vim.api.nvim_set_hl(0, 'MiniStatuslineGit', { fg = style.hl('String').fg, bg = devinfo })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineLsp', { fg = blue, bg = bg })
+  vim.api.nvim_set_hl(0, 'MiniStatuslineGit', { fg = style.hl('String').fg, bg = bg })
 
-  -- Themes tend to give the file info the dev info's background; the file
-  -- name's instead makes the sections alternate, so each stands apart.
-  vim.api.nvim_set_hl(0, 'MiniStatuslineFileinfo', { fg = style.hl('MiniStatuslineFileinfo').fg, bg = bg })
+  -- Unfocused windows: a fainter tint, the text dimmed into it.
+  local inactive = style.blend(base, blue, INACTIVE_TINT)
+  vim.api.nvim_set_hl(0, 'MiniStatuslineInactive', { fg = style.blend(fg, inactive, DIM_AMOUNT), bg = inactive })
 
-  -- A cap is drawn in the mode colour on the section it borders: the file
-  -- name/info, or the dev info when the file info has been dropped for space.
-  for _, name in ipairs(MODE_GROUPS) do
-    local group = 'MiniStatuslineMode' .. name
-    local mode_bg = style.hl(group).bg
-    vim.api.nvim_set_hl(0, group .. 'Inner', { fg = mode_bg, bg = bg })
-    vim.api.nvim_set_hl(0, group .. 'Dev', { fg = mode_bg, bg = devinfo })
+  -- Caps in the mode colour, rounding it off into the bar.
+  for _, mode in ipairs(MODE_GROUPS) do
+    local group = 'MiniStatuslineMode' .. mode
+    vim.api.nvim_set_hl(0, group .. 'Inner', { fg = style.hl(group).bg, bg = bg })
   end
 end
 
@@ -191,9 +203,6 @@ return {
             -- length to three.
             local location = ('%%%dl|%%L│%%3v|%%-3{virtcol("$") - 1}')
               :format(#tostring(vim.api.nvim_buf_line_count(0)))
-            if git ~= '' then
-              git = '%#MiniStatuslineGit#' .. git .. '%#MiniStatuslineDevinfo#'
-            end
             local diagnostics, lsp = diagnostics_section(), lsp_section()
             -- e.g. `markdown 󱐋 marksman`
             local fileinfo = table.concat(vim.tbl_filter(function(x) return x ~= '' end, { fileinfo_section(), lsp }), ' ')
@@ -202,8 +211,6 @@ return {
             -- LSP, then shorten the directory. Mode and file name always stay.
             return fit(function(level)
               local info = level < 2 and fileinfo or ''
-              local dev_shown = (level < 1 and git ~= '') or diagnostics ~= ''
-              local location_border = (info == '' and dev_shown) and 'Dev' or 'Inner'
               return statusline.combine_groups({
                 -- Both ends in the mode's colour, as mini's own layout has them.
                 { hl = mode_hl,                  strings = { mode } },
@@ -211,9 +218,10 @@ return {
                 { hl = 'MiniStatuslineFilename', strings = { filename_section(level >= 3) } },
                 -- Align the rest of the items to the right
                 '%=',
-                { hl = 'MiniStatuslineDevinfo',  strings = { level < 1 and git or '', diagnostics } },
+                { hl = 'MiniStatuslineGit',      strings = { level < 1 and git or '' } },
+                { hl = 'MiniStatuslineDevinfo',  strings = { diagnostics } },
                 { hl = 'MiniStatuslineFileinfo', strings = { info } },
-                '%#' .. mode_hl .. location_border .. '#' .. CAP_LEFT,
+                '%#' .. mode_hl .. 'Inner#' .. CAP_LEFT,
                 { hl = mode_hl,                  strings = { location } },
               })
             end, 3)
