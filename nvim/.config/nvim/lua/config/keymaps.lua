@@ -57,7 +57,7 @@ vim.keymap.set('n', '<leader>\\', "<cmd>vsplit<CR>", { desc = 'Split window vert
 vim.keymap.set('n', '<leader>å', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>x', "<cmd>close<CR>", { desc = 'Close window' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
-vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", require('save_file').save_file, { desc = 'Write buffer' })
+vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<Esc><Cmd>lua require('save_file').save_file()<CR>", { desc = 'Save as' })
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })
