@@ -1,6 +1,8 @@
 -- Save As: a name field above an explorer, both in one dialog. The name is
 -- typed in the field, the folder picked in the tree; Enter in the field
 -- saves, after a confirmation popup.
+-- The same popup asks about unsaved changes when quitting or closing a
+-- buffer.
 local M = {}
 
 local Snacks = require("snacks")
@@ -791,6 +793,145 @@ function M.save_file(on_saved, bufnr)
       require("cmp").setup.buffer({ enabled = false })
     end)
   end)
+end
+
+-- Buffers whose changes quitting would throw away: edited files, loaded.
+local function unsaved(buffers)
+  return vim.tbl_filter(function(buf)
+    return vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].modified
+      and vim.tbl_contains({ "", "acwrite" }, vim.bo[buf].buftype)
+  end, buffers)
+end
+
+-- Asks whether to save buf's changes: Yes writes it (a new file through
+-- Save As), No lets them go, Cancel stops. on_done gets "saved" or
+-- "discarded"; a cancel, or a cancelled Save As, never calls it.
+local function ask_save(buf, on_done)
+  local path = buffer_path(buf)
+  local question = path and ("Save changes to %s?"):format(vim.fn.fnamemodify(path, ":~"))
+    or "Save changes to the new file?"
+  ask(question, { choices = { "yes", "no", "cancel" } }, function(choice)
+    if choice == "cancel" then
+      return
+    elseif choice == "no" then
+      return on_done("discarded")
+    end
+    if path and vim.fn.isdirectory(vim.fs.dirname(path)) == 1 then
+      if write_buffer(buf, path, false) then
+        on_done("saved")
+      end
+    else
+      M.save_file(function() on_done("saved") end, buf)
+    end
+  end)
+end
+
+-- Asks about each buffer in turn, showing it while asked: Yes writes it (a
+-- new file through Save As), No lets it go, Cancel stops everything. Then
+-- runs command; the buffers let go only look unchanged for it, so a quit
+-- that fails for another reason keeps their edits.
+local function settle(buffers, command)
+  local discarded = {}
+  local function finish()
+    for _, buf in ipairs(discarded) do
+      vim.bo[buf].modified = false
+    end
+    local ok, err = pcall(vim.cmd, command)
+    for _, buf in ipairs(discarded) do
+      if vim.api.nvim_buf_is_valid(buf) then
+        vim.bo[buf].modified = true
+      end
+    end
+    if not ok then
+      vim.notify(tostring(err):gsub("^Vim:", ""), vim.log.levels.ERROR)
+    end
+  end
+
+  local function next_buffer(index)
+    local buf = buffers[index]
+    if not buf then
+      return finish()
+    elseif not (vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].modified) then
+      return next_buffer(index + 1)
+    end
+    vim.api.nvim_set_current_buf(buf)
+    ask_save(buf, function(result)
+      if result == "discarded" then
+        discarded[#discarded + 1] = buf
+      end
+      next_buffer(index + 1)
+    end)
+  end
+  next_buffer(1)
+end
+
+-- :q through the popup. Closing one of several windows loses nothing, as
+-- 'hidden' keeps its buffer; closing the last one quits, so every unsaved
+-- buffer is asked about first.
+function M.quit(bang)
+  if bang then
+    return vim.cmd("quit!")
+  end
+  local windows = 0
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_config(win).relative == "" then
+      windows = windows + 1
+    end
+  end
+  if windows > 1 then
+    local buf = vim.api.nvim_get_current_buf()
+    local kept = vim.o.hidden or vim.bo[buf].bufhidden == "hide" or #vim.fn.win_findbuf(buf) > 1
+    return settle(kept and {} or unsaved({ buf }), "quit")
+  end
+  settle(unsaved(vim.api.nvim_list_bufs()), "quit")
+end
+
+-- :qa through the popup.
+function M.quit_all(bang)
+  if bang then
+    return vim.cmd("qall!")
+  end
+  settle(unsaved(vim.api.nvim_list_bufs()), "qall")
+end
+
+-- <leader>q: closes the buffer, first asking about unsaved changes with the
+-- popup, as :q does.
+function M.close_buffer()
+  local buf = vim.api.nvim_get_current_buf()
+  if #unsaved({ buf }) == 0 then
+    return Snacks.bufdelete(buf)
+  end
+  ask_save(buf, function(result)
+    if vim.api.nvim_buf_is_valid(buf) then
+      Snacks.bufdelete({ buf = buf, force = result == "discarded" })
+    end
+  end)
+end
+
+-- Routes :q and :qa (with their long forms and !) to the above, as typed;
+-- a range, count or other command is left alone. The command line is
+-- rewritten as it is left: abbreviations would miss the Enter that cmp's
+-- command-line mapping passes on.
+function M.setup()
+  vim.api.nvim_create_user_command("SaveQuit", function(o) M.quit(o.bang) end, { bang = true })
+  vim.api.nvim_create_user_command("SaveQuitAll", function(o) M.quit_all(o.bang) end, { bang = true })
+  local routes = {
+    q = "SaveQuit", quit = "SaveQuit",
+    qa = "SaveQuitAll", qall = "SaveQuitAll", quita = "SaveQuitAll", quitall = "SaveQuitAll",
+  }
+  vim.api.nvim_create_autocmd("CmdlineLeave", {
+    group = vim.api.nvim_create_augroup("save_file_quit", { clear = true }),
+    pattern = ":",
+    callback = function()
+      if vim.v.event.abort then
+        return
+      end
+      local word, bang = vim.fn.getcmdline():match("^%s*(%a+)(!?)%s*$")
+      if word and routes[word] then
+        vim.fn.setcmdline(routes[word] .. bang)
+      end
+    end,
+  })
 end
 
 return M

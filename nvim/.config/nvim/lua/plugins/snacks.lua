@@ -95,7 +95,8 @@ return {
     {
       "<leader>q",
       function()
-        require("snacks").bufdelete()
+        -- Asks about unsaved changes with the save popup first.
+        require("save_file").close_buffer()
       end,
       desc = "Close buffer",
     },

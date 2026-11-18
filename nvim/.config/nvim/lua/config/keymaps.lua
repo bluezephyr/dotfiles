@@ -51,13 +51,15 @@ vim.keymap.set("n", "<S-l>", ":bnext<CR>", { desc = 'Next buffer' })
 vim.keymap.set("n", "<S-h>", ":bprevious<CR>", { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>w', "<cmd>wall!<CR>", { desc = 'Write all buffers' })
 -- vim.keymap.set('n', '<leader>q', require('mini.bufremove').delete, { desc = 'Close buffer' })
-vim.keymap.set('n', '<leader>e', "<cmd>qa<CR>", { desc = 'Exit nvim' })
+vim.keymap.set('n', '<leader>e', "<cmd>SaveQuitAll<CR>", { desc = 'Exit nvim' })
 vim.keymap.set('n', '<leader>-', "<cmd>split<CR>", { desc = 'Split window horizontally' })
 vim.keymap.set('n', '<leader>\\', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>å', "<cmd>vsplit<CR>", { desc = 'Split window vertically' })
 vim.keymap.set('n', '<leader>x', "<cmd>close<CR>", { desc = 'Close window' })
 vim.keymap.set("n", "<leader>o", "<cmd>only<CR>", { desc = 'Set the current buffer as the only visible' })
 vim.keymap.set({ "i", "v", "n", "s" }, "<C-s>", "<Esc><Cmd>lua require('save_file').save_file()<CR>", { desc = 'Save as' })
+-- :q and :qa ask about unsaved changes with the same popup, saving new files through Save As.
+require('save_file').setup()
 
 -- Insert --
 vim.keymap.set("i", "jj", "<ESC>", { desc = '' })
