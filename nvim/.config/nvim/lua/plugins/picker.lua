@@ -244,7 +244,9 @@ local function explorer_search_jump(picker, direction, pattern, cursor, preview)
   local hits, total = {}, 0
   for index = 1, count do
     local item = list:get(index)
-    local name = item.file and vim.fs.basename(item.file) or item.text
+    -- The explorer shows names; other pickers their entries' text.
+    local name = picker.opts.source == "explorer" and item.file and vim.fs.basename(item.file)
+      or item.text or item.file or ""
     if regex:match_str(name) then
       total = total + 1
       hits[index] = total
@@ -364,16 +366,19 @@ local function explorer_search(picker, direction, prompt)
   local function hit(step)
     return function() explorer_search_jump(picker, direction * step, vim.fn.getcmdline(), list.cursor, true) end
   end
-  -- Arrows move through the tree; <C-g>/<C-t> go to the next and previous
-  -- hit, as with 'incsearch' in a buffer.
+  -- Arrows move through the list (and in the explorer open and close
+  -- folders); <C-g>/<C-t> go to the next and previous hit, as with
+  -- 'incsearch' in a buffer.
   local keys = {
     ["<Up>"] = action("list_up"),
     ["<Down>"] = action("list_down"),
-    ["<Left>"] = action("explorer_close"),
-    ["<Right>"] = action("explorer_expand"),
     ["<C-g>"] = hit(1),
     ["<C-t>"] = hit(-1),
   }
+  if picker.opts.source == "explorer" then
+    keys["<Left>"] = action("explorer_close")
+    keys["<Right>"] = action("explorer_expand")
+  end
   for key, fn in pairs(keys) do
     vim.keymap.set("c", key, function()
       navigated = true
@@ -540,6 +545,18 @@ return {
         yank_entry = { action = "yank", reg = "+" },
         pane_next = function(picker) cycle_pane(picker, 1) end,
         pane_prev = function(picker) cycle_pane(picker, -1) end,
+        -- The explorer's search through the list, for every picker.
+        list_search = function(picker) explorer_search(picker, 1, true) end,
+        list_search_next = function(picker) explorer_search(picker, 1) end,
+        list_search_prev = function(picker) explorer_search(picker, -1) end,
+        -- Esc clears a search first, as in a buffer, then closes.
+        list_escape = function(picker)
+          if picker.explorer_search_match then
+            explorer_nohl(picker)
+          else
+            picker:close()
+          end
+        end,
       },
 
       win = {
@@ -575,6 +592,11 @@ return {
             ["<c-k>"] = "focus_input",
             ["<Tab>"] = { "pane_next", mode = { "n", "x" } },
             ["<S-Tab>"] = { "pane_prev", mode = { "n", "x" } },
+            -- Search the list as a buffer, instead of jumping to the input.
+            ["/"] = "list_search",
+            ["n"] = "list_search_next",
+            ["N"] = "list_search_prev",
+            ["<Esc>"] = "list_escape",
           },
         },
         preview = {
