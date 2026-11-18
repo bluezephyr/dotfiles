@@ -167,14 +167,14 @@ end
 
 -- gitsigns' own setqflist() and get_hunks() both stop at unstaged hunks, so
 -- the cache is read directly: the staged ones sit in a second field.
-local function collect_hunks()
+local function collect_hunks(root)
   local ok, gitsigns_cache = pcall(require, 'gitsigns.cache')
   local entries = {}
   if not ok then
     return entries
   end
   for bufnr, bcache in pairs(gitsigns_cache.cache or {}) do
-    if vim.api.nvim_buf_is_valid(bufnr) then
+    if vim.api.nvim_buf_is_valid(bufnr) and vim.fs.root(bufnr, '.git') == root then
       hunk_entries(bufnr, bcache.hunks, false, entries)
       hunk_entries(bufnr, bcache.hunks_staged, true, entries)
     end
@@ -183,12 +183,17 @@ local function collect_hunks()
   return entries
 end
 
--- Every attached buffer, so each one's own diff base applies. Reaching every
--- changed file instead would mean always diffing the index.
+-- Buffers in this repo keep their own diff base. Reaching every changed file
+-- instead would mean always diffing the index.
 local function pick_hunks()
-  local entries = collect_hunks()
+  local root = vim.fs.root(0, '.git')
+  if not root then
+    vim.notify('Current buffer is not in a Git repository', vim.log.levels.WARN)
+    return
+  end
+  local entries = collect_hunks(root)
   if #entries == 0 then
-    vim.notify('No hunks in the open buffers', vim.log.levels.WARN)
+    vim.notify('No hunks in open buffers for this repository', vim.log.levels.WARN)
     return
   end
   vim.fn.setqflist({}, ' ', { items = entries, title = 'Hunks' })

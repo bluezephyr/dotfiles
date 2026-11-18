@@ -110,6 +110,11 @@ local function grep_curbuf()
   Snacks.picker.grep({ dirs = { name } })
 end
 
+-- The repository holding the current buffer, falling back to the cwd.
+local function git_curbuf_root()
+  return vim.fs.root(0, ".git") or vim.fn.getcwd()
+end
+
 -- Live grep starting from the word under the cursor or the visual selection,
 -- escaped so it matches literally; whole wraps it in \b to match whole words.
 local function grep_word(whole)
@@ -698,21 +703,21 @@ return {
     {
       "<leader>gs",
       function()
-        Snacks.picker.git_status()
+        Snacks.picker.git_status({ cwd = git_curbuf_root() })
       end,
       desc = "Git status",
     },
     {
       "<leader>gl",
       function()
-        Snacks.picker.git_log()
+        Snacks.picker.git_log({ cwd = git_curbuf_root() })
       end,
       desc = "Git log",
     },
     {
       "<leader>gf",
       function()
-        Snacks.picker.git_log({ confirm = commit_files_quickfix })
+        Snacks.picker.git_log({ cwd = git_curbuf_root(), confirm = commit_files_quickfix })
       end,
       desc = "Git commit files in quickfix",
     },
