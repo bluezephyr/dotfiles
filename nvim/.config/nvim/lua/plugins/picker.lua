@@ -150,6 +150,35 @@ local function explorer_split()
   })
 end
 
+-- Finds files under the folder of the item, swapping out the explorer; Esc
+-- goes back to it where it was left.
+local function explorer_find_files(picker, item)
+  if not item then
+    return
+  end
+  local dir = Snacks.picker.util.dir(item)
+  picker.init_opts.cwd = picker:cwd()
+  picker:close()
+  vim.schedule(function()
+    Snacks.picker.files({
+      cwd = dir,
+      actions = {
+        return_to_explorer = function(files)
+          files:norm(function()
+            files:close()
+            vim.schedule(function() Snacks.picker.resume("explorer") end)
+          end)
+        end,
+      },
+      win = {
+        input = { keys = { ["<esc>"] = { "return_to_explorer", mode = { "n", "i" } } } },
+        list = { keys = { ["<esc>"] = "return_to_explorer" } },
+        preview = { keys = { ["<esc>"] = "return_to_explorer" } },
+      },
+    })
+  end)
+end
+
 -- The window whose title shows the search status.
 local function explorer_status_win(picker)
   return picker.layout.root:has_border() and picker.layout.root or picker.input.win
@@ -452,6 +481,7 @@ return {
           end,
           actions = {
             explorer_expand = explorer_expand,
+            explorer_find_files = explorer_find_files,
             explorer_hit_next = function(picker) explorer_hit(picker, 1) end,
             explorer_hit_prev = function(picker) explorer_hit(picker, -1) end,
             explorer_nohl = explorer_nohl,
@@ -474,6 +504,7 @@ return {
               ["<Esc>"] = "explorer_nohl",
               ["<Left>"] = "explorer_close",
               ["<Right>"] = "explorer_expand",
+              ["f"] = "explorer_find_files",
               -- Opens folders only; Enter opens files.
               ["l"] = "explorer_expand",
               ["/"] = "explorer_search",
