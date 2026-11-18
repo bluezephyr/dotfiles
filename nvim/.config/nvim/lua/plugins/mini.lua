@@ -68,9 +68,11 @@ end
 -- The buffer's name, then the full directory holding it, shortened to ~ where
 -- it sits under the home directory, and to one letter per level when short.
 -- Should the line still not fit, Vim cuts the directory from the left (%<).
-local function filename_section(short)
+-- Windows without focus show it all in one dimmed group.
+local function filename_section(short, inactive)
+  local hl = function(group) return '%#' .. (inactive and 'MiniStatuslineInactive' or group) .. '#' end
   if vim.bo.buftype == 'terminal' then
-    return '%#MiniStatuslineName#%t'
+    return hl('MiniStatuslineName') .. '%t'
   end
 
   local path = vim.api.nvim_buf_get_name(0)
@@ -82,19 +84,20 @@ local function filename_section(short)
   end
 
   return table.concat({
-    '%#MiniStatuslineName#', name,
-    '%#MiniStatuslineModified#%m%r',
-    '%#MiniStatuslineDir#    %<', dir,
+    hl('MiniStatuslineName'), name,
+    hl('MiniStatuslineModified'), '%m%r',
+    hl('MiniStatuslineDir'), '    %<', dir,
   })
 end
 
--- The first line from build(level) that fits the screen, raising the level
+-- The first line from build(level) that fits the window, raising the level
 -- (dropping or shortening more) until it does.
 local function fit(build, max_level)
+  local win_width = vim.api.nvim_win_get_width(0)
   for level = 0, max_level do
     local line = build(level)
     local width = vim.api.nvim_eval_statusline((line:gsub('%%=', '')), { maxwidth = 10000 }).width
-    if width <= vim.o.columns or level == max_level then
+    if width <= win_width or level == max_level then
       return line
     end
   end
@@ -215,22 +218,21 @@ return {
               })
             end, 3)
           end,
+          inactive = function()
+            return '%#MiniStatuslineInactive# ' .. filename_section(false, true) .. '%='
+          end,
         },
       })
 
-      -- The statusline sits at the top, where the bufferline used to.
-      vim.o.tabline = '%!v:lua.MiniStatusline.active()'
+      -- Each window carries its own statusline at the top, evaluated in that
+      -- window; the full one only where the cursor is. The real statusline
+      -- stays blank, to separate horizontal splits.
+      vim.go.winbar = '%{%nvim_get_current_win() ==# g:actual_curwin'
+        .. ' ? v:lua.MiniStatusline.active() : v:lua.MiniStatusline.inactive()%}'
+      vim.go.statusline = ' '
 
       style_statusline()
       vim.api.nvim_create_autocmd('ColorScheme', { callback = style_statusline })
-
-      -- A statusline is redrawn on these, a tabline is not: without the nudge
-      -- the mode, location and diagnostics would go stale.
-      vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'ModeChanged', 'DiagnosticChanged', 'LspAttach', 'LspDetach' }, {
-        group = vim.api.nvim_create_augroup('statusline_tabline', { clear = true }),
-        -- On LspDetach the client is still listed, so redraw once it is gone.
-        callback = function() vim.schedule(function() vim.cmd('redrawtabline') end) end,
-      })
     end
   },
 }
