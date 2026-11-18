@@ -908,11 +908,20 @@ function M.close_buffer()
   end)
 end
 
--- Routes :q and :qa (with their long forms and !) to the above, as typed;
--- a range, count or other command is left alone. The command line is
--- rewritten as it is left: abbreviations would miss the Enter that cmp's
--- command-line mapping passes on.
+-- Puts snacks' questions in the popup and routes :q and :qa (with their
+-- long forms and !) to the above, as typed; a range, count or other command
+-- is left alone. The command line is rewritten as it is left: abbreviations
+-- would miss the Enter that cmp's command-line mapping passes on.
 function M.setup()
+  -- Snacks' yes/no questions (deleting in the explorer among them) use the
+  -- same popup, starting on No as snacks' own list does.
+  Snacks.picker.util.confirm = function(prompt, fn)
+    ask(prompt, { default = "no" }, function(choice)
+      if choice == "yes" then
+        fn()
+      end
+    end)
+  end
   vim.api.nvim_create_user_command("SaveQuit", function(o) M.quit(o.bang) end, { bang = true })
   vim.api.nvim_create_user_command("SaveQuitAll", function(o) M.quit_all(o.bang) end, { bang = true })
   local routes = {
