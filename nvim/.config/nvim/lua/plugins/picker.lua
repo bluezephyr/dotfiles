@@ -403,6 +403,26 @@ local function explorer_search(picker, direction, prompt)
   end
 end
 
+-- Moves focus to the next (step 1) or previous (-1) shown pane, input above
+-- list above preview, wrapping around; hidden panes are skipped.
+local PANES = { "input", "list", "preview" }
+local function cycle_pane(picker, step)
+  local shown, index = {}, 1
+  local current = vim.api.nvim_get_current_win()
+  for _, name in ipairs(PANES) do
+    local win = picker[name] and picker[name].win
+    if win and win:valid() and not picker.layout:is_hidden(name) then
+      shown[#shown + 1] = name
+      if win.win == current then
+        index = #shown
+      end
+    end
+  end
+  if #shown > 0 then
+    picker:focus(shown[(index - 1 + step) % #shown + 1])
+  end
+end
+
 -- Items carry a cwd-relative path; the register should hold the whole one.
 local function yank_path(picker, item)
   local path = Snacks.picker.util.path(item)
@@ -518,6 +538,8 @@ return {
       actions = {
         yank_path = yank_path,
         yank_entry = { action = "yank", reg = "+" },
+        pane_next = function(picker) cycle_pane(picker, 1) end,
+        pane_prev = function(picker) cycle_pane(picker, -1) end,
       },
 
       win = {
@@ -539,6 +561,10 @@ return {
             -- picker. <C-n>/<C-p> still move the selection.
             ["<c-j>"] = { "focus_list", mode = { "n", "i" } },
             ["<c-k>"] = { "focus_preview", mode = { "n", "i" } },
+            -- Tab and Shift-Tab go round the panes too, as in the save
+            -- dialog, instead of selecting entries.
+            ["<Tab>"] = { "pane_next", mode = { "n", "i" } },
+            ["<S-Tab>"] = { "pane_prev", mode = { "n", "i" } },
           },
         },
         list = {
@@ -547,9 +573,18 @@ return {
             ["<a-?>"] = { "toggle_help_list", desc = "help" },
             ["<c-j>"] = "focus_preview",
             ["<c-k>"] = "focus_input",
+            ["<Tab>"] = { "pane_next", mode = { "n", "x" } },
+            ["<S-Tab>"] = { "pane_prev", mode = { "n", "x" } },
           },
         },
-        preview = { keys = { ["<c-j>"] = "focus_input", ["<c-k>"] = "focus_list" } },
+        preview = {
+          keys = {
+            ["<c-j>"] = "focus_input",
+            ["<c-k>"] = "focus_list",
+            ["<Tab>"] = "pane_next",
+            ["<S-Tab>"] = "pane_prev",
+          },
+        },
       },
     },
   },
