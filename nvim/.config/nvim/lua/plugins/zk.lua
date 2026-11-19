@@ -33,9 +33,35 @@ local function edit_or_create(options, pattern)
   })
 end
 
--- The notebook holding the current buffer, else the default one.
+-- The notebook holding the current buffer, else the one holding the working
+-- directory, else the default one.
 local function notebook_dir()
-  return vim.fs.root(0, ".zk") or vim.env.ZK_NOTEBOOK_DIR
+  return vim.fs.root(0, ".zk") or vim.fs.root(vim.fn.getcwd(), ".zk") or vim.env.ZK_NOTEBOOK_DIR
+end
+
+-- A new note in the notebook holding the current buffer's text, asking for its
+-- title. A leading "# " heading is offered as the title and left out of the
+-- text, since the note template writes the title as that heading; otherwise
+-- the file name is offered.
+local function new_note_from_buffer()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local first = 1
+  while lines[first] and lines[first]:match("^%s*$") do
+    first = first + 1
+  end
+  local title = lines[first] and lines[first]:match("^#%s+(.-)%s*$")
+  if title then
+    lines = vim.list_slice(lines, first + 1)
+  else
+    title = vim.fn.expand("%:t:r")
+  end
+  local content = vim.trim(table.concat(lines, "\n"))
+
+  vim.ui.input({ prompt = "Note title: ", default = title }, function(input)
+    if input and vim.trim(input) ~= "" then
+      require("zk").new({ notebook_path = notebook_dir(), title = vim.trim(input), content = content })
+    end
+  end)
 end
 
 -- Live grep over the notebook's notes, starting from search when given.
@@ -159,6 +185,7 @@ return {
   keys = {
     { "<leader>zf", edit_or_create, desc = "zk: Edit or create note" },
     { "<leader>z<space>", "<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: Open notes" },
+    { "<leader>zc", new_note_from_buffer, desc = "zk: Create note from buffer" },
     { "<leader>zw", search_notes_by_word, mode = { "n", "x" }, desc = "zk: Grep notes for word or selection" },
     { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Tag under cursor or pick tags (AND)" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
