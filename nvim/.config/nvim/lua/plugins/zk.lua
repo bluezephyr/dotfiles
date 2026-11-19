@@ -158,7 +158,7 @@ return {
   end,
   keys = {
     { "<leader>zf", edit_or_create, desc = "zk: Edit or create note" },
-    { "<leader>zo","<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: List Find notes" },
+    { "<leader>z<space>", "<Cmd>ZkBuffers { sort = { 'modified' } }<CR>", desc = "zk: Open notes" },
     { "<leader>zw", search_notes_by_word, mode = { "n", "x" }, desc = "zk: Grep notes for word or selection" },
     { "<leader>zt", search_notes_by_tag_under_cursor, desc = "zk: Tag under cursor or pick tags (AND)" },
     { "<leader>zg", search_notes, desc = "zk: Grep in notes" },
